@@ -7,7 +7,7 @@
 
 #include <sys/time.h>
 #include "../graph/CellNode.h"
-#include "../VTree-master/vtree_knn_demo.h"
+#include "../../VTree-master/vtree_knn_demo.h"
 
 vector<KNode> merge_queue;
 

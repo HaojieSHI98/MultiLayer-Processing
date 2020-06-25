@@ -8,7 +8,7 @@
 
 #include "../dijk/DijkstraQueue.h"
 #include "../graph/CellNode.h"
-#include "../VTree-master/vtree_knn_demo.h"
+#include "../../VTree-master/vtree_knn_demo.h"
 #include "DijkstraKNN.h"
 #include "../scob/ScobQuery.h"
 #include "../scob/ScobIndex.h"
