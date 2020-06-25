@@ -49,8 +49,8 @@ void set_test_para() {
         input_parameters.set_graph_input("USA-road-d."+network_name+".co", "USA-road-t."+network_name+".gr");
 
 
-    input_parameters.set_in_out_folder("/home/stone/Downloads/code-MPR/code-MPR/TOAIN/RoadKNN_input/",
-                                       "/home/stone/Downloads/code-MPR/code-MPR/TOAIN/RoadKNN_output");
+    input_parameters.set_in_out_folder("/home/siqiang/MPR/TOAIN/RoadKNN_input/",
+                                       "/home/siqiang/MPR/TOAIN/RoadKNN_output");
 //    input_parameters.set_in_out_folder("/data/sqluo/RoadKNN_input/",
 //                                       "/data/sqluo/RoadKNN_output/");
     data_space=data_map[input_parameters.graph_node_file];
