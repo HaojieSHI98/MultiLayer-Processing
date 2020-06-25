@@ -50,7 +50,7 @@ void set_test_para() {
 
 
     input_parameters.set_in_out_folder("/home/siqiang/MPR/TOAIN/RoadKNN_input/",
-                                       "/home/siqiang/MPR/TOAIN/RoadKNN_output");
+                                       "/home/siqiang/MPR/TOAIN/RoadKNN_output/");
 //    input_parameters.set_in_out_folder("/data/sqluo/RoadKNN_input/",
 //                                       "/data/sqluo/RoadKNN_output/");
     data_space=data_map[input_parameters.graph_node_file];
