@@ -66,34 +66,40 @@ MultiTestParameter anaylizeParameters(){
     multiTestPara.test_simulation_time = atoi(paras["-testtime"].c_str());// simulation time (seconds)
 
     if(paras.find("-querythread")==paras.end()){
-        cout<<"miss querythread parameters!"<<endl;
-        stop_here();
+        multiTestPara.query_thread = multiTestPara.num_total_threads-1;
     }
-    multiTestPara.query_thread = atoi(paras["-querythread"].c_str());
+    else{
+        multiTestPara.query_thread = atoi(paras["-querythread"].c_str());
+    }
 
     if(paras.find("-updatethread")==paras.end()){
-        cout<<"miss updatethread parameters!"<<endl;
-        stop_here();
+        multiTestPara.update_thread = 1;
     }
-    multiTestPara.update_thread = atoi(paras["-updatethread"].c_str());
+    else
+    {
+        multiTestPara.update_thread = atoi(paras["-updatethread"].c_str());
+    }
 
     if(paras.find("-querycost")==paras.end()){
-        cout<<"miss querycost parameters!"<<endl;
-        stop_here();
+        multiTestPara.query_cost = 0;
     }
-    multiTestPara.query_cost = atoi(paras["-querycost"].c_str());
+    else{
+        multiTestPara.query_cost = atoi(paras["-querycost"].c_str());
+    }
 
     if(paras.find("-insertcost")==paras.end()){
-        cout<<"miss insertcost parameters!"<<endl;
-        stop_here();
+        multiTestPara.insert_cost = 0;
     }
-    multiTestPara.insert_cost = atoi(paras["-insertcost"].c_str());
+    else{
+        multiTestPara.insert_cost = atoi(paras["-insertcost"].c_str());
+    }
 
     if(paras.find("-deletecost")==paras.end()){
-        cout<<"miss deletecost parameters!"<<endl;
-        stop_here();
+        multiTestPara.delete_cost = 0;
     }
-    multiTestPara.delete_cost = atoi(paras["-deletecost"].c_str());
+    else{
+        multiTestPara.delete_cost = atoi(paras["-deletecost"].c_str());
+    }
 
     if(paras.find("-network")==paras.end()){
         cout<<"here 1"<<endl;
@@ -123,11 +129,6 @@ MultiTestParameter anaylizeParameters(){
     }
     multiTestPara.is_thresholded=atoi(paras["-threshold"].c_str());
 
-    if(paras.find("-threshold")==paras.end()){
-        cout<<"threshold is missing"<<endl;
-        stop_here();
-    }
-    multiTestPara.is_thresholded=atoi(paras["-threshold"].c_str());
 
     if(paras.find("-parmethod")==paras.end()){
         cout<<"parmethod is missing"<<endl;
@@ -171,7 +172,7 @@ MultiTestParameter anaylizeParameters(){
         multiTestPara.auto_config=0;
     }
     else
-        multiTestPara.auto_config=1;
+        multiTestPara.auto_config= atoi(paras["-autoconf"].c_str());
 
     if(paras.find("-pfail")==paras.end()){
         multiTestPara.pfail=0.0;

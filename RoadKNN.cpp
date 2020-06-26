@@ -1,8 +1,8 @@
 ﻿// AreaIntersection.cpp : Defines the entry point for the console application.
 //
 
-#include<iostream>
-#include<vector>
+#include <iostream>
+#include <vector>
 #include <chrono>
 #include <cmath>
 #include <sstream>
@@ -372,55 +372,12 @@ int main(int argc, char *argv[]) {
     for (int i = 1; i < argc; i += 2) {
         std::string str(argv[i]);
         paras[str] = argv[i + 1];
-//        cout<<str<<" "<<argv[i+1]<<endl;
     }
     multiTestPara = anaylizeParameters();
     srand(time(NULL));
     set_test_para();
     read_road_network();
-//    gen_random_numbers();
 
-
-//	index construction
-//	if (test_parameters.construct_index) {
-//        init_memory();
-//        build_scob();
-//        delete_memory();
-//    }
-//    return 1;
-//    stop_here();
-//
-//	// before testing a new setting, we need to invoke the training functions.
-//    if(test_parameters.train_toain_query_first){
-//        init_memory();
-//        train_toain_query_first();
-//        delete_memory();
-//    }
-//
-//
-//	if(test_parameters.test_toain_query_first) {
-//        init_memory();
-//        test_toain_query_first();
-//        delete_memory();
-//    }
-//
-//    if(test_parameters.format_metis){
-//        read_road_network();
-//        transformToMetis(vStart, eNext, test_n, test_m);
-//
-//    }
-
-//    if(test_parameters.multi_core){
-    if (paras.find("-configure") != paras.end()) {
-        double alpha = 1.0;
-        int k = 10;
-        double fail_p = 0.0;
-
-        int configurationId = 2;
-//        multiTestPara = ChooseTOAINPRConfiguration(fail_p, alpha, k,
-//                                   configurationId);
-        return 0;
-    }
     if (paras.find("-multicore") != paras.end()) {
         struct timeval start, end;
         srand(time(NULL));
@@ -432,14 +389,10 @@ int main(int argc, char *argv[]) {
         double alpha = 1.0;
         int k = 10;
         double fail_p = multiTestPara.pfail;
-//        if(network_name.compare("NY")==0){
-            can_estimate = 1;
-//        }
+        can_estimate = 1;
 
 
         cout << "num of threads: " << multiTestPara.num_threads_update << endl;
-//        vector<int> part_maps = read_network_parts(multiTestPara.num_threads_update, test_n);
-//        vector<int> part_maps = get_network_parts_by_coor(num_threads_update);
         string loadfile;
         if (multiTestPara.method_name.compare("vtree") == 0) {
             car_id_insert_cnt =  new int[MAX_CORES];
@@ -458,34 +411,16 @@ int main(int argc, char *argv[]) {
 
         }
         int configurationId = 9;
-
-
-//        stop_here();
-//        if(multiTestPara.method_name.compare("toain")==0 && (network_name.compare("BJ")==0 || network_name.compare("BJ-old")==0))
-//            configurationId=18;
         cout<<"method name: "<<multiTestPara.method_name<<endl;
 
         if (multiTestPara.method_name.compare("toain") == 0) {
             init_memory();
             cout<<"network_name: "<<network_name<<endl;
             cout<<"toain type: "<<multiTestPara.toain_type<<endl;
-//            if(network_name.compare("BJ-old")==0){
-//                if(multiTestPara.toain_type==TOAIN_UPDATE){
-//                    configurationId = 18;
-//                } else
-//                    configurationId = 6;
-//            }
-//            if(network_name.compare("NY")==0){
-//                if(multiTestPara.toain_type==TOAIN_UPDATE){
-//                    configurationId=9;
-//                } else
-//                    configurationId=3;
-//            }
-//            configurationId = chooseSingleTOAINConfiguration(fail_p, alpha, k,
-//                                                             multiTestPara);
-            configurationId = 12;
+            configurationId = chooseSingleTOAINConfiguration(fail_p, alpha, k,
+                                                             multiTestPara);
             cout<<"configurationID: "<<configurationId<<endl;
-            multiTestPara = anaylizeParameters();
+//            multiTestPara = anaylizeParameters();
             multiTestPara.num_total_threads/=multiTestPara.layer;
             multiTestPara.num_threads_query=get_num_threads_query(multiTestPara.num_threads_update, multiTestPara.is_single_aggregate,
                                                                   multiTestPara.num_total_threads);
@@ -507,7 +442,14 @@ int main(int argc, char *argv[]) {
             if(multiTestPara.auto_config) {
                 ChooseDIJKPRConfiguration(fail_p, alpha, k, multiTestPara);
             }
-
+            else{
+                multiTestPara.num_threads_query = multiTestPara.query_thread;
+                multiTestPara.num_threads_update = multiTestPara.update_thread;
+                cout << "finish choosing configuration!" << endl;
+                cout << "multiTestPara.num_threads_query: " << multiTestPara.num_threads_query << endl;
+                cout << "multiTestPara.num_threads_update: " << multiTestPara.num_threads_update << endl;
+                cout << "start online running" << endl;
+            }
         }
 
         int test_num = 1;
@@ -589,18 +531,7 @@ int main(int argc, char *argv[]) {
                     }
 
                 } else {
-//                PartitionThreadPool tp(part_maps, num_threads_update, alpha, k, fail_p, test_n, query_rate,
-//                       insert_rate, delete_rate, simulation_time, num_objects);
-//                tp.start();
-//                while (true) {
-//                    std::this_thread::sleep_for(std::chrono::microseconds(1));
-//                    if (tp.isNeedJoin()) {
-//                        gettimeofday(&start, NULL);
-//                        tp.join();
-//
-//                        break;
-//                    }
-//                }
+
                 }
 
 
@@ -705,97 +636,14 @@ int main(int argc, char *argv[]) {
 
         outfile.close();
 
-//        }
-//        cout<<"average response time: "<<total_response_time/tests<<" seconds"<<endl;
         if (multiTestPara.method_name.compare("toain") == 0) {
             delete_memory();
-//            for (int j = 0; j < multiTestPara.num_threads_query; j++) {
-//                for (int i = 0; i < multiTestPara.num_threads_update; i++) {
-//
-//                    delete[] hier_local_knn_arr_multi[i + multiTestPara.num_threads_update * j];
-//                }
-//
-//            }
-//            delete[] hier_local_knn_arr_multi;
         }
-//        if(multiTestPara.method_name.compare("vtree")==0){
-//            for(int i=0;i<MAX_CORES;i++) delete[] vtree_objects[i];
-//            delete[] vtree_objects;
-//        }
+
 
 
         cout << endl << endl << endl << endl << endl;
 
-
-//        std::ofstream outfile;
-//        outfile.open(input_parameters.output_data_dir + "outfile" + (multiTestPara.suffix)+"_details", std::ios_base::app);
-//        int num=1000;
-//        int c=0;
-//        long s=0;
-//        outfile<<endl<<endl<<"query response time"<<endl;
-//        for(long rtime: response_time_list) {
-//            s+=rtime;
-//            c++;
-//            if(c%num==0){
-//                outfile << s/1000 << " ";
-//                s=0;
-//
-//            }
-//            if(c%(100*num)==0){
-//                outfile<<endl;
-//            }
-//
-//        }
-//        outfile<<endl<<endl<<"query processing time"<<endl;
-//        c=0;s=0;
-//        for(long rtime: query_time_list) {
-//            s+=rtime;
-//            c++;
-//            if(c%num==0){
-//                outfile << s/1000 << " ";
-//                s=0;
-//
-//            }
-//            if(c%(100*num)==0){
-//                outfile<<endl;
-//            }
-//
-//        }
-//
-//        outfile<<endl<<endl<<"update response time"<<endl;
-//        c=0;s=0;
-//        for(long rtime: update_response_time_list) {
-//            s+=rtime;
-//            c++;
-//            if(c%num==0){
-//                outfile << s/1000 << " ";
-//                s=0;
-//
-//            }
-//            if(c%(100*num)==0){
-//                outfile<<endl;
-//            }
-//
-//        }
-//
-//        outfile<<endl<<endl<<"update process time"<<endl;
-//        c=0;s=0;
-//        for(long rtime: update_time_list) {
-//            s+=rtime;
-//            c++;
-//            if(c%num==0){
-//                outfile << s/1000 << " ";
-//                s=0;
-//
-//            }
-//            if(c%(100*num)==0){
-//                outfile<<endl;
-//            }
-//
-//        }
-//
-//
-//        outfile.close();
 
 
 
