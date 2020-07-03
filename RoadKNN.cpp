@@ -544,7 +544,6 @@ int main(int argc, char *argv[]) {
 
 
 
-    }
     if (test_parameters.demo) {
 
         init_memory();
