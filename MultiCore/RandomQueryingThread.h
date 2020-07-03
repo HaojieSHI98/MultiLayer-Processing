@@ -681,13 +681,18 @@ private:
     vector<std::pair<double, int> > full_list;
     vector<int> arrival_nodes;
     int init_objects;
+    int query_cost;
+    int insert_cost;
+    int delete_cost;
+    int run_time; //how many times have run
+    int threshold_number;
 
     // Algorithm data structure
 //    vector<int *> dijkstra_object_map_vec;
 public:
     RandomThreadPool_new(int threadpool_id_val, int begin_node_val, int end_node_val, int num_threads_query_val, int num_threads_update_val, double alpha_val, int k_val, double fail_p_val,
-                         int test_n_val, double query_rate_val, double insert_rate_val, double delete_rate_val, int simulation_time_val,int query_cost,int insert_cost,int delete_cost,
-                         vector<std::pair<double, int> > full_list_val,vector<int> arrival_nodes_val,int init_objects_val) {
+                         int test_n_val, double query_rate_val, double insert_rate_val, double delete_rate_val, int simulation_time_val,int query_cost_val,int insert_cost_val,int delete_cost_val,
+                         vector<std::pair<double, int> > full_list_val,vector<int> arrival_nodes_val,int init_objects_val,int run_time_val,int threshold_number_val) {
         cout << "constructing RandomThreadPool..." << endl;
         if(overload_flag)
             overload_flag=0;
@@ -711,8 +716,12 @@ public:
         init_objects = init_objects_val;
         full_list.assign(full_list_val.begin(),full_list_val.end());
         arrival_nodes.assign(arrival_nodes_val.begin(),arrival_nodes_val.end());
-        init();
-        cout<<"num_threads_query: "<<num_threads_query<<endl;
+        query_cost = query_cost_val;
+        insert_cost = insert_cost_val;
+        delete_cost = delete_cost_val;
+        _needjoin = 0;
+        run_time = run_time_val;
+        threshold_number = threshold_number_val;
         globalThreadVar = new GlobalThreadVar*[num_threads_query];
         int k_star = compute_k_star(k, num_threads_update, alpha, fail_p);
         for(int j =0;j<num_threads_query;j++) {
@@ -741,22 +750,14 @@ public:
                 }
             }
         }
-
-        _needjoin = 0;
     }
 
     //释放线程池
     ~RandomThreadPool_new() {
         cout << "hi, RandomThreadPooladPool()" << endl;
-        // releasePool();
-        // for(int i = 0;i < _pool.size(); ++i){
-        //     delete _pool[i];
-        // }
-
-    }
-
-    void init() {
-        cout << "start init() function ..." << endl;
+//         for(int i = 0;i < _pool.size(); ++i){
+//             delete _pool[i];
+//         }
 
     }
 
@@ -802,16 +803,8 @@ public:
     int isNeedJoin() {
         return _needjoin;
     }
-    void releasePool() {
-//        for(int j=0;j<num_threads_query;j++) {
-        for (int i = 0; i < _pool.size(); ++i) {
-            delete _pool[i];
-//            }
-        }
-    }
 
     void start() {
-
         _main_thread = std::thread(&RandomThreadPool_new::run, this);
     }
 
@@ -879,7 +872,6 @@ public:
 //        cout<<"init:"<<init_objects<<endl;
         for(i=0;i<init_objects;i++){
 //            cout<<i<<endl;
-
             if(can_estimate)
                 gettimeofday(&end, NULL);
             else{
@@ -942,6 +934,13 @@ public:
 
         for (; i < full_list.size(); i++) {
             if(overload_flag) break;
+            if(run_time ==0 && i>threshold_number)
+            {
+                _needjoin = 1;
+                cout<<"Over threshold num!!!!!RESTART NOW!!!"<<endl<<endl<<endl<<endl<<endl;
+                break;
+
+            }
 //            cout<<i<<endl;
             if(arrival_nodes[i]==-1) continue;
             pair<double, int> &event = full_list[i];
@@ -1199,6 +1198,8 @@ private:
     int init_objects;
     vector<std::pair<double, int> > full_list;
     vector<int> arrival_nodes;
+    int x_time; //how many times we run x
+    int threshold_number; //bigger than the threshold then we may restart
 
 public:
     RandomThreadPool_Control(int threadpool_id_val, int begin_node_val, int end_node_val, int num_threads_query_val, int num_threads_update_val, double alpha_val, int k_val, double fail_p_val,
@@ -1221,6 +1222,8 @@ public:
         insert_cost = insert_cost_val;
         total_response_time = 0.0;
         configurationId = ConfigID_val;
+        x_time = 0;
+        threshold_number = 400000;
 }
     ~RandomThreadPool_Control(){
 
@@ -1386,7 +1389,8 @@ public:
         init();
         tp_x = new RandomThreadPool_new(0, 0, end_node, num_threads_query,num_threads_update, alpha, k, fail_p,test_n,
                                   query_rate, insert_rate,delete_rate, simulation_time,
-                                  query_cost,insert_cost,delete_cost,full_list,arrival_nodes,init_objects);
+                                  query_cost,insert_cost,delete_cost,full_list,arrival_nodes,init_objects,
+                                  x_time,threshold_number);
         tp_x->start();
         while (true) {
             std::this_thread::sleep_for(std::chrono::microseconds(1));
@@ -1402,6 +1406,7 @@ public:
                 break;
             }
         }
+        delete tp_x;
         if(can_estimate)
             gettimeofday(&end, NULL);
         else{
