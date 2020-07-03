@@ -52,6 +52,11 @@ double PI = 3.1415926535;
 #define NW_OBJECTS 13000
 #define ZIPF_OBJECT 0
 #define ZIPF_QUERY 0
+
+//new
+
+
+//
 int NEIGHBOR_SEARCH=0;
 double ALPHA=2.0;
 int COVERAGE_INDEX=0;

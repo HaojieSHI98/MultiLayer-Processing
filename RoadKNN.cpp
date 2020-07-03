@@ -469,65 +469,24 @@ int main(int argc, char *argv[]) {
                     vtrees.push_back(&(tree[i]));
                 }
             }
-
-//        int tests=1;
-            double total_response_time = 0.0;
             double object_ratio = 0.001;
-//        int num_objects = (int) (test_n * object_ratio);
-//        for(int i =0;i< tests;i++) {
-//            if(i>0) {
-//                if (method_name.compare("toain") == 0) {
-//                    for (int j = 0; j < num_threads_update; j++) {
-//
-//                        for (int i = 0; i < test_n; i++) {
-//                            hier_local_knn_arr_multi[j][i].clear();
-//                        }
-//
-//                    }
-//                    if (method_name.compare("vtree") == 0) {
-//                        for (int i = 0; i < num_threads_update; i++) {
-//                            vtrees[i]->car_offset.clear();
-//                            vtrees[i]->car_in_node.clear();
-//                        }
-//
-//
-//                    }
-//                }
-//            }
             if (multiTestPara.num_threads_update != -1) {
                 if (multiTestPara.parmethod.compare("rand") == 0) {
                     overload_flag = 0;
 
                     is_simulation = 1;
-                    RandomThreadPool *tp = new RandomThreadPool(0, 0, test_n, multiTestPara.num_threads_query,
-                                                                multiTestPara.num_threads_update, alpha, k, fail_p,
-                                                                test_n,
-                                                                query_rate, insert_rate,
-                                                                delete_rate, multiTestPara.test_simulation_time,
-                                                                multiTestPara.query_cost,multiTestPara.insert_cost,multiTestPara.delete_cost);
-                    tp->start();
+                    RandomThreadPool_Control *tp = new RandomThreadPool_Control(0, 0, test_n, multiTestPara.num_threads_query,
+                                                                                multiTestPara.num_threads_update, alpha, k, fail_p,test_n,query_rate, insert_rate,
+                                                                                delete_rate, multiTestPara.test_simulation_time,multiTestPara.query_cost,
+                                                                                multiTestPara.insert_cost,multiTestPara.delete_cost,configurationId);
+                    tp->run();
+
 
 //            RandomThreadPool *tp2 = new RandomThreadPool(0, test_n/2, test_n, multiTestPara.num_threads_query,
 //                                                         multiTestPara.num_threads_update, alpha, k, fail_p, test_n,
 //                                                         query_rate, insert_rate,
 //                                                         delete_rate, multiTestPara.test_simulation_time);
 
-                    while (true) {
-                        std::this_thread::sleep_for(std::chrono::microseconds(1));
-
-                        if (tp->isNeedJoin()) {
-                            if(can_estimate)
-                                gettimeofday(&start, NULL);
-                            else{
-                                estimate_mutex.lock();
-                                gettimeofday(&start, NULL);
-                                estimate_mutex.unlock();
-                            }
-                            tp->join();
-                            break;
-                        }
-
-
                     }
 
                 } else {
@@ -535,72 +494,10 @@ int main(int argc, char *argv[]) {
                 }
 
 
-                if(can_estimate)
-                    gettimeofday(&end, NULL);
-                else{
-                    estimate_mutex.lock();
-                    gettimeofday(&end, NULL);
-                    estimate_mutex.unlock();
-                }
-                cout << end.tv_sec << " " << start.tv_sec << endl;
-                cout << "finish in : " << end.tv_sec - start.tv_sec << " secs" << endl;
 
-                if (!multiTestPara.is_single_aggregate) {
-                    for (int i = 0; i < multiTestPara.num_threads_query; i++) {
-                        total_response_time += globalThreadVar[i]->total_query_time;
-                        number_of_queries += globalThreadVar[i]->number_of_queries;
-                    }
-                } else {
-                    total_response_time += globalThreadVar[0]->total_query_time;
-                    number_of_queries += globalThreadVar[0]->number_of_queries;
 
-                }
-                cout << "expected response time: " << total_response_time / number_of_queries << " seconds" << endl;
-                cout << "total_response_time: " << total_response_time << endl;
-                cout << "number_of_queries: " << number_of_queries << endl;
-                cout << "expected_update_response_time: " << total_update_response_time / number_of_updates << endl;
 
-                cout << "expected_update_process_time: " << total_update_process_time / number_of_updates << endl;
-
-                std::ofstream outfile;
-
-                outfile.open(input_parameters.output_data_dir + "stone_outfile" + (multiTestPara.suffix), std::ios_base::app);
-                outfile << endl
-                        << network_name<<" "
-                        << "init: "<<multiTestPara.init_objects<<" "
-                        << multiTestPara.method_name << " config simulation time: "
-                        << multiTestPara.config_simulation_time << " test simulate time: "
-                        << multiTestPara.test_simulation_time << " configure: "
-                        << configurationId << " threshold: " << multiTestPara.is_thresholded << " fail_p: " << fail_p
-                        << " "
-                        << query_rate << " " << insert_rate
-                        << " " << delete_rate << " " << multiTestPara.method_name << " singleAggregate: "
-                        << multiTestPara.is_single_aggregate << " "
-                        << multiTestPara.num_threads_update
-                        << " " << multiTestPara.num_threads_query << " "
-                        << "query response time: " << total_response_time / number_of_queries << " "
-                        << "query process time: " << total_query_process_time / number_of_query_processings << " "
-                        << "update response time: " << total_update_response_time / number_of_updates << " "
-                        << "update process time: " << total_update_process_time / number_of_updates << " "
-                        << end.tv_sec - start.tv_sec
-                        << " overload: " << overload_flag
-                        <<" query finish: "<<query_finish_rate
-                        <<" update finish: "<<1.0-update_finish_rate
-                        <<" schedule cost: "<<avg_offset
-                        << endl;
-                query_process_time_all+=total_query_process_time / number_of_query_processings;
-                update_process_time_all+=total_update_response_time / number_of_updates;
-                response_time_all+=total_response_time / number_of_queries;
-                schedule_cost_all += avg_offset;
-                query_finish_rate_all+=query_finish_rate;
-                outfile.close();
-            } else {
-                std::ofstream outfile;
-                outfile.open(input_parameters.output_data_dir + "outfile" + (multiTestPara.suffix), std::ios_base::app);
-                outfile << "overloaded!" << endl;
-                outfile.close();
             }
-            total_response_time = 0.0;
             number_of_queries = 1;
             total_update_response_time = 0.0;
             number_of_updates = 1;
@@ -608,33 +505,33 @@ int main(int argc, char *argv[]) {
             total_query_process_time = 0.0;
             number_of_query_processings = 1;
         }
-        std::ofstream outfile;
-
-        outfile.open(input_parameters.output_data_dir + "outfile" + (multiTestPara.suffix), std::ios_base::app);
-
-        outfile << endl
-                << network_name<<" "
-                << "init: "<<multiTestPara.init_objects<<" "
-                << multiTestPara.method_name << " config simulation time: "
-                << multiTestPara.config_simulation_time << " test simulate time: "
-                << multiTestPara.test_simulation_time << " configure: "
-                << configurationId << " threshold: " << multiTestPara.is_thresholded << " fail_p: " << fail_p
-                << " "
-                << query_rate << " " << insert_rate
-                << " " << delete_rate << " " << multiTestPara.method_name << " singleAggregate: "
-                << multiTestPara.is_single_aggregate << " "
-                << multiTestPara.num_threads_update
-                << " " << multiTestPara.num_threads_query << " "
-                <<"average response time: "<<response_time_all/test_num
-                <<" average query time: "<<query_process_time_all / test_num
-                <<" average update time: "<<update_process_time_all / test_num
-                <<" average schedule cost: "<<schedule_cost_all / test_num
-                <<" average query finish: "<<query_finish_rate_all/test_num
-                <<" layer: "<<multiTestPara.layer
-                << endl;
-
-
-        outfile.close();
+//        std::ofstream outfile;
+//
+//        outfile.open(input_parameters.output_data_dir + "outfile" + (multiTestPara.suffix), std::ios_base::app);
+//
+//        outfile << endl
+//                << network_name<<" "
+//                << "init: "<<multiTestPara.init_objects<<" "
+//                << multiTestPara.method_name << " config simulation time: "
+//                << multiTestPara.config_simulation_time << " test simulate time: "
+//                << multiTestPara.test_simulation_time << " configure: "
+//                << configurationId << " threshold: " << multiTestPara.is_thresholded << " fail_p: " << fail_p
+//                << " "
+//                << query_rate << " " << insert_rate
+//                << " " << delete_rate << " " << multiTestPara.method_name << " singleAggregate: "
+//                << multiTestPara.is_single_aggregate << " "
+//                << multiTestPara.num_threads_update
+//                << " " << multiTestPara.num_threads_query << " "
+//                <<"average response time: "<<response_time_all/test_num
+//                <<" average query time: "<<query_process_time_all / test_num
+//                <<" average update time: "<<update_process_time_all / test_num
+//                <<" average schedule cost: "<<schedule_cost_all / test_num
+//                <<" average query finish: "<<query_finish_rate_all/test_num
+//                <<" layer: "<<multiTestPara.layer
+//                << endl;
+//
+//
+//        outfile.close();
 
         if (multiTestPara.method_name.compare("toain") == 0) {
             delete_memory();
