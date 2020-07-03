@@ -1196,6 +1196,9 @@ private:
     double total_response_time;
     RandomThreadPool_new * tp_x;
     int configurationId;
+    int init_objects;
+    vector<std::pair<double, int> > full_list;
+    vector<int> arrival_nodes;
 
 public:
     RandomThreadPool_Control(int threadpool_id_val, int begin_node_val, int end_node_val, int num_threads_query_val, int num_threads_update_val, double alpha_val, int k_val, double fail_p_val,
@@ -1331,10 +1334,10 @@ public:
                 << endl;
         outfile.close();
     }
-    void run()
-    {
-        int init_objects = multiTestPara.init_objects;
-        vector<std::pair<double, int> > full_list;
+    void init(){
+        full_list.clear();
+        arrival_nodes.clear();
+        init_objects = multiTestPara.init_objects;
         for (int i = 0; i < init_objects; i++) {
             full_list.push_back(make_pair(0.0, INSERT));
         }
@@ -1372,18 +1375,21 @@ public:
             cout<<"read from queryfile!"<<endl;
         }
 
-        vector<int> arrival_nodes = generate_arrival_nodes(full_list, begin_node, end_node);
+        arrival_nodes = generate_arrival_nodes(full_list, begin_node, end_node);
 
 
         cout << "full_list made..." << endl;
         cout << "full list size: " << full_list.size() << endl;
+    }
+    void run()
+    {
+        init();
         tp_x = new RandomThreadPool_new(0, 0, end_node, num_threads_query,num_threads_update, alpha, k, fail_p,test_n,
                                   query_rate, insert_rate,delete_rate, simulation_time,
                                   query_cost,insert_cost,delete_cost,full_list,arrival_nodes,init_objects);
         tp_x->start();
         while (true) {
             std::this_thread::sleep_for(std::chrono::microseconds(1));
-
             if (tp_x->isNeedJoin()) {
                 if(can_estimate)
                     gettimeofday(&start, NULL);
