@@ -946,13 +946,17 @@ public:
             }
 
         }
-        if(can_estimate)
-            gettimeofday(&global_start, NULL);
-        else{
-            estimate_mutex.lock();
-            gettimeofday(&global_start, NULL);
-            estimate_mutex.unlock();
+        if(run_time==1)
+        {
+            if(can_estimate)
+                gettimeofday(&global_start, NULL);
+            else{
+                estimate_mutex.lock();
+                gettimeofday(&global_start, NULL);
+                estimate_mutex.unlock();
+            }
         }
+
 
         struct timeval global_start_2;
         if(can_estimate)
@@ -1006,15 +1010,15 @@ public:
                 if(i>=begin_i){
                     issue_time = current_time;
                 }
-                if(i==begin_i&&run_time==0){
-                    if(can_estimate)
-                        gettimeofday(&global_start, NULL);
-                    else{
-                        estimate_mutex.lock();
-                        gettimeofday(&global_start, NULL);
-                        estimate_mutex.unlock();
-                    }
-                }
+//                if(i==begin_i&&run_time==0){
+//                    if(can_estimate)
+//                        gettimeofday(&global_start, NULL);
+//                    else{
+//                        estimate_mutex.lock();
+//                        gettimeofday(&global_start, NULL);
+//                        estimate_mutex.unlock();
+//                    }
+//                }
                 // start from queue id $start_q_id, we list num_queues_selected consecutive queues to hold random updates
             }
 
