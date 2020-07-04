@@ -678,27 +678,32 @@ private:
     long total_updates_plan;
     long total_queries_finished;
     long total_updates_finished;
-    vector<std::pair<double, int> > full_list;
-    vector<int> arrival_nodes;
-    int init_objects;
+    vector<std::pair<double, int> > full_task_list;
+    vector<std::pair<double, int> > init_list;
+    vector<int> arrival_task_nodes;
+    vector<int> init_arrival_nodes;
     int query_cost;
     int insert_cost;
     int delete_cost;
     int run_time; //how many times have run
     int threshold_number;
     vector<int> current_object_node;
+
     int i;//frame
+    int begin_i;//begin_frame
 
     // Algorithm data structure
 //    vector<int *> dijkstra_object_map_vec;
 public:
     RandomThreadPool_new(int threadpool_id_val, int begin_node_val, int end_node_val, int num_threads_query_val, int num_threads_update_val, double alpha_val, int k_val, double fail_p_val,
                          int test_n_val, double query_rate_val, double insert_rate_val, double delete_rate_val, int simulation_time_val,int query_cost_val,int insert_cost_val,int delete_cost_val,
-                         vector<std::pair<double, int> > full_list_val,vector<int> arrival_nodes_val,int init_objects_val,int run_time_val,int threshold_number_val) {
+                         vector<std::pair<double, int> > full_task_list_val,vector<int> arrival_task_nodes_val,vector<std::pair<double, int> > init_list_val,vector<int> init_arrival_nodes_val,int run_time_val,
+                         int threshold_number_val,int begin_i_val) {
         cout << "constructing RandomThreadPool..." << endl;
         if(overload_flag)
             overload_flag=0;
-        i = 0;
+        i = begin_i_val;
+        begin_i = begin_i_val;
         current_object_node.clear();
         threadpool_id = threadpool_id_val;
         begin_node = begin_node_val;
@@ -717,9 +722,10 @@ public:
         total_updates_plan=0;
         total_queries_finished=0;
         total_updates_finished=0;
-        init_objects = init_objects_val;
-        full_list.assign(full_list_val.begin(),full_list_val.end());
-        arrival_nodes.assign(arrival_nodes_val.begin(),arrival_nodes_val.end());
+        full_task_list.assign(full_task_list_val.begin(),full_task_list_val.end());
+        arrival_task_nodes.assign(arrival_task_nodes_val.begin(),arrival_task_nodes_val.end());
+        init_list.assign(init_list_val.begin(),init_list_val.end());
+        init_arrival_nodes.assign(init_arrival_nodes_val.begin(),init_arrival_nodes_val.end());
         query_cost = query_cost_val;
         insert_cost = insert_cost_val;
         delete_cost = delete_cost_val;
@@ -776,8 +782,8 @@ public:
                     int num_inserts = _pool[pool_index]->get_num_inserts_in_queue();
                     int num_deletes = _pool[pool_index]->get_num_deletes_in_queue();
                     num_intask += num_deletes + num_inserts + num_queries;
-                    cout << "query:" << z << " update:" << q_id << " queries:" << num_queries << " inserts:"
-                         << num_inserts << " deletes:" << num_deletes << endl;
+//                    cout << "query:" << z << " update:" << q_id << " queries:" << num_queries << " inserts:"
+//                         << num_inserts << " deletes:" << num_deletes << endl;
                 }
             }
             if(num_intask == 0) break;
@@ -843,9 +849,13 @@ public:
 
     }
 
-    int get_current_frame(){
-
+    vector<int> get_current_object(){
+            return current_object_node;
     };
+
+    int get_current_tasknum(){
+        return i;
+    }
     void run() {
         mem_struct mems;
         int* car_nodes;
@@ -892,7 +902,7 @@ public:
         }
 //        int i;
 //        cout<<"init:"<<init_objects<<endl;
-        for(i=0;i<init_objects;i++){
+        for(int init_i=0;init_i<init_list.size();init_i++){
 //            cout<<i<<endl;
             if(can_estimate)
                 gettimeofday(&end, NULL);
@@ -904,8 +914,8 @@ public:
             long current_time =
                     (end.tv_sec - global_start.tv_sec) * MICROSEC_PER_SEC + end.tv_usec - global_start.tv_usec;
 
-            pair<double, int> &event = full_list[i];
-            int non_object_node = arrival_nodes[i];
+            pair<double, int> &event = init_list[init_i];
+            int non_object_node = init_arrival_nodes[init_i];
 
             if(need_opt){
                 non_object_node%=1270000;
@@ -953,7 +963,7 @@ public:
             estimate_mutex.unlock();
         }
 
-        for (; i < full_list.size(); i++) {
+        for (i=begin_i; i < full_task_list.size(); i++) {
             if(overload_flag) break;
             if(run_time ==0 && i>threshold_number)
             {
@@ -963,8 +973,8 @@ public:
 
             }
 //            cout<<i<<endl;
-            if(arrival_nodes[i]==-1) continue;
-            pair<double, int> &event = full_list[i];
+            if(arrival_task_nodes[i]==-1) continue;
+            pair<double, int> &event = full_task_list[i];
             long issue_time = floor(event.first * MICROSEC_PER_SEC);
 //            cout<<"time: "<<event.first<<" sec"<<endl;
             long current_time=0;
@@ -993,10 +1003,10 @@ public:
 
                     if (issue_time > current_time) std::this_thread::sleep_for(std::chrono::microseconds(1));
                 } while (true);
-                if(i<init_objects){
+                if(i<begin_i){
                     issue_time = current_time;
                 }
-                if(i==init_objects){
+                if(i==begin_i){
                     if(can_estimate)
                         gettimeofday(&global_start, NULL);
                     else{
@@ -1004,8 +1014,6 @@ public:
                         gettimeofday(&global_start, NULL);
                         estimate_mutex.unlock();
                     }
-
-
                 }
                 // start from queue id $start_q_id, we list num_queues_selected consecutive queues to hold random updates
             }
@@ -1015,7 +1023,7 @@ public:
             if (event.second == INSERT) {
 
 
-                int non_object_node = arrival_nodes[i];
+                int non_object_node = arrival_task_nodes[i];
 
                 if(need_opt){
                     non_object_node%=1270000;
@@ -1051,7 +1059,7 @@ public:
             }
             if (event.second == DELETE) {
 
-                int object_node = arrival_nodes[i];
+                int object_node = arrival_task_nodes[i];
                 if(need_opt){
                     object_node%=1270000;
                 }
@@ -1104,7 +1112,7 @@ public:
 
                 total_offset+=current_time-issue_time;
 
-                int query_node=arrival_nodes[i];
+                int query_node=arrival_task_nodes[i];
                 if(need_opt){
                     query_node%=1270000;
                 }
@@ -1174,7 +1182,7 @@ public:
 
         long duration =
                 (end_2.tv_sec - global_start_2.tv_sec);
-        cout<<"duration: "<<duration<<" secs; fulllist size: "<<full_list.size()<<endl;
+        cout<<"duration: "<<duration<<" secs; fulllist size: "<<full_task_list.size()+init_list.size()<<endl;
         avg_offset = total_offset/total_queries;
         cout<<"avg offset: "<<total_offset/total_queries<<endl;
         if(VERIFY){
@@ -1234,6 +1242,8 @@ private:
     int init_objects;
     vector<std::pair<double, int> > full_list;
     vector<int> arrival_nodes;
+    vector<std::pair<double, int> > full_task_list;
+    vector<int> arrival_task_nodes;
     int x_time; //how many times we run x
     int threshold_number; //bigger than the threshold then we may restart
 
@@ -1374,48 +1384,60 @@ public:
         outfile.close();
     }
     void init(){
+        full_task_list.clear();
         full_list.clear();
         arrival_nodes.clear();
+        arrival_task_nodes.clear();
         init_objects = multiTestPara.init_objects;
         for (int i = 0; i < init_objects; i++) {
             full_list.push_back(make_pair(0.0, INSERT));
         }
 
         std::ifstream queryfile;
-        queryfile.open(input_parameters.input_data_dir + "query_" +std::to_string(query_rate)+"_"+std::to_string(insert_rate)+"_"+
-                       std::to_string(delete_rate)+"_"+std::to_string(simulation_time)+".txt", std::ios_base::in);
+        queryfile.open(input_parameters.input_data_dir + "query_" + std::to_string(query_rate) + "_" +
+                       std::to_string(insert_rate) + "_" +
+                       std::to_string(delete_rate) + "_" + std::to_string(simulation_time) + ".txt",
+                       std::ios_base::in);
         double f1;
         int f2;
-        if(!queryfile.is_open())
-        {
-            cout<<"can't load queryfile!"<<endl;
+        if (!queryfile.is_open()) {
+            cout << "can't load queryfile!" << endl;
             vector<std::pair<double, int> > append_list = make_online_query_update_list(query_rate, insert_rate,
                                                                                         delete_rate,
                                                                                         simulation_time);
             std::ofstream queryfile_w;
-            queryfile_w.open(input_parameters.input_data_dir + "query_" +std::to_string(query_rate)+"_"+std::to_string(insert_rate)+"_"+
-                             std::to_string(delete_rate)+"_"+std::to_string(simulation_time)+".txt", std::ios_base::out);
-            for (pair<double, int> &item : append_list)
-            {
+            queryfile_w.open(input_parameters.input_data_dir + "query_" + std::to_string(query_rate) + "_" +
+                             std::to_string(insert_rate) + "_" +
+                             std::to_string(delete_rate) + "_" + std::to_string(simulation_time) + ".txt",
+                             std::ios_base::out);
+            for (pair<double, int> &item : append_list) {
                 full_list.push_back(item);
-                queryfile_w<<item.first<<" "<<item.second<<endl;
+                queryfile_w << item.first << " " << item.second << endl;
             }
             queryfile_w.close();
-            cout<<"write to queryfile!"<<endl;
-        }
-        else{
-            while(!queryfile.eof())
-            {
-                queryfile>>f1>>f2;
+            cout << "write to queryfile!" << endl;
+        } else {
+            while (!queryfile.eof()) {
+                queryfile >> f1 >> f2;
 //                cout<<f1<<" "<<f2<<endl;
-                full_list.push_back(make_pair(f1,f2));
+                full_list.push_back(make_pair(f1, f2));
             }
             queryfile.close();
-            cout<<"read from queryfile!"<<endl;
+            cout << "read from queryfile!" << endl;
         }
 
         arrival_nodes = generate_arrival_nodes(full_list, begin_node, end_node);
 
+        full_task_list.assign(full_list.begin()+init_objects,full_list.end());
+        arrival_task_nodes.assign(arrival_nodes.begin()+init_objects,arrival_nodes.end());
+        vector<std::pair<double, int> > init_list;
+        init_list.assign(full_list.begin(),full_list.begin()+init_objects-1);
+        vector<int> init_arrival_node;
+        init_arrival_node.assign(arrival_nodes.begin(),arrival_nodes.begin()+init_objects-1);
+        tp_x = new RandomThreadPool_new(0, 0, end_node, num_threads_query,num_threads_update, alpha, k, fail_p,test_n,
+                                        query_rate, insert_rate,delete_rate, simulation_time,
+                                        query_cost,insert_cost,delete_cost,full_task_list,arrival_task_nodes,init_list,init_arrival_node,
+                                        x_time,threshold_number,0);
 
         cout << "full_list made..." << endl;
         cout << "full list size: " << full_list.size() << endl;
@@ -1423,10 +1445,10 @@ public:
     void run()
     {
         init();
-        tp_x = new RandomThreadPool_new(0, 0, end_node, num_threads_query,num_threads_update, alpha, k, fail_p,test_n,
-                                  query_rate, insert_rate,delete_rate, simulation_time,
-                                  query_cost,insert_cost,delete_cost,full_list,arrival_nodes,init_objects,
-                                  x_time,threshold_number);
+//        tp_x = new RandomThreadPool_new(0, 0, end_node, num_threads_query,num_threads_update, alpha, k, fail_p,test_n,
+//                                  query_rate, insert_rate,delete_rate, simulation_time,
+//                                  query_cost,insert_cost,delete_cost,full_list,arrival_nodes,init_objects,
+//                                  x_time,threshold_number);
         tp_x->start();
         while (true) {
             std::this_thread::sleep_for(std::chrono::microseconds(1));
