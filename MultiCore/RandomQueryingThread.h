@@ -1431,12 +1431,12 @@ public:
 
         arrival_nodes = generate_arrival_nodes(full_list, begin_node, end_node);
 
-        full_task_list.assign(full_list.begin()+init_objects,full_list.end());
-        arrival_task_nodes.assign(arrival_nodes.begin()+init_objects,arrival_nodes.end());
+        full_task_list.assign(full_list.begin()+init_objects+1,full_list.end());
+        arrival_task_nodes.assign(arrival_nodes.begin()+init_objects+1,arrival_nodes.end());
         vector<std::pair<double, int> > init_list;
-        init_list.assign(full_list.begin(),full_list.begin()+init_objects-1);
+        init_list.assign(full_list.begin(),full_list.begin()+init_objects);
         vector<int> init_arrival_node;
-        init_arrival_node.assign(arrival_nodes.begin(),arrival_nodes.begin()+init_objects-1);
+        init_arrival_node.assign(arrival_nodes.begin(),arrival_nodes.begin()+init_objects);
         tp_x = new RandomThreadPool_new(0, 0, end_node, num_threads_query,num_threads_update, alpha, k, fail_p,test_n,
                                         query_rate, insert_rate,delete_rate, simulation_time,
                                         query_cost,insert_cost,delete_cost,full_task_list,arrival_task_nodes,init_list,init_arrival_node,
