@@ -1445,6 +1445,21 @@ public:
         cout << "full_list made..." << endl;
         cout << "full list size: " << full_list.size() << endl;
     }
+    void re_init(){
+        x_time++;
+        int begin_frame = tp_x->get_current_tasknum();
+        vector<int> init_object_nodes = tp_x->get_current_object();
+        vector<std::pair<double, int> > init_list;
+        for(int init_i = 0;init_i< init_object_nodes.size();init_i++)
+        {
+            init_list.push_back(make_pair(0.0, INSERT));
+        }
+        delete tp_x;
+        tp_x = new RandomThreadPool_new(0, 0, end_node, num_threads_query,num_threads_update, alpha, k, fail_p,test_n,
+                                        query_rate, insert_rate,delete_rate, simulation_time,
+                                        query_cost,insert_cost,delete_cost,full_task_list,arrival_task_nodes,init_list,init_object_nodes,
+                                        x_time,threshold_number,begin_frame);
+    }
     void run()
     {
         init();
@@ -1452,6 +1467,22 @@ public:
 //                                  query_rate, insert_rate,delete_rate, simulation_time,
 //                                  query_cost,insert_cost,delete_cost,full_list,arrival_nodes,init_objects,
 //                                  x_time,threshold_number);
+        tp_x->start();
+        while (true) {
+            std::this_thread::sleep_for(std::chrono::microseconds(1));
+            if (tp_x->isNeedJoin()) {
+                if(can_estimate)
+                    gettimeofday(&start, NULL);
+                else{
+                    estimate_mutex.lock();
+                    gettimeofday(&start, NULL);
+                    estimate_mutex.unlock();
+                }
+                tp_x->join();
+                break;
+            }
+        }
+        re_init();
         tp_x->start();
         while (true) {
             std::this_thread::sleep_for(std::chrono::microseconds(1));
