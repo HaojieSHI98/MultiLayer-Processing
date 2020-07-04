@@ -1342,16 +1342,15 @@ public:
         return arrival_node_list;
     }
     void Generate_results(){
-        if (!multiTestPara.is_single_aggregate) {
+//        if (!multiTestPara.is_single_aggregate) {
             for (int i = 0; i < multiTestPara.num_threads_query; i++) {
                 total_response_time += globalThreadVar[i]->total_query_time;
                 number_of_queries += globalThreadVar[i]->number_of_queries;
             }
-        } else {
-            total_response_time += globalThreadVar[0]->total_query_time;
-            number_of_queries += globalThreadVar[0]->number_of_queries;
-
-        }
+//        } else {
+//            total_response_time += globalThreadVar[0]->total_query_time;
+//            number_of_queries += globalThreadVar[0]->number_of_queries;
+//        }
         cout << "expected response time: " << total_response_time / number_of_queries << " seconds" << endl;
         cout << "total_response_time: " << total_response_time << endl;
         cout << "number_of_queries: " << number_of_queries << endl;
