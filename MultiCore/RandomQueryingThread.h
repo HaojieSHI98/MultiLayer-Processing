@@ -903,7 +903,7 @@ public:
 //        int i;
 //        cout<<"init:"<<init_objects<<endl;
         for(int init_i=0;init_i<init_list.size();init_i++){
-            cout<<init_i<<endl;
+//            cout<<init_i<<endl;
             if(can_estimate)
                 gettimeofday(&end, NULL);
             else{
