@@ -903,7 +903,7 @@ public:
 //        int i;
 //        cout<<"init:"<<init_objects<<endl;
         for(int init_i=0;init_i<init_list.size();init_i++){
-//            cout<<i<<endl;
+            cout<<init_i<<endl;
             if(can_estimate)
                 gettimeofday(&end, NULL);
             else{
@@ -1087,6 +1087,9 @@ public:
                     current_object_node[key_obj] = current_object_node[last_index];
                     current_object_node[last_index] = tmp;
                     current_object_node.pop_back();
+                }
+                else{
+                    cout<<"not exist object node:"<<object_node<<endl<<endl<<endl;
                 }
                 if(VERIFY){
 //                    car_nodes[object_node]=0;
