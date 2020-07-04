@@ -686,6 +686,8 @@ private:
     int delete_cost;
     int run_time; //how many times have run
     int threshold_number;
+    vector<int> current_object_node;
+    int i;//frame
 
     // Algorithm data structure
 //    vector<int *> dijkstra_object_map_vec;
@@ -696,6 +698,8 @@ public:
         cout << "constructing RandomThreadPool..." << endl;
         if(overload_flag)
             overload_flag=0;
+        i = 0;
+        current_object_node.clear();
         threadpool_id = threadpool_id_val;
         begin_node = begin_node_val;
         end_node = end_node_val;
@@ -764,6 +768,17 @@ public:
     void join() {
         cout << "start joining" << endl;
 
+       for(int z = 0;z < num_threads_query;z++)
+       {
+           for(int q_id = 0;q_id <num_threads_update;q_id++)
+           {
+               int pool_index=z * num_threads_update + q_id;
+               int num_queries = _pool[pool_index]->get_num_queries_in_queue();
+               int num_inserts = _pool[pool_index]->get_num_inserts_in_queue();
+               int num_deletes = _pool[pool_index]->get_num_deletes_in_queue();
+               cout<<"query:"<<z<<" update:"<<q_id<<" queries:"<<num_queries<<" inserts:"<<num_inserts<<" deletes:"<<num_deletes<<endl;
+           }
+       }
         if(!multiTestPara.is_single_aggregate) {
             for (int j = 0; j < num_threads_query; j++) {
                 _aggregate_thread[j]->join();
@@ -824,6 +839,9 @@ public:
 
     }
 
+    int get_current_frame(){
+
+    };
     void run() {
         mem_struct mems;
         int* car_nodes;
@@ -868,7 +886,7 @@ public:
         if(multiTestPara.method_name.compare("vtree")==0 && network_name.compare("BJ-old")==0){
             need_opt=1;
         }
-        int i;
+//        int i;
 //        cout<<"init:"<<init_objects<<endl;
         for(i=0;i<init_objects;i++){
 //            cout<<i<<endl;
@@ -907,6 +925,7 @@ public:
                 _pool[pool_index]->add_task(task);
                 total_object_map[z][non_object_node] = pool_index;
             }
+            current_object_node.push_back(non_object_node);
             if(VERIFY){
 //                    car_nodes[non_object_node]=1;
                 DijkstraKNNInsert(non_object_node, car_nodes);
@@ -920,8 +939,6 @@ public:
             gettimeofday(&global_start, NULL);
             estimate_mutex.unlock();
         }
-
-
 
         struct timeval global_start_2;
         if(can_estimate)
@@ -1020,6 +1037,7 @@ public:
                     _pool[pool_index]->add_task(task);
                     total_object_map[z][non_object_node] = pool_index;
                 }
+                current_object_node.push_back(non_object_node);
                 if(VERIFY){
 //                    car_nodes[non_object_node]=1;
                     DijkstraKNNInsert(non_object_node, car_nodes);
@@ -1043,6 +1061,20 @@ public:
 //                        cout<<"delete added to "<<z * num_threads_update + j_mod<<endl;
                         _pool[z * num_threads_update + j_mod]->add_task(task);
                     }
+                }
+                int key_obj = -1;
+                for(int obj_i = 0;obj_i<current_object_node.size();obj_i++){
+                    if(current_object_node[obj_i]==object_node){
+                        key_obj = obj_i;
+                        break;
+                    }
+                }
+                if(key_obj!=-1){
+                    int last_index = current_object_node.size() - 1;
+                    int tmp = current_object_node[key_obj];
+                    current_object_node[key_obj] = current_object_node[last_index];
+                    current_object_node[last_index] = tmp;
+                    current_object_node.pop_back();
                 }
                 if(VERIFY){
 //                    car_nodes[object_node]=0;
