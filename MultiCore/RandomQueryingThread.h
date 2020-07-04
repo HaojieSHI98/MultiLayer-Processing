@@ -1006,7 +1006,7 @@ public:
                 if(i>=begin_i){
                     issue_time = current_time;
                 }
-                if(i==begin_i){
+                if(i==begin_i&&run_time==0){
                     if(can_estimate)
                         gettimeofday(&global_start, NULL);
                     else{
