@@ -1254,6 +1254,8 @@ private:
     vector<int> arrival_task_nodes;
     int x_time; //how many times we run x
     int threshold_number; //bigger than the threshold then we may restart
+    int x_response_time=0;
+    int x_query_num = 0;
 
 public:
     RandomThreadPool_Control(int threadpool_id_val, int begin_node_val, int end_node_val, int num_threads_query_val, int num_threads_update_val, double alpha_val, int k_val, double fail_p_val,
@@ -1348,14 +1350,16 @@ public:
     }
     void Generate_results(){
 //        if (!multiTestPara.is_single_aggregate) {
-            for (int i = 0; i < multiTestPara.num_threads_query; i++) {
-                total_response_time += globalThreadVar[i]->total_query_time;
-                number_of_queries += globalThreadVar[i]->number_of_queries;
-            }
+//            for (int i = 0; i < multiTestPara.num_threads_query; i++) {
+//                total_response_time += globalThreadVar[i]->total_query_time;
+//                number_of_queries += globalThreadVar[i]->number_of_queries;
+//            }
 //        } else {
 //            total_response_time += globalThreadVar[0]->total_query_time;
 //            number_of_queries += globalThreadVar[0]->number_of_queries;
 //        }
+        total_response_time = x_response_time;
+        number_of_queries = x_query_num;
         cout << "expected response time: " << total_response_time / number_of_queries << " seconds" << endl;
         cout << "total_response_time: " << total_response_time << endl;
         cout << "number_of_queries: " << number_of_queries << endl;
@@ -1390,6 +1394,7 @@ public:
                 << endl;
         outfile.close();
     }
+
     void init(){
         full_task_list.clear();
         full_list.clear();
@@ -1464,6 +1469,12 @@ public:
                                         query_cost,insert_cost,delete_cost,full_task_list,arrival_task_nodes,init_list,init_object_nodes,
                                         x_time,threshold_number,begin_frame);
     }
+    void update_query_time(){
+        for (int i = 0; i < multiTestPara.num_threads_query; i++) {
+            x_response_time += globalThreadVar[i]->total_query_time;
+            x_query_num += globalThreadVar[i]->number_of_queries;
+        }
+    }
     void run()
     {
         init();
@@ -1486,6 +1497,7 @@ public:
                 break;
             }
         }
+        update_query_time();
         re_init();
         tp_x->start();
         while (true) {
@@ -1502,6 +1514,7 @@ public:
                 break;
             }
         }
+        update_query_time();
         delete tp_x;
         if(can_estimate)
             gettimeofday(&end, NULL);
