@@ -278,7 +278,7 @@ public:
         last_insert_cost=insert_cost;
         last_delete_cost=delete_cost;
         last_query_response_time=0;
-        cout<<"query_lost:"<<last_query_cost<<"insert_lost:"<<last_insert_cost<<"delete_lost:"<<last_delete_cost<<endl;
+//        cout<<"query_lost:"<<last_query_cost<<"insert_lost:"<<last_insert_cost<<"delete_lost:"<<last_delete_cost<<endl;
 
         working_thread = std::thread(&RandomThread::run, this);
         // working_thread.detach(); //放到后台， join是等待线程结束
@@ -737,6 +737,7 @@ public:
         for(int j =0;j<num_threads_query;j++) {
             globalThreadVar[j] = new GlobalThreadVar();
             globalThreadVar[j]->ran_threshold.clear();
+            cout<<"query:"<<j<<" time:"<<globalThreadVar[j]->total_query_time<<" num:"<<globalThreadVar[j]->number_of_queries<<endl;
             for (int i = 0; i <= QUERY_ID_FOLD; i++) globalThreadVar[j]->ran_threshold.push_back(INT_MAX);
         }
         if(!multiTestPara.is_single_aggregate)
