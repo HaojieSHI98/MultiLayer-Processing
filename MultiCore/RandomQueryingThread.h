@@ -115,7 +115,10 @@ public:
     }
 
     void run() {
-        cout << "enter aggregate run!" << endl;
+        if(DISPLAY)
+        {
+            cout << "enter aggregate run!" << endl;
+        }
         while (true) {
             if(overload_flag) break;
             if(is_simulation && thread_stop){
@@ -720,7 +723,7 @@ public:
         delete_rate = delete_rate_val;
         test_n = test_n_val;
         num_threads_update = num_threads_update_val; //partition
-        cout<<"num_threads_update:"<<num_threads_update<<" num_threads_query:"<<num_threads_query_val<<endl;
+        if(DISPLAY)cout<<"num_threads_update:"<<num_threads_update<<" num_threads_query:"<<num_threads_query_val<<endl;
         alpha = alpha_val;
         fail_p = fail_p_val;
         k = k_val;
@@ -751,7 +754,7 @@ public:
         if(multiTestPara.is_single_aggregate){
             _single_aggregate_thread=new RandomAggregateThread(threadpool_id,0, k, num_threads_update);
         }
-        cout << "k_star: " << k_star << endl;
+        if(DISPLAY)cout << "k_star: " << k_star << endl;
         for(int j =0;j<num_threads_query;j++){
 
             if(!multiTestPara.is_single_aggregate)
@@ -779,7 +782,7 @@ public:
     }
 
     void join() {
-        cout << "start joining" << endl;
+        if(DISPLAY)cout << "start joining" << endl;
 
         if(!multiTestPara.is_single_aggregate) {
             for (int j = 0; j < num_threads_query; j++) {
@@ -789,7 +792,7 @@ public:
         if(multiTestPara.is_single_aggregate){
             _single_aggregate_thread->join();
         }
-        cout << "finish joining aggregatethreads" << endl;
+        if(DISPLAY)cout << "finish joining aggregatethreads" << endl;
 
 
 
@@ -865,7 +868,7 @@ public:
         if (r < alpha - alpha_floor) {
             num_queues_selected = alpha_floor;
         }
-        cout << "num_queues_selected: " << num_queues_selected << endl;
+        if(DISPLAY)cout << "num_queues_selected: " << num_queues_selected << endl;
         vector<int> object_list;
         vector<int> non_object_list;
         for(int j =0;j<40;j++) {
@@ -1665,7 +1668,7 @@ public:
 
     //释放线程池
     ~RandomThreadPool()  {
-        cout << "hi, RandomThreadPooladPool()" << endl;
+        if(DISPLAY)cout << "hi, RandomThreadPooladPool()" << endl;
         // releasePool();
         // for(int i = 0;i < _pool.size(); ++i){
         //     delete _pool[i];
@@ -1674,7 +1677,7 @@ public:
     }
 
     void init() {
-        cout << "start init() function ..." << endl;
+        if(DISPLAY) cout << "start init() function ..." << endl;
 
     }
 

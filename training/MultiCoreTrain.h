@@ -80,6 +80,14 @@ MultiTestParameter anaylizeParameters(){
         multiTestPara.update_thread = atoi(paras["-updatethread"].c_str());
     }
 
+    if(paras.find("-DISPLAY")==paras.end()){
+        DISPLAY = 0;
+    }
+    else
+    {
+        DISPLAY = atoi(paras["-DISPLAY"].c_str());
+    }
+
     if(paras.find("-querycost")==paras.end()){
         multiTestPara.query_cost = 0;
     }

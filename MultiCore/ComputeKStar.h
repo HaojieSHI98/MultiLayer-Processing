@@ -32,7 +32,7 @@ long double prob_at_least(int k, int h, int num_threads_update, double alpha){
 int compute_k_star(int k, int num_threads_update, double alpha, double fail_p){
     for(int k_star=1;k_star<=k;k_star++){
         long double prob = prob_at_least(k, k_star, num_threads_update, alpha);
-        cout<<k_star<<" "<<prob<<endl;
+        if(DISPLAY) cout<<k_star<<" "<<prob<<endl;
         if(prob<fail_p) return k_star;
     }
     return k;
