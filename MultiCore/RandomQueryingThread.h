@@ -737,7 +737,7 @@ public:
         for(int j =0;j<num_threads_query;j++) {
             globalThreadVar[j] = new GlobalThreadVar();
             globalThreadVar[j]->ran_threshold.clear();
-            cout<<"query:"<<j<<" time:"<<globalThreadVar[j]->total_query_time<<" num:"<<globalThreadVar[j]->number_of_queries<<endl;
+//            cout<<"query:"<<j<<" time:"<<globalThreadVar[j]->total_query_time<<" num:"<<globalThreadVar[j]->number_of_queries<<endl;
             for (int i = 0; i <= QUERY_ID_FOLD; i++) globalThreadVar[j]->ran_threshold.push_back(INT_MAX);
         }
         if(!multiTestPara.is_single_aggregate)
@@ -1170,8 +1170,8 @@ public:
                     int num_inserts = _pool[pool_index]->get_num_inserts_in_queue();
                     int num_deletes = _pool[pool_index]->get_num_deletes_in_queue();
                     num_intask += num_deletes + num_inserts + num_queries;
-                    cout << "query:" << z << " update:" << q_id << " queries:" << num_queries << " inserts:"
-                         << num_inserts << " deletes:" << num_deletes << endl;
+//                    cout << "query:" << z << " update:" << q_id << " queries:" << num_queries << " inserts:"
+//                         << num_inserts << " deletes:" << num_deletes << endl;
                 }
             }
             if(num_intask == 0) break;
@@ -1227,8 +1227,9 @@ private:
     int threadpool_id;
     int begin_node;
     int end_node;
-    int num_threads_update;
-    int num_threads_query;
+    int num_threads;
+    int num_threads_query_x;
+    int num_threads_update_x;
     int _needjoin;
     double alpha;
     int test_n;
@@ -1260,13 +1261,12 @@ private:
     int x_query_num = 0;
 
 public:
-    RandomThreadPool_Control(int threadpool_id_val, int begin_node_val, int end_node_val, int num_threads_query_val, int num_threads_update_val, double alpha_val, int k_val, double fail_p_val,
+    RandomThreadPool_Control(int threadpool_id_val, int begin_node_val, int end_node_val, int num_threads_val, double alpha_val, int k_val, double fail_p_val,
                      int test_n_val, double query_rate_val, double insert_rate_val, double delete_rate_val, int simulation_time_val,int query_cost_val,int insert_cost_val,int delete_cost_val,int ConfigID_val){
 
         begin_node = begin_node_val;
         end_node = end_node_val;
-        num_threads_query = num_threads_query_val;
-        num_threads_update = num_threads_update_val;
+        num_threads = num_threads_val;
         alpha = alpha_val;
         test_n = test_n_val;
         fail_p = fail_p_val;
@@ -1448,7 +1448,9 @@ public:
         init_list.assign(full_list.begin(),full_list.begin()+init_objects);
         vector<int> init_arrival_node;
         init_arrival_node.assign(arrival_nodes.begin(),arrival_nodes.begin()+init_objects);
-        tp_x = new RandomThreadPool_new(0, 0, end_node, num_threads_query,num_threads_update, alpha, k, fail_p,test_n,
+        num_threads_update_x = 1;
+        num_threads_query_x = num_threads - 2;
+        tp_x = new RandomThreadPool_new(0, 0, end_node, num_threads_query_x,num_threads_update_x, alpha, k, fail_p,test_n,
                                         query_rate, insert_rate,delete_rate, simulation_time,
                                         query_cost,insert_cost,delete_cost,full_task_list,arrival_task_nodes,init_list,init_arrival_node,
                                         x_time,threshold_number,0);
@@ -1466,13 +1468,18 @@ public:
             init_list.push_back(make_pair(0.0, INSERT));
         }
         delete tp_x;
-        tp_x = new RandomThreadPool_new(0, 0, end_node, num_threads_query,num_threads_update, alpha, k, fail_p,test_n,
+        int num_q = int(sqrt(num_threads-2));
+        int num_p = int((num_threads-2)/num_q);
+        num_threads_query_x = max(num_q,num_p);
+        num_threads_update_x = num_p+num_q-num_threads_query_x;
+
+        tp_x = new RandomThreadPool_new(0, 0, end_node, num_threads_query_x,num_threads_update_x, alpha, k, fail_p,test_n,
                                         query_rate, insert_rate,delete_rate, simulation_time,
                                         query_cost,insert_cost,delete_cost,full_task_list,arrival_task_nodes,init_list,init_object_nodes,
                                         x_time,threshold_number,begin_frame);
     }
     void update_query_time(){
-        for (int i = 0; i < multiTestPara.num_threads_query; i++) {
+        for (int i = 0; i < num_threads_query_x; i++) {
             x_response_time += globalThreadVar[i]->total_query_time;
             x_query_num += globalThreadVar[i]->number_of_queries;
         }
