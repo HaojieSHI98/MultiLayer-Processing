@@ -1514,7 +1514,7 @@ public:
                 break;
             }
         }
-//        update_query_time();
+        update_query_time();
         re_init();
         tp_x->start();
         while (true) {
@@ -1531,7 +1531,7 @@ public:
                 break;
             }
         }
-        update_query_time();
+//        update_query_time();
         delete tp_x;
         if(can_estimate)
             gettimeofday(&end, NULL);
