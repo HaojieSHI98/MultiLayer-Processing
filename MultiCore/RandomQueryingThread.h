@@ -366,7 +366,7 @@ public:
         cv.notify_all();
     }
     void run() {
-        cout << "enter thread run!" << endl;
+        if(DISPLAY)cout << "enter thread run!" << endl;
         timeval init;
         timeval end;
         while (true) {
@@ -774,7 +774,7 @@ public:
 
     //释放线程池
     ~RandomThreadPool_new() {
-        cout << "hi, RandomThreadPooladPool()" << endl;
+        if(DISPLAY)cout << "hi, RandomThreadPooladPool()" << endl;
 //         for(int i = 0;i < _pool.size(); ++i){
 //             delete _pool[i];
 //         }
@@ -811,12 +811,12 @@ public:
         }
         query_finish_rate = total_queries_finished * 1.0 / total_queries_plan;
 
-        cout << "finish joining threads" << endl;
+        if(DISPLAY)cout << "finish joining threads" << endl;
 
         if(_main_thread.joinable())
             _main_thread.join();
 
-        cout << "finish joining main thread" << endl;
+        if(DISPLAY)cout << "finish joining main thread" << endl;
 
     }
 
@@ -1209,9 +1209,9 @@ public:
 
         long duration =
                 (end_2.tv_sec - global_start_2.tv_sec);
-        cout<<"duration: "<<duration<<" secs; fulllist size: "<<full_task_list.size()+init_list.size()<<endl;
+        if(DISPLAY)cout<<"duration: "<<duration<<" secs; fulllist size: "<<full_task_list.size()+init_list.size()<<endl;
         avg_offset = total_offset/total_queries;
-        cout<<"avg offset: "<<total_offset/total_queries<<endl;
+        if(DISPLAY)cout<<"avg offset: "<<total_offset/total_queries<<endl;
         if(VERIFY){
             delete[] car_nodes;
             delete_mems(mems);
@@ -1234,7 +1234,7 @@ public:
             _single_aggregate_thread->notify();
         }
         _needjoin = 1;
-        cout << "all set stopped!" << endl;
+        if(DISPLAY)cout << "all set stopped!" << endl;
     }
 
 };
