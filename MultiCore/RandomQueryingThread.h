@@ -1518,13 +1518,13 @@ public:
         update_query_time();
         re_init();
         tp_x->start();
-        if(can_estimate)
-            gettimeofday(&global_start, NULL);
-        else{
-            estimate_mutex.lock();
-            gettimeofday(&global_start, NULL);
-            estimate_mutex.unlock();
-        }
+//        if(can_estimate)
+//            gettimeofday(&global_start, NULL);
+//        else{
+//            estimate_mutex.lock();
+//            gettimeofday(&global_start, NULL);
+//            estimate_mutex.unlock();
+//        }
         while (true) {
             std::this_thread::sleep_for(std::chrono::microseconds(1));
             if (tp_x->isNeedJoin()) {
