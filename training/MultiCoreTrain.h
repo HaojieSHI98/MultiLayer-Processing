@@ -86,6 +86,7 @@ MultiTestParameter anaylizeParameters(){
     else
     {
         DISPLAY = atoi(paras["-DISPLAY"].c_str());
+        cout<<"DISPLAY:"<<DISPLAY<<endl;
     }
 
     if(paras.find("-querycost")==paras.end()){
