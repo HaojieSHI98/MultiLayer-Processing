@@ -715,6 +715,7 @@ public:
         delete_rate = delete_rate_val;
         test_n = test_n_val;
         num_threads_update = num_threads_update_val; //partition
+        cout<<"num_threads_update:"<<num_threads_update<<" num_threads_query:"<<num_threads_query_val<<endl;
         alpha = alpha_val;
         fail_p = fail_p_val;
         k = k_val;
