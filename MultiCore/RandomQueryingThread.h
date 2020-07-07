@@ -1245,8 +1245,8 @@ private:
     int begin_node;
     int end_node;
     int num_threads;
-    int num_threads_query_x;
-    int num_threads_update_x;
+    int num_threads_query[2];
+    int num_threads_update[2];
     int _needjoin;
     double alpha;
     int test_n;
@@ -1265,17 +1265,17 @@ private:
     int delete_cost;
     struct timeval start, end;
     double total_response_time;
-    RandomThreadPool_new * tp_x;
+    RandomThreadPool_new * tp[2];
     int configurationId;
     int init_objects;
     vector<std::pair<double, int> > full_list;
     vector<int> arrival_nodes;
     vector<std::pair<double, int> > full_task_list;
     vector<int> arrival_task_nodes;
-    int x_time; //how many times we run x
+    int run_time[2]; //how many times we run x
     int threshold_number; //bigger than the threshold then we may restart
-    int x_response_time=0;
-    int x_query_num = 0;
+    int response_time[2]={0};
+    int query_num[2] = {0};
 
 public:
     RandomThreadPool_Control(int threadpool_id_val, int begin_node_val, int end_node_val, int num_threads_val, double alpha_val, int k_val, double fail_p_val,
@@ -1297,7 +1297,6 @@ public:
         insert_cost = insert_cost_val;
         total_response_time = 0.0;
         configurationId = ConfigID_val;
-        x_time = 0;
         threshold_number = 400000;
 }
     ~RandomThreadPool_Control(){
@@ -1377,8 +1376,8 @@ public:
 //            total_response_time += globalThreadVar[0]->total_query_time;
 //            number_of_queries += globalThreadVar[0]->number_of_queries;
 //        }
-        total_response_time = x_response_time;
-        number_of_queries = x_query_num;
+        total_response_time = response_time[0]+response_time[1];
+        number_of_queries = query_num[0]+query_num[1];
         cout << "expected response time: " << total_response_time / number_of_queries << " seconds" << endl;
         cout << "total_response_time: " << total_response_time << endl;
         cout << "number_of_queries: " << number_of_queries << endl;
@@ -1465,45 +1464,47 @@ public:
         init_list.assign(full_list.begin(),full_list.begin()+init_objects);
         vector<int> init_arrival_node;
         init_arrival_node.assign(arrival_nodes.begin(),arrival_nodes.begin()+init_objects);
-        num_threads_update_x = 1;
-        num_threads_query_x = num_threads - 2;
+        num_threads_update[0] = 1;
+        num_threads_query[0] = num_threads - 2;
 //        int num_q = int(sqrt(num_threads-2));
 //        int num_p = int((num_threads-2)/num_q);
 //        num_threads_query_x = max(num_q,num_p);
 //        num_threads_update_x = num_p+num_q-num_threads_query_x;
-        tp_x = new RandomThreadPool_new(0, 0, end_node, num_threads_query_x,num_threads_update_x, alpha, k, fail_p,test_n,
+        tp[0] = new RandomThreadPool_new(0, 0, end_node, num_threads_query[0],num_threads_update[0], alpha, k, fail_p,test_n,
                                         query_rate, insert_rate,delete_rate, simulation_time,
                                         query_cost,insert_cost,delete_cost,full_task_list,arrival_task_nodes,init_list,init_arrival_node,
-                                        x_time,threshold_number,0);
+                                        run_time[0],threshold_number,0);
 
         cout << "full_list made..." << endl;
         cout << "full list size: " << full_list.size() << endl;
     }
-    void re_init(){
-        x_time++;
-        int begin_frame = tp_x->get_current_tasknum();
-        vector<int> init_object_nodes = tp_x->get_current_object();
+    void re_init(int id){
+        run_time[id]++;
+        int begin_frame = tp[id]->get_current_tasknum();
+        vector<int> init_object_nodes = tp[id]->get_current_object();
         vector<std::pair<double, int> > init_list;
         for(int init_i = 0;init_i< init_object_nodes.size();init_i++)
         {
             init_list.push_back(make_pair(0.0, INSERT));
         }
-        delete tp_x;
+//        delete tp_x;
         int num_q = int(sqrt(num_threads-2));
         int num_p = int((num_threads-2)/num_q);
-        num_threads_query_x = max(num_q,num_p);
-        num_threads_update_x = num_p+num_q-num_threads_query_x;
+        num_threads_query[id] = max(num_q,num_p);
+        num_threads_update[id] = num_p+num_q-num_threads_query[id];
 //        num_threads_query_x = num_threads-2;
 //        num_threads_update_x = 1;
-        tp_x = new RandomThreadPool_new(0, 0, end_node, num_threads_query_x,num_threads_update_x, alpha, k, fail_p,test_n,
+        tp[id] = new RandomThreadPool_new(id, 0, end_node, num_threads_query[id],num_threads_update[id], alpha, k, fail_p,test_n,
                                         query_rate, insert_rate,delete_rate, simulation_time,
                                         query_cost,insert_cost,delete_cost,full_task_list,arrival_task_nodes,init_list,init_object_nodes,
-                                        x_time,threshold_number,begin_frame);
+                                        run_time[id],threshold_number,begin_frame);
     }
     void update_query_time(){
-        for (int i = 0; i < num_threads_query_x; i++) {
-            x_response_time += globalThreadVar[0][i]->total_query_time;
-            x_query_num += globalThreadVar[0][i]->number_of_queries;
+        for(int id =0;id<2;id++) {
+            for (int i = 0; i < num_threads_query[id]; i++) {
+                response_time[id] += globalThreadVar[id][i]->total_query_time;
+                query_num[id] += globalThreadVar[id][i]->number_of_queries;
+            }
         }
     }
     void run()
@@ -1513,7 +1514,7 @@ public:
 //                                  query_rate, insert_rate,delete_rate, simulation_time,
 //                                  query_cost,insert_cost,delete_cost,full_list,arrival_nodes,init_objects,
 //                                  x_time,threshold_number);
-        tp_x->start();
+        tp[0]->start();
         if(can_estimate)
             gettimeofday(&global_start, NULL);
         else{
@@ -1523,7 +1524,7 @@ public:
         }
         while (true) {
             std::this_thread::sleep_for(std::chrono::microseconds(1));
-            if (tp_x->isNeedJoin()) {
+            if (tp[0]->isNeedJoin()) {
                 if(can_estimate)
                     gettimeofday(&start, NULL);
                 else{
@@ -1531,13 +1532,13 @@ public:
                     gettimeofday(&start, NULL);
                     estimate_mutex.unlock();
                 }
-                tp_x->join();
+                tp[0]->join();
                 break;
             }
         }
         update_query_time();
-        re_init();
-        tp_x->start();
+        re_init(0);
+        tp[0]->start();
 //        if(can_estimate)
 //            gettimeofday(&global_start, NULL);
 //        else{
@@ -1547,7 +1548,7 @@ public:
 //        }
         while (true) {
             std::this_thread::sleep_for(std::chrono::microseconds(1));
-            if (tp_x->isNeedJoin()) {
+            if (tp[0]->isNeedJoin()) {
                 if(can_estimate)
                     gettimeofday(&start, NULL);
                 else{
@@ -1555,12 +1556,12 @@ public:
                     gettimeofday(&start, NULL);
                     estimate_mutex.unlock();
                 }
-                tp_x->join();
+                tp[0]->join();
                 break;
             }
         }
         update_query_time();
-        delete tp_x;
+        delete tp[0];
         if(can_estimate)
             gettimeofday(&end, NULL);
         else{
