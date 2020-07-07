@@ -964,17 +964,26 @@ public:
         long offset_time;
         for (i=begin_i; i < full_task_list.size(); i++) {
             if(overload_flag) break;
-            if(run_time ==0 && i>threshold_number)
-            {
-                _needjoin = 1;
-                cout<<"Over threshold num!!!!!RESTART NOW!!!"<<endl<<endl<<endl<<endl<<endl;
-                break;
 
-            }
+//            if(run_time ==0 && i>threshold_number)
+//            {
+//                _needjoin = 1;
+//                cout<<"Over threshold num!!!!!RESTART NOW!!!"<<endl<<endl<<endl<<endl<<endl;
+//                break;
+//
+//            }
 //            cout<<i<<endl;
             if(arrival_task_nodes[i]==-1) continue;
             pair<double, int> &event = full_task_list[i];
             long issue_time = floor(event.first * MICROSEC_PER_SEC);
+            if(event.second == QUERY){
+                if(threadpool_id!=task_turn_flag || i==current_task_num) continue;
+                else
+                {
+                    current_task_num = i;
+                    task_turn_flag = (task_turn_flag+1)%2;
+                }
+            }
 //            cout<<"time: "<<event.first<<" sec"<<endl;
             if(can_estimate)
                 gettimeofday(&end, NULL);
@@ -1378,6 +1387,8 @@ public:
 //        }
         total_response_time = response_time[0]+response_time[1];
         number_of_queries = query_num[0]+query_num[1];
+        cout<<"toal response time 0 :"<<response_time[0]<<" number of queries 0: "<<query_num[0]<<endl;
+        cout<<"toal response time 1 :"<<response_time[1]<<" number of queries 1: "<<query_num[1]<<endl;
         cout << "expected response time: " << total_response_time / number_of_queries << " seconds" << endl;
         cout << "total_response_time: " << total_response_time << endl;
         cout << "number_of_queries: " << number_of_queries << endl;
@@ -1466,15 +1477,18 @@ public:
         init_arrival_node.assign(arrival_nodes.begin(),arrival_nodes.begin()+init_objects);
         num_threads_update[0] = 1;
         num_threads_query[0] = num_threads - 2;
-//        int num_q = int(sqrt(num_threads-2));
-//        int num_p = int((num_threads-2)/num_q);
-//        num_threads_query_x = max(num_q,num_p);
-//        num_threads_update_x = num_p+num_q-num_threads_query_x;
+        int num_q = int(sqrt(num_threads-2));
+        int num_p = int((num_threads-2)/num_q);
+        num_threads_query[1] = max(num_q,num_p);
+        num_threads_update[1] = num_p+num_q-num_threads_query[1];
         tp[0] = new RandomThreadPool_new(0, 0, end_node, num_threads_query[0],num_threads_update[0], alpha, k, fail_p,test_n,
                                         query_rate, insert_rate,delete_rate, simulation_time,
                                         query_cost,insert_cost,delete_cost,full_task_list,arrival_task_nodes,init_list,init_arrival_node,
                                         run_time[0],threshold_number,0);
-
+        tp[1] = new RandomThreadPool_new(1, 0, end_node, num_threads_query[1],num_threads_update[1], alpha, k, fail_p,test_n,
+                                         query_rate, insert_rate,delete_rate, simulation_time,
+                                         query_cost,insert_cost,delete_cost,full_task_list,arrival_task_nodes,init_list,init_arrival_node,
+                                         run_time[1],threshold_number,0);
         cout << "full_list made..." << endl;
         cout << "full list size: " << full_list.size() << endl;
     }
@@ -1515,6 +1529,7 @@ public:
 //                                  query_cost,insert_cost,delete_cost,full_list,arrival_nodes,init_objects,
 //                                  x_time,threshold_number);
         tp[0]->start();
+        tp[1]->start();
         if(can_estimate)
             gettimeofday(&global_start, NULL);
         else{
@@ -1525,43 +1540,45 @@ public:
         while (true) {
             std::this_thread::sleep_for(std::chrono::microseconds(1));
             if (tp[0]->isNeedJoin()) {
-                if(can_estimate)
-                    gettimeofday(&start, NULL);
-                else{
-                    estimate_mutex.lock();
-                    gettimeofday(&start, NULL);
-                    estimate_mutex.unlock();
-                }
                 tp[0]->join();
-                break;
             }
+            if (tp[1]->isNeedJoin()) {
+                tp[1]->join();
+            }
+            if(tp[0]->isNeedJoin()&&tp[1]->isNeedJoin()) break;
         }
         update_query_time();
-        re_init(0);
-        tp[0]->start();
-//        if(can_estimate)
-//            gettimeofday(&global_start, NULL);
-//        else{
-//            estimate_mutex.lock();
-//            gettimeofday(&global_start, NULL);
-//            estimate_mutex.unlock();
+
+        //
+
+//        re_init(0);
+//        tp[0]->start();
+////        if(can_estimate)
+////            gettimeofday(&global_start, NULL);
+////        else{
+////            estimate_mutex.lock();
+////            gettimeofday(&global_start, NULL);
+////            estimate_mutex.unlock();
+////        }
+//        while (true) {
+//            std::this_thread::sleep_for(std::chrono::microseconds(1));
+//            if (tp[0]->isNeedJoin()) {
+//                if(can_estimate)
+//                    gettimeofday(&start, NULL);
+//                else{
+//                    estimate_mutex.lock();
+//                    gettimeofday(&start, NULL);
+//                    estimate_mutex.unlock();
+//                }
+//                tp[0]->join();
+//                break;
+//            }
 //        }
-        while (true) {
-            std::this_thread::sleep_for(std::chrono::microseconds(1));
-            if (tp[0]->isNeedJoin()) {
-                if(can_estimate)
-                    gettimeofday(&start, NULL);
-                else{
-                    estimate_mutex.lock();
-                    gettimeofday(&start, NULL);
-                    estimate_mutex.unlock();
-                }
-                tp[0]->join();
-                break;
-            }
-        }
-        update_query_time();
-        delete tp[0];
+//        update_query_time();
+//        delete tp[0];
+
+
+        //
         if(can_estimate)
             gettimeofday(&end, NULL);
         else{
@@ -1569,8 +1586,8 @@ public:
             gettimeofday(&end, NULL);
             estimate_mutex.unlock();
         }
-        cout << end.tv_sec << " " << start.tv_sec << endl;
-        cout << "finish in : " << end.tv_sec - start.tv_sec << " secs" << endl;
+        cout << end.tv_sec << " " << global_start.tv_sec << endl;
+        cout << "finish in : " << end.tv_sec - global_start.tv_sec << " secs" << endl;
         Generate_results();
     }
 };

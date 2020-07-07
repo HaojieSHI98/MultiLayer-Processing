@@ -56,6 +56,8 @@ double PI = 3.1415926535;
 //new
 
 int DISPLAY = 1;
+int task_turn_flag =0;
+int current_task_num = -1;
 //
 int NEIGHBOR_SEARCH=0;
 double ALPHA=2.0;
