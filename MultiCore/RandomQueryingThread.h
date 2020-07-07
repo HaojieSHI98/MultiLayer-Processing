@@ -947,16 +947,16 @@ public:
             }
 
         }
-        if(run_time==1)
-        {
-            if(can_estimate)
-                gettimeofday(&global_start, NULL);
-            else{
-                estimate_mutex.lock();
-                gettimeofday(&global_start, NULL);
-                estimate_mutex.unlock();
-            }
-        }
+//        if(run_time==1)
+//        {
+//            if(can_estimate)
+//                gettimeofday(&global_start, NULL);
+//            else{
+//                estimate_mutex.lock();
+//                gettimeofday(&global_start, NULL);
+//                estimate_mutex.unlock();
+//            }
+//        }
 
 
         struct timeval global_start_2;
@@ -1483,6 +1483,13 @@ public:
 //                                  query_cost,insert_cost,delete_cost,full_list,arrival_nodes,init_objects,
 //                                  x_time,threshold_number);
         tp_x->start();
+        if(can_estimate)
+            gettimeofday(&global_start, NULL);
+        else{
+            estimate_mutex.lock();
+            gettimeofday(&global_start, NULL);
+            estimate_mutex.unlock();
+        }
         while (true) {
             std::this_thread::sleep_for(std::chrono::microseconds(1));
             if (tp_x->isNeedJoin()) {
