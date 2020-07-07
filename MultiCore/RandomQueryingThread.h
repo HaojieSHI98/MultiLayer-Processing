@@ -1450,8 +1450,12 @@ public:
         init_list.assign(full_list.begin(),full_list.begin()+init_objects);
         vector<int> init_arrival_node;
         init_arrival_node.assign(arrival_nodes.begin(),arrival_nodes.begin()+init_objects);
-        num_threads_update_x = 1;
-        num_threads_query_x = num_threads - 2;
+//        num_threads_update_x = 1;
+//        num_threads_query_x = num_threads - 2;
+        int num_q = int(sqrt(num_threads-2));
+        int num_p = int((num_threads-2)/num_q);
+        num_threads_query_x = max(num_q,num_p);
+        num_threads_update_x = num_p+num_q-num_threads_query_x;
         tp_x = new RandomThreadPool_new(0, 0, end_node, num_threads_query_x,num_threads_update_x, alpha, k, fail_p,test_n,
                                         query_rate, insert_rate,delete_rate, simulation_time,
                                         query_cost,insert_cost,delete_cost,full_task_list,arrival_task_nodes,init_list,init_arrival_node,
