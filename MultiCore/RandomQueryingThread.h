@@ -42,15 +42,17 @@ private:
     timeval end;
     std::condition_variable cv;
     bool is_wait=false;
+    int pool_id;
 
 
 
 public:
 
     //构造
-    RandomAggregateThread(int copy_id_val, int k_val, int num_threads_update_val) : is_free(true), thread_stop(0) {
+    RandomAggregateThread(int pool_id_val,int copy_id_val, int k_val, int num_threads_update_val) : is_free(true), thread_stop(0) {
         copy_id = copy_id_val;
         k = k_val;
+        pool_id = pool_id_val;
         num_threads_update = num_threads_update_val;
         for (int i = 0; i < QUERY_ID_FOLD; i++) merge_cnt.push_back(0);
         _thread = std::thread(&RandomAggregateThread::run, this);
@@ -176,8 +178,8 @@ public:
 //                    cout<<"current_time: "<<current_time<<endl;
 //                    cout<<"issue_time: "<<issue_time<<endl;
 
-                    globalThreadVar[copy_id]->total_query_time += response_time * 1.0 / MICROSEC_PER_SEC;
-                    globalThreadVar[copy_id]->number_of_queries++;
+                    globalThreadVar[pool_id][copy_id]->total_query_time += response_time * 1.0 / MICROSEC_PER_SEC;
+                    globalThreadVar[pool_id][copy_id]->number_of_queries++;
 
 
                     // cout top-k
@@ -191,9 +193,9 @@ public:
                     }
 
                     if (multiTestPara.is_thresholded) {
-                        globalThreadVar[copy_id]->ran_global_locker.lock();
-                        globalThreadVar[copy_id]->ran_threshold[adjust_id] = INT_MAX;
-                        globalThreadVar[copy_id]->ran_global_locker.unlock();
+                        globalThreadVar[pool_id][copy_id]->ran_global_locker.lock();
+                        globalThreadVar[pool_id][copy_id]->ran_threshold[adjust_id] = INT_MAX;
+                        globalThreadVar[pool_id][copy_id]->ran_global_locker.unlock();
                     }
                 }
 
@@ -205,13 +207,13 @@ public:
             thread_mutex.unlock();
             if (stop_cond) {
                 if(!multiTestPara.is_single_aggregate) {
-                    if (globalThreadVar[copy_id]->stop_run_threads == num_threads_update) {
+                    if (globalThreadVar[pool_id][copy_id]->stop_run_threads == num_threads_update) {
                         cout << "stopped aggregate threads running" << endl;
                         break;
                     }
                 }
                 else{
-                    if (globalThreadVar[copy_id]->stop_run_threads == num_threads_update*multiTestPara.num_threads_query) {
+                    if (globalThreadVar[pool_id][copy_id]->stop_run_threads == num_threads_update*multiTestPara.num_threads_query) {
                         cout << "stopped aggregate threads running" << endl;
                         break;
                     }
@@ -254,14 +256,16 @@ private:
     int num_queries_in_queue;
     int num_inserts_in_queue;
     int num_deletes_in_queue;
+    int pool_id;
 
 
 public:
 
     //构造
-    RandomThread(int copy_id_val, int id, int k_val,int query_cost,int insert_cost,int delete_cost, RandomAggregateThread *aggregate_thread_val) : thread_id(id), is_free(true),
+    RandomThread(int pool_id_val, int copy_id_val, int id, int k_val,int query_cost,int insert_cost,int delete_cost, RandomAggregateThread *aggregate_thread_val) : thread_id(id), is_free(true),
                                                                                                     thread_stop(0) {
         copy_id = copy_id_val;
+        pool_id = pool_id_val;
         k = k_val;
         is_wait=false;
         allocate_mem(mems, test_n + test_n + 1);
@@ -423,7 +427,7 @@ public:
                         kNNs = HandleQueryThreshold(copy_id, thread_id, multiTestPara.method_name, k, _taskid.first,
                                                     mems.dist, mems.visited,
                                                     mems.q,
-                                                    dijkstra_object_map, globalThreadVar[copy_id]->ran_threshold,
+                                                    dijkstra_object_map, globalThreadVar[pool_id][copy_id]->ran_threshold,
                                                     query_id);
                     else{
 
@@ -441,7 +445,7 @@ public:
 
                         kNNs = HandleQuery(copy_id, thread_id, multiTestPara.method_name, k, _taskid.first, mems.dist,
                                            mems.visited, mems.q,
-                                           dijkstra_object_map, globalThreadVar[copy_id]->ran_threshold, query_id,
+                                           dijkstra_object_map, globalThreadVar[pool_id][copy_id]->ran_threshold, query_id,
                                            hier_local_knn_arr_single);
                         if(can_estimate) {
                             gettimeofday(&end, NULL);
@@ -469,11 +473,11 @@ public:
                     }
                     if (multiTestPara.is_thresholded) {
                         if (kNNs.size() == k) {
-                            globalThreadVar[copy_id]->ran_global_locker.lock();
+                            globalThreadVar[pool_id][copy_id]->ran_global_locker.lock();
 
-                            if (kNNs[k - 1].dis < globalThreadVar[copy_id]->ran_threshold[query_id])
-                                globalThreadVar[copy_id]->ran_threshold[query_id] = kNNs[k - 1].dis;
-                            globalThreadVar[copy_id]->ran_global_locker.unlock();
+                            if (kNNs[k - 1].dis < globalThreadVar[pool_id][copy_id]->ran_threshold[query_id])
+                                globalThreadVar[pool_id][copy_id]->ran_threshold[query_id] = kNNs[k - 1].dis;
+                            globalThreadVar[pool_id][copy_id]->ran_global_locker.unlock();
                         }
                     }
 //                    if(multiTestPara.num_threads_update>1) {
@@ -612,14 +616,14 @@ public:
 //                cout << "stopped running" << endl;
 
                 if(!multiTestPara.is_single_aggregate) {
-                    globalThreadVar[copy_id]->ran_global_locker.lock();
-                    globalThreadVar[copy_id]->stop_run_threads++;
-                    globalThreadVar[copy_id]->ran_global_locker.unlock();
+                    globalThreadVar[pool_id][copy_id]->ran_global_locker.lock();
+                    globalThreadVar[pool_id][copy_id]->stop_run_threads++;
+                    globalThreadVar[pool_id][copy_id]->ran_global_locker.unlock();
                 }
                 else {
-                    globalThreadVar[0]->ran_global_locker.lock();
-                    globalThreadVar[0]->stop_run_threads++;
-                    globalThreadVar[0]->ran_global_locker.unlock();
+                    globalThreadVar[pool_id][0]->ran_global_locker.lock();
+                    globalThreadVar[pool_id][0]->stop_run_threads++;
+                    globalThreadVar[pool_id][0]->ran_global_locker.unlock();
                 }
                 if(can_estimate) {
 
@@ -734,31 +738,31 @@ public:
         _needjoin = 0;
         run_time = run_time_val;
         threshold_number = threshold_number_val;
-        globalThreadVar = new GlobalThreadVar*[num_threads_query];
+        globalThreadVar[threadpool_id] = new GlobalThreadVar*[num_threads_query];
         int k_star = compute_k_star(k, num_threads_update, alpha, fail_p);
         for(int j =0;j<num_threads_query;j++) {
-            globalThreadVar[j] = new GlobalThreadVar();
-            globalThreadVar[j]->ran_threshold.clear();
+            globalThreadVar[threadpool_id][j] = new GlobalThreadVar();
+            globalThreadVar[threadpool_id][j]->ran_threshold.clear();
 //            cout<<"query:"<<j<<" time:"<<globalThreadVar[j]->total_query_time<<" num:"<<globalThreadVar[j]->number_of_queries<<endl;
-            for (int i = 0; i <= QUERY_ID_FOLD; i++) globalThreadVar[j]->ran_threshold.push_back(INT_MAX);
+            for (int i = 0; i <= QUERY_ID_FOLD; i++) globalThreadVar[threadpool_id][j]->ran_threshold.push_back(INT_MAX);
         }
         if(!multiTestPara.is_single_aggregate)
             _aggregate_thread = new RandomAggregateThread*[num_threads_query];
         if(multiTestPara.is_single_aggregate){
-            _single_aggregate_thread=new RandomAggregateThread(0, k, num_threads_update);
+            _single_aggregate_thread=new RandomAggregateThread(threadpool_id,0, k, num_threads_update);
         }
         cout << "k_star: " << k_star << endl;
         for(int j =0;j<num_threads_query;j++){
 
             if(!multiTestPara.is_single_aggregate)
-                _aggregate_thread[j] = new RandomAggregateThread(j, k, num_threads_update);
+                _aggregate_thread[j] = new RandomAggregateThread(threadpool_id,j, k, num_threads_update);
             for(int i=0;i<num_threads_update;i++) {
                 if(!multiTestPara.is_single_aggregate) {
-                    RandomThread *t = new RandomThread(j, i, k_star,query_cost,insert_cost,delete_cost, _aggregate_thread[j]);
+                    RandomThread *t = new RandomThread(threadpool_id,j, i, k_star,query_cost,insert_cost,delete_cost, _aggregate_thread[j]);
                     _pool.push_back(t);
                 }
                 else{
-                    RandomThread *t = new RandomThread(j, i, k_star,query_cost,insert_cost,delete_cost, _single_aggregate_thread);
+                    RandomThread *t = new RandomThread(threadpool_id,j, i, k_star,query_cost,insert_cost,delete_cost, _single_aggregate_thread);
                     _pool.push_back(t);
                 }
             }
@@ -800,7 +804,7 @@ public:
 
         update_finish_rate = max_updates*1.0/total_updates_plan;
         for (int i = 0; i < num_threads_query; i++) {
-            total_queries_finished += globalThreadVar[i]->number_of_queries;
+            total_queries_finished += globalThreadVar[threadpool_id][i]->number_of_queries;
         }
         query_finish_rate = total_queries_finished * 1.0 / total_queries_plan;
 
@@ -1187,7 +1191,7 @@ public:
             if(num_intask == 0) break;
             else num_intask = 0;
         }
-        while(globalThreadVar[0]->number_of_queries<2){
+        while(globalThreadVar[threadpool_id][0]->number_of_queries<2){
             std::this_thread::sleep_for(std::chrono::microseconds(1));
         }
         struct timeval end_2;
@@ -1495,8 +1499,8 @@ public:
     }
     void update_query_time(){
         for (int i = 0; i < num_threads_query_x; i++) {
-            x_response_time += globalThreadVar[i]->total_query_time;
-            x_query_num += globalThreadVar[i]->number_of_queries;
+            x_response_time += globalThreadVar[0][i]->total_query_time;
+            x_query_num += globalThreadVar[0][i]->number_of_queries;
         }
     }
     void run()
@@ -1627,31 +1631,30 @@ public:
         total_updates_finished=0;
         init();
         cout<<"num_threads_query: "<<num_threads_query<<endl;
-        delete globalThreadVar;
-        globalThreadVar = new GlobalThreadVar*[num_threads_query];
+        globalThreadVar[threadpool_id] = new GlobalThreadVar*[num_threads_query];
         int k_star = compute_k_star(k, num_threads_update, alpha, fail_p);
         for(int j =0;j<num_threads_query;j++) {
-            globalThreadVar[j] = new GlobalThreadVar();
-            globalThreadVar[j]->ran_threshold.clear();
-            for (int i = 0; i <= QUERY_ID_FOLD; i++) globalThreadVar[j]->ran_threshold.push_back(INT_MAX);
+            globalThreadVar[threadpool_id][j] = new GlobalThreadVar();
+            globalThreadVar[threadpool_id][j]->ran_threshold.clear();
+            for (int i = 0; i <= QUERY_ID_FOLD; i++) globalThreadVar[threadpool_id][j]->ran_threshold.push_back(INT_MAX);
         }
         if(!multiTestPara.is_single_aggregate)
             _aggregate_thread = new RandomAggregateThread*[num_threads_query];
         if(multiTestPara.is_single_aggregate){
-            _single_aggregate_thread=new RandomAggregateThread(0, k, num_threads_update);
+            _single_aggregate_thread=new RandomAggregateThread(threadpool_id,0, k, num_threads_update);
         }
         cout << "k_star: " << k_star << endl;
         for(int j =0;j<num_threads_query;j++){
 
             if(!multiTestPara.is_single_aggregate)
-                _aggregate_thread[j] = new RandomAggregateThread(j, k, num_threads_update);
+                _aggregate_thread[j] = new RandomAggregateThread(threadpool_id,j, k, num_threads_update);
             for(int i=0;i<num_threads_update;i++) {
                 if(!multiTestPara.is_single_aggregate) {
-                    RandomThread *t = new RandomThread(j, i, k_star,query_cost,insert_cost,delete_cost, _aggregate_thread[j]);
+                    RandomThread *t = new RandomThread(threadpool_id,j, i, k_star,query_cost,insert_cost,delete_cost, _aggregate_thread[j]);
                     _pool.push_back(t);
                 }
                 else{
-                    RandomThread *t = new RandomThread(j, i, k_star,query_cost,insert_cost,delete_cost, _single_aggregate_thread);
+                    RandomThread *t = new RandomThread(threadpool_id,j, i, k_star,query_cost,insert_cost,delete_cost, _single_aggregate_thread);
                     _pool.push_back(t);
                 }
             }
@@ -1701,7 +1704,7 @@ public:
 
         update_finish_rate = max_updates*1.0/total_updates_plan;
         for (int i = 0; i < multiTestPara.num_threads_query; i++) {
-            total_queries_finished += globalThreadVar[i]->number_of_queries;
+            total_queries_finished += globalThreadVar[threadpool_id][i]->number_of_queries;
         }
         query_finish_rate = total_queries_finished * 1.0 / total_queries_plan;
 
@@ -2280,7 +2283,7 @@ public:
 //           }
 
         }
-        while(globalThreadVar[0]->number_of_queries<2){
+        while(globalThreadVar[threadpool_id][0]->number_of_queries<2){
             std::this_thread::sleep_for(std::chrono::microseconds(1));
         }
         struct timeval end_2;

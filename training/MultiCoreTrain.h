@@ -285,13 +285,13 @@ int chooseSingleTOAINConfiguration(double fail_p, double alpha, int k,
 
         if(!multiTestPara.is_single_aggregate) {
             for (int i = 0; i < multiTestPara.num_threads_query; i++) {
-                total_response_time += globalThreadVar[i]->total_query_time;
-                number_of_queries += globalThreadVar[i]->number_of_queries;
+                total_response_time += globalThreadVar[0][i]->total_query_time;
+                number_of_queries += globalThreadVar[0][i]->number_of_queries;
             }
         }
         else{
-            total_response_time += globalThreadVar[0]->total_query_time;
-            number_of_queries += globalThreadVar[0]->number_of_queries;
+            total_response_time += globalThreadVar[0][0]->total_query_time;
+            number_of_queries += globalThreadVar[0][0]->number_of_queries;
 
         }
         cout << "expected response time: " << total_response_time / number_of_queries << " seconds" << endl;
@@ -401,13 +401,13 @@ void ChooseTOAINPRConfiguration(double fail_p, double alpha, int k,
 
         if(!multiTestPara.is_single_aggregate) {
             for (int i = 0; i < multiTestPara.num_threads_query; i++) {
-                total_response_time += globalThreadVar[i]->total_query_time;
-                number_of_queries += globalThreadVar[i]->number_of_queries;
+                total_response_time += globalThreadVar[0][i]->total_query_time;
+                number_of_queries += globalThreadVar[0][i]->number_of_queries;
             }
         }
         else{
-            total_response_time += globalThreadVar[0]->total_query_time;
-            number_of_queries += globalThreadVar[0]->number_of_queries;
+            total_response_time += globalThreadVar[0][0]->total_query_time;
+            number_of_queries += globalThreadVar[0][0]->number_of_queries;
 
         }
         cout << "expected response time: " << total_response_time / number_of_queries << " seconds" << endl;
@@ -525,8 +525,8 @@ void ChooseVtreePRConfiguration(double fail_p, double alpha, int k, MultiTestPar
         cout << "finish in : " << end.tv_sec - start.tv_sec << " secs" << endl;
 
         for (int i = 0; i < multiTestPara.num_threads_query; i++) {
-            total_response_time += globalThreadVar[i]->total_query_time;
-            number_of_queries += globalThreadVar[i]->number_of_queries;
+            total_response_time += globalThreadVar[0][i]->total_query_time;
+            number_of_queries += globalThreadVar[0][i]->number_of_queries;
         }
         cout << "expected response time: " << total_response_time / number_of_queries << " seconds" << endl;
         cout << "total_response_time: " << total_response_time << endl;
@@ -637,8 +637,8 @@ void ChooseDIJKPRConfiguration(double fail_p, double alpha, int k, MultiTestPara
         cout << "finish in : " << end.tv_sec - start.tv_sec << " secs" << endl;
 
         for (int i = 0; i < multiTestPara.num_threads_query; i++) {
-            total_response_time += globalThreadVar[i]->total_query_time;
-            number_of_queries += globalThreadVar[i]->number_of_queries;
+            total_response_time += globalThreadVar[0][i]->total_query_time;
+            number_of_queries += globalThreadVar[0][i]->number_of_queries;
         }
         cout << "expected response time: " << total_response_time / number_of_queries << " seconds" << endl;
         cout << "total_response_time: " << total_response_time << endl;

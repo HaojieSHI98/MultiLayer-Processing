@@ -94,7 +94,7 @@ public:
     }
 };
 
-GlobalThreadVar **globalThreadVar;
+GlobalThreadVar **globalThreadVar[2];
 long number_of_updates=1;
 double total_update_response_time=0.0;
 double total_update_process_time=0.0;
