@@ -995,9 +995,9 @@ public:
 
                     if (issue_time > current_time) std::this_thread::sleep_for(std::chrono::microseconds(1));
                 } while (true);
-                if(i>=begin_i){
+//                if(i>=begin_i){
                     issue_time = current_time;
-                }
+//                }
 //                if(i==begin_i&&run_time==0){
 //                    if(can_estimate)
 //                        gettimeofday(&global_start, NULL);
