@@ -774,22 +774,7 @@ public:
 
     void join() {
         cout << "start joining" << endl;
-        int num_intask = 0;
-        while(1) {
-            for (int z = 0; z < num_threads_query; z++) {
-                for (int q_id = 0; q_id < num_threads_update; q_id++) {
-                    int pool_index = z * num_threads_update + q_id;
-                    int num_queries = _pool[pool_index]->get_num_queries_in_queue();
-                    int num_inserts = _pool[pool_index]->get_num_inserts_in_queue();
-                    int num_deletes = _pool[pool_index]->get_num_deletes_in_queue();
-                    num_intask += num_deletes + num_inserts + num_queries;
-                    cout << "query:" << z << " update:" << q_id << " queries:" << num_queries << " inserts:"
-                         << num_inserts << " deletes:" << num_deletes << endl;
-                }
-            }
-            if(num_intask == 0) break;
-            else num_intask = 0;
-        }
+
         if(!multiTestPara.is_single_aggregate) {
             for (int j = 0; j < num_threads_query; j++) {
                 _aggregate_thread[j]->join();
@@ -1176,6 +1161,22 @@ public:
 //           }
 
         }
+        int num_intask = 0;
+        while(1) {
+            for (int z = 0; z < num_threads_query; z++) {
+                for (int q_id = 0; q_id < num_threads_update; q_id++) {
+                    int pool_index = z * num_threads_update + q_id;
+                    int num_queries = _pool[pool_index]->get_num_queries_in_queue();
+                    int num_inserts = _pool[pool_index]->get_num_inserts_in_queue();
+                    int num_deletes = _pool[pool_index]->get_num_deletes_in_queue();
+                    num_intask += num_deletes + num_inserts + num_queries;
+                    cout << "query:" << z << " update:" << q_id << " queries:" << num_queries << " inserts:"
+                         << num_inserts << " deletes:" << num_deletes << endl;
+                }
+            }
+            if(num_intask == 0) break;
+            else num_intask = 0;
+        }
         while(globalThreadVar[0]->number_of_queries<2){
             std::this_thread::sleep_for(std::chrono::microseconds(1));
         }
@@ -1187,6 +1188,7 @@ public:
             gettimeofday(&end_2, NULL);
             estimate_mutex.unlock();
         }
+
 
         long duration =
                 (end_2.tv_sec - global_start_2.tv_sec);
