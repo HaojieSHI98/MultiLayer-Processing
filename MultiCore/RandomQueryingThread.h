@@ -1606,6 +1606,7 @@ public:
         total_updates_finished=0;
         init();
         cout<<"num_threads_query: "<<num_threads_query<<endl;
+        delete globalThreadVar;
         globalThreadVar = new GlobalThreadVar*[num_threads_query];
         int k_star = compute_k_star(k, num_threads_update, alpha, fail_p);
         for(int j =0;j<num_threads_query;j++) {
