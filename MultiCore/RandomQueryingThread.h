@@ -954,7 +954,7 @@ public:
             gettimeofday(&global_start_2, NULL);
             estimate_mutex.unlock();
         }
-
+        long offset_time;
         for (i=begin_i; i < full_task_list.size(); i++) {
             if(overload_flag) break;
             if(run_time ==0 && i>threshold_number)
@@ -969,11 +969,19 @@ public:
             pair<double, int> &event = full_task_list[i];
             long issue_time = floor(event.first * MICROSEC_PER_SEC);
 //            cout<<"time: "<<event.first<<" sec"<<endl;
-            long current_time=0;
+            if(can_estimate)
+                gettimeofday(&end, NULL);
+            else{
+                estimate_mutex.lock();
+                gettimeofday(&end, NULL);
+                estimate_mutex.unlock();
+            }
+            long current_time=(end.tv_sec - global_start.tv_sec) * MICROSEC_PER_SEC + end.tv_usec - global_start.tv_usec;
+            if(i==begin_i) offset_time = current_time-issue_time;
             if(!VERIFY) {
 
                 do {
-                    if (issue_time <= current_time) {
+                    if (issue_time <= current_time-offset_time) {
 //                        if(event.second==QUERY && simulation_time==200) {
 //                            if(issue_time + 50 < current_time) {
 //                                cout << "current time > issue time + 50" << endl;
@@ -1450,12 +1458,12 @@ public:
         init_list.assign(full_list.begin(),full_list.begin()+init_objects);
         vector<int> init_arrival_node;
         init_arrival_node.assign(arrival_nodes.begin(),arrival_nodes.begin()+init_objects);
-//        num_threads_update_x = 1;
-//        num_threads_query_x = num_threads - 2;
-        int num_q = int(sqrt(num_threads-2));
-        int num_p = int((num_threads-2)/num_q);
-        num_threads_query_x = max(num_q,num_p);
-        num_threads_update_x = num_p+num_q-num_threads_query_x;
+        num_threads_update_x = 1;
+        num_threads_query_x = num_threads - 2;
+//        int num_q = int(sqrt(num_threads-2));
+//        int num_p = int((num_threads-2)/num_q);
+//        num_threads_query_x = max(num_q,num_p);
+//        num_threads_update_x = num_p+num_q-num_threads_query_x;
         tp_x = new RandomThreadPool_new(0, 0, end_node, num_threads_query_x,num_threads_update_x, alpha, k, fail_p,test_n,
                                         query_rate, insert_rate,delete_rate, simulation_time,
                                         query_cost,insert_cost,delete_cost,full_task_list,arrival_task_nodes,init_list,init_arrival_node,
@@ -1476,10 +1484,10 @@ public:
         delete tp_x;
         int num_q = int(sqrt(num_threads-2));
         int num_p = int((num_threads-2)/num_q);
-//        num_threads_query_x = max(num_q,num_p);
-//        num_threads_update_x = num_p+num_q-num_threads_query_x;
-        num_threads_query_x = num_threads-2;
-        num_threads_update_x = 1;
+        num_threads_query_x = max(num_q,num_p);
+        num_threads_update_x = num_p+num_q-num_threads_query_x;
+//        num_threads_query_x = num_threads-2;
+//        num_threads_update_x = 1;
         tp_x = new RandomThreadPool_new(0, 0, end_node, num_threads_query_x,num_threads_update_x, alpha, k, fail_p,test_n,
                                         query_rate, insert_rate,delete_rate, simulation_time,
                                         query_cost,insert_cost,delete_cost,full_task_list,arrival_task_nodes,init_list,init_object_nodes,
