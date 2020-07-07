@@ -783,8 +783,8 @@ public:
                     int num_inserts = _pool[pool_index]->get_num_inserts_in_queue();
                     int num_deletes = _pool[pool_index]->get_num_deletes_in_queue();
                     num_intask += num_deletes + num_inserts + num_queries;
-//                    cout << "query:" << z << " update:" << q_id << " queries:" << num_queries << " inserts:"
-//                         << num_inserts << " deletes:" << num_deletes << endl;
+                    cout << "query:" << z << " update:" << q_id << " queries:" << num_queries << " inserts:"
+                         << num_inserts << " deletes:" << num_deletes << endl;
                 }
             }
             if(num_intask == 0) break;
