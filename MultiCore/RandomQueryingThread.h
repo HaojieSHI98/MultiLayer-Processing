@@ -1529,7 +1529,7 @@ public:
 //                                  query_cost,insert_cost,delete_cost,full_list,arrival_nodes,init_objects,
 //                                  x_time,threshold_number);
         tp[0]->start();
-        tp[1]->start();
+//        tp[1]->start();
         if(can_estimate)
             gettimeofday(&global_start, NULL);
         else{
@@ -1541,11 +1541,12 @@ public:
             std::this_thread::sleep_for(std::chrono::microseconds(1));
             if (tp[0]->isNeedJoin()) {
                 tp[0]->join();
+                break;
             }
-            if (tp[1]->isNeedJoin()) {
-                tp[1]->join();
-            }
-            if(tp[0]->isNeedJoin()&&tp[1]->isNeedJoin()) break;
+//            if (tp[1]->isNeedJoin()) {
+//                tp[1]->join();
+//            }
+//            if(tp[0]->isNeedJoin()&&tp[1]->isNeedJoin()) break;
         }
         update_query_time();
 
