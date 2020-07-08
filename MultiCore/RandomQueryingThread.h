@@ -1552,31 +1552,31 @@ public:
 
         //
 
-//        re_init(0);
-//        tp[0]->start();
-////        if(can_estimate)
-////            gettimeofday(&global_start, NULL);
-////        else{
-////            estimate_mutex.lock();
-////            gettimeofday(&global_start, NULL);
-////            estimate_mutex.unlock();
-////        }
-//        while (true) {
-//            std::this_thread::sleep_for(std::chrono::microseconds(1));
-//            if (tp[0]->isNeedJoin()) {
-//                if(can_estimate)
-//                    gettimeofday(&start, NULL);
-//                else{
-//                    estimate_mutex.lock();
-//                    gettimeofday(&start, NULL);
-//                    estimate_mutex.unlock();
-//                }
-//                tp[0]->join();
-//                break;
-//            }
+        re_init(0);
+        tp[0]->start();
+//        if(can_estimate)
+//            gettimeofday(&global_start, NULL);
+//        else{
+//            estimate_mutex.lock();
+//            gettimeofday(&global_start, NULL);
+//            estimate_mutex.unlock();
 //        }
-//        update_query_time();
-//        delete tp[0];
+        while (true) {
+            std::this_thread::sleep_for(std::chrono::microseconds(1));
+            if (tp[0]->isNeedJoin()) {
+                if(can_estimate)
+                    gettimeofday(&start, NULL);
+                else{
+                    estimate_mutex.lock();
+                    gettimeofday(&start, NULL);
+                    estimate_mutex.unlock();
+                }
+                tp[0]->join();
+                break;
+            }
+        }
+        update_query_time();
+        delete tp[0];
 
 
         //
