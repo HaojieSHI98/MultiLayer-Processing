@@ -976,14 +976,14 @@ public:
             if(arrival_task_nodes[i]==-1) continue;
             pair<double, int> &event = full_task_list[i];
             long issue_time = floor(event.first * MICROSEC_PER_SEC);
-            if(event.second == QUERY){
-                if(threadpool_id!=task_turn_flag || i==current_task_num) continue;
-                else
-                {
-                    current_task_num = i;
-                    task_turn_flag = (task_turn_flag+1)%2;
-                }
-            }
+//            if(event.second == QUERY){
+//                if(threadpool_id!=task_turn_flag || i==current_task_num) continue;
+//                else
+//                {
+//                    current_task_num = i;
+//                    task_turn_flag = (task_turn_flag+1)%2;
+//                }
+//            }
 //            cout<<"time: "<<event.first<<" sec"<<endl;
             if(can_estimate)
                 gettimeofday(&end, NULL);
