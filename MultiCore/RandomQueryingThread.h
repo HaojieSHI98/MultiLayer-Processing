@@ -965,13 +965,13 @@ public:
         for (i=begin_i; i < full_task_list.size(); i++) {
             if(overload_flag) break;
 
-//            if(run_time ==0 && i>threshold_number)
-//            {
-//                _needjoin = 1;
-//                cout<<"Over threshold num!!!!!RESTART NOW!!!"<<endl<<endl<<endl<<endl<<endl;
-//                break;
-//
-//            }
+            if(run_time ==0 && i>threshold_number)
+            {
+                _needjoin = 1;
+                cout<<"Over threshold num!!!!!RESTART NOW!!!"<<endl<<endl<<endl<<endl<<endl;
+                break;
+
+            }
 //            cout<<i<<endl;
             if(arrival_task_nodes[i]==-1) continue;
             pair<double, int> &event = full_task_list[i];
