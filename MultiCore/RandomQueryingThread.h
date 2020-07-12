@@ -1094,7 +1094,6 @@ public:
             }
 //            cout<<"step1: event-"<<event.second<<endl;
             // if insert
-            if (event.second == QUERY) continue;
             if (event.second == INSERT) {
 
                 int non_object_node = arrival_task_nodes[i];
@@ -1203,21 +1202,20 @@ public:
                     pair<int, int> node_type_pair = std::make_pair(query_node, QUERY);
                     pair<long, pair<int, int> > task = std::make_pair(issue_time, node_type_pair);
 //                    cout<<"query added to "<<current_query_threads * num_threads_update + j<<endl;
-                    if(multiTestPara.method_name.compare("dijk")!=0) {
-                        int use_thread_id=-1;
-                        long min_cost = INT_MAX;
-                        for(int u = tp[ti].current_query_threads;u < tp[ti].current_query_threads+tp[ti].num_threads_query; u++) {
-                            int u_mod = u % tp[ti].num_threads_query;
-                            long est_cost = tp[ti]._pool[u_mod * tp[ti].num_thread_update + j]->get_est_cost();
-                            if(min_cost>est_cost){
-                                min_cost = est_cost;
-                                use_thread_id = u_mod;
-                            }
-
-                        }
-                        tp[ti]._pool[use_thread_id * tp[ti].num_thread_update + j]->add_task(task);
-                    }
-                    else
+//                    if(multiTestPara.method_name.compare("dijk")!=0) {
+//                        int use_thread_id=-1;
+//                        long min_cost = INT_MAX;
+//                        for(int u = tp[ti].current_query_threads;u < tp[ti].current_query_threads+tp[ti].num_threads_query; u++) {
+//                            int u_mod = u % tp[ti].num_threads_query;
+//                            long est_cost = tp[ti]._pool[u_mod * tp[ti].num_thread_update + j]->get_est_cost();
+//                            if(min_cost>est_cost){
+//                                min_cost = est_cost;
+//                                use_thread_id = u_mod;
+//                            }
+//                        }
+//                        tp[ti]._pool[use_thread_id * tp[ti].num_thread_update + j]->add_task(task);
+//                    }
+//                    else
                         tp[ti]._pool[tp[ti].current_query_threads * tp[ti].num_thread_update + j]->add_task(task);
                 }
 
