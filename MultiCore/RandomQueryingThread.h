@@ -925,11 +925,11 @@ public:
                 for(int i=0;i<tp[ti].num_thread_update;i++) {
                     if(!multiTestPara.is_single_aggregate) {
                         RandomThread *t = new RandomThread(ti,j, i, k_star,query_cost,insert_cost,delete_cost, tp[ti]._aggregate_thread[j]);
-                        tp[i]._pool.push_back(t);
+                        tp[ti]._pool.push_back(t);
                     }
                     else{
                         RandomThread *t = new RandomThread(ti,j, i, k_star,query_cost,insert_cost,delete_cost, tp[ti]._single_aggregate_thread);
-                        tp[i]._pool.push_back(t);
+                        tp[ti]._pool.push_back(t);
                     }
                 }
             }
@@ -1011,7 +1011,7 @@ public:
             tp[id].total_object_map.push_back(tmp);
         }
         tp[id].global_start_q_id = 0;
-        cout<<"Pool"<<id<<" step 1 finished!"<<endl;
+//        cout<<"Pool"<<id<<" step 1 finished!"<<endl;
         for(int init_i=0;init_i<tp[id].init_list.size();init_i++){
             if(can_estimate)
                 gettimeofday(&end, NULL);
@@ -1029,7 +1029,7 @@ public:
             int start_q_id = tp[id].global_start_q_id;
             tp[id].global_start_q_id=(tp[id].global_start_q_id+1)%tp[id].num_thread_update;
             tp[id].rand_idx_update=(tp[id].rand_idx_update+1)%rand_length+rand_length;
-            if(id==1) cout<<"Step 1"<<endl;
+//            if(id==1) cout<<"Step 1"<<endl;
             for(int z = 0; z<tp[id].num_threads_query;z++) {
 
 
@@ -1039,13 +1039,13 @@ public:
 
                 // assign insert tasks
                 int min_task_size = INT_MAX;
-                if(id==1) cout<<"start_q_id"<<start_q_id<<"z:"<<z<<endl;
+//                if(id==1) cout<<"start_q_id"<<start_q_id<<"z:"<<z<<endl;
                 int pool_index=z * tp[id].num_thread_update + start_q_id;
                 tp[id]._pool[pool_index]->add_task(task);
-                if(id==1) cout<<"Step 2"<<endl;
+//                if(id==1) cout<<"Step 2"<<endl;
                 tp[id].total_object_map[z][non_object_node] = pool_index;
             }
-            if(id==1) cout<<"Step 3"<<endl;
+//            if(id==1) cout<<"Step 3"<<endl;
             tp[id].current_object_node.push_back(non_object_node);
             if(VERIFY){
 //                    car_nodes[non_object_node]=1;
