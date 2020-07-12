@@ -1092,7 +1092,7 @@ public:
                 } while (true);
                 issue_time = current_time;
             }
-
+            cout<<"step1: event-"<<event.second<<endl;
             // if insert
             if (event.second == INSERT) {
 
@@ -1103,6 +1103,7 @@ public:
 //                }
                 for(int ti = 0;ti<2;ti++)
                 {
+//                    cout<<"id:"<<ti<<endl;
                     int start_q_id = tp[ti].global_start_q_id;
                     tp[ti].global_start_q_id=(tp[ti].global_start_q_id+1)%tp[ti].num_thread_update;
                     tp[ti].rand_idx_update=(tp[ti].rand_idx_update+1)%rand_length+rand_length;
@@ -1135,10 +1136,10 @@ public:
 //                }
                 for(int ti=0;ti<2;ti++)
                 {
-                    for(int z = 0; z<tp[i].num_threads_query;z++) {
-                        int start_q_id = tp[i].total_object_map[z][object_node];
+                    for(int z = 0; z<tp[ti].num_threads_query;z++) {
+                        int start_q_id = tp[ti].total_object_map[z][object_node];
                         for (int j = start_q_id; j < 1 + start_q_id; j++) {
-                            int j_mod = j % tp[i].num_thread_update;
+                            int j_mod = j % tp[ti].num_thread_update;
                             pair<int, int> node_type_pair = std::make_pair(object_node, DELETE);
                             pair<long, pair<int, int> > task = std::make_pair(issue_time, node_type_pair);
                             tp[ti]._pool[z * tp[ti].num_thread_update + j_mod]->add_task(task);
