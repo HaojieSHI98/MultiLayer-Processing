@@ -1324,45 +1324,45 @@ public:
     }
     void run() {
         task_init(0);
-        task_init(1);
-        long offset_time;
-        struct timeval global_start_2;
-        if(can_estimate)
-            gettimeofday(&global_start_2, NULL);
-        else{
-            estimate_mutex.lock();
-            gettimeofday(&global_start_2, NULL);
-            estimate_mutex.unlock();
-        }
-        task_run();
-        wait_for_finish(0);
-        wait_for_finish(1);
-        struct timeval end_2;
-        if(can_estimate)
-            gettimeofday(&end_2, NULL);
-        else{
-            estimate_mutex.lock();
-            gettimeofday(&end_2, NULL);
-            estimate_mutex.unlock();
-        }
-
-        long duration =
-                (end_2.tv_sec - global_start_2.tv_sec);
-        if(DISPLAY){
-            cout<<"duration: "<<duration<<" secs; fulllist size: "<<full_task_list.size()+tp[0].init_list.size()<<endl;
-            avg_offset = tp[0].total_offset/tp[0].total_queries;
-            cout<<"Pool 0 avg offset: "<<avg_offset<<"queries: "<<tp[0].total_queries<<endl;
-            avg_offset = tp[1].total_offset/tp[1].total_queries;
-            cout<<"Pool 1 avg offset: "<<avg_offset<<"queries: "<<tp[1].total_queries<<endl;
-        }
-        update_query_time();
-        set_stop(0);
-        set_stop(1);
-        tp[0]._needjoin = 1;
-        tp[1]._needjoin = 1;
-        if(DISPLAY)cout << "all set stopped!" << endl;
-        join();
-        Generate_results();
+//        task_init(1);
+//        long offset_time;
+//        struct timeval global_start_2;
+//        if(can_estimate)
+//            gettimeofday(&global_start_2, NULL);
+//        else{
+//            estimate_mutex.lock();
+//            gettimeofday(&global_start_2, NULL);
+//            estimate_mutex.unlock();
+//        }
+//        task_run();
+//        wait_for_finish(0);
+//        wait_for_finish(1);
+//        struct timeval end_2;
+//        if(can_estimate)
+//            gettimeofday(&end_2, NULL);
+//        else{
+//            estimate_mutex.lock();
+//            gettimeofday(&end_2, NULL);
+//            estimate_mutex.unlock();
+//        }
+//
+//        long duration =
+//                (end_2.tv_sec - global_start_2.tv_sec);
+//        if(DISPLAY){
+//            cout<<"duration: "<<duration<<" secs; fulllist size: "<<full_task_list.size()+tp[0].init_list.size()<<endl;
+//            avg_offset = tp[0].total_offset/tp[0].total_queries;
+//            cout<<"Pool 0 avg offset: "<<avg_offset<<"queries: "<<tp[0].total_queries<<endl;
+//            avg_offset = tp[1].total_offset/tp[1].total_queries;
+//            cout<<"Pool 1 avg offset: "<<avg_offset<<"queries: "<<tp[1].total_queries<<endl;
+//        }
+//        update_query_time();
+//        set_stop(0);
+//        set_stop(1);
+//        tp[0]._needjoin = 1;
+//        tp[1]._needjoin = 1;
+//        if(DISPLAY)cout << "all set stopped!" << endl;
+//        join();
+//        Generate_results();
     }
 };
 class RandomThreadPool_new {
