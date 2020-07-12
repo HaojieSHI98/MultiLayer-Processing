@@ -1324,7 +1324,7 @@ public:
     }
     void run() {
         task_init(0);
-//        task_init(1);
+        task_init(1);
 //        long offset_time;
 //        struct timeval global_start_2;
 //        if(can_estimate)
