@@ -1094,6 +1094,7 @@ public:
             }
 //            cout<<"step1: event-"<<event.second<<endl;
             // if insert
+            if (event.second == QUERY) continue;
             if (event.second == INSERT) {
 
                 int non_object_node = arrival_task_nodes[i];
