@@ -924,11 +924,11 @@ public:
                     tp[ti]._aggregate_thread[j] = new RandomAggregateThread(ti,j, k, tp[ti].num_thread_update);
                 for(int i=0;i<tp[ti].num_thread_update;i++) {
                     if(!multiTestPara.is_single_aggregate) {
-                        RandomThread *t = new RandomThread(ti,j, i, k_star,query_cost,insert_cost,delete_cost, tp[i]._aggregate_thread[j]);
+                        RandomThread *t = new RandomThread(ti,j, i, k_star,query_cost,insert_cost,delete_cost, tp[ti]._aggregate_thread[j]);
                         tp[i]._pool.push_back(t);
                     }
                     else{
-                        RandomThread *t = new RandomThread(ti,j, i, k_star,query_cost,insert_cost,delete_cost, tp[i]._single_aggregate_thread);
+                        RandomThread *t = new RandomThread(ti,j, i, k_star,query_cost,insert_cost,delete_cost, tp[ti]._single_aggregate_thread);
                         tp[i]._pool.push_back(t);
                     }
                 }
