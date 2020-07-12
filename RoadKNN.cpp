@@ -475,7 +475,7 @@ int main(int argc, char *argv[]) {
                     overload_flag = 0;
 
                     is_simulation = 1;
-                    RandomThreadPool_Control *tp = new RandomThreadPool_Control(0, 0, test_n, multiTestPara.num_total_threads, alpha, k, fail_p,test_n,query_rate, insert_rate,
+                    RandomTwoThreadPool_Control *tp = new RandomTwoThreadPool_Control( 0, test_n, multiTestPara.num_total_threads, alpha, k, fail_p,test_n,query_rate, insert_rate,
                                                                                 delete_rate, multiTestPara.test_simulation_time,multiTestPara.query_cost,
                                                                                 multiTestPara.insert_cost,multiTestPara.delete_cost,configurationId);
                     tp->run();

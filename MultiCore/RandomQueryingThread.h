@@ -657,6 +657,714 @@ public:
     }
 };
 
+typedef struct {
+    int threadpool_id;
+    int num_thread_update;
+    int num_threads_query;
+    int _needjoin;
+    int run_time;//how many times have run
+    int threshold_number;
+    vector< vector<int> >total_object_map;
+    vector<std::pair<double, int> > init_list;
+    vector<int> init_arrival_nodes;
+    vector<int> current_object_node;
+    int current_frame;//frame
+    int begin_frame;
+    int global_start_q_id;
+    int current_query_threads;
+    int rand_idx_query;
+    int rand_idx_update;
+    long total_offset;
+    int total_queries;
+    vector<RandomThread *> _pool;
+    RandomAggregateThread **_aggregate_thread;
+    RandomAggregateThread * _single_aggregate_thread;
+    int num_intask;
+    double response_time;
+    int query_num;
+
+}OneThreadPool;
+
+class RandomTwoThreadPool_Control {
+private:
+    std::thread _main_thread;
+    int begin_node;
+    int end_node;
+    double query_rate;
+    double insert_rate;
+    double delete_rate;
+    int simulation_time;
+    long total_queries_plan;
+    long total_updates_plan;
+    long total_queries_finished;
+    long total_updates_finished;
+    int* car_nodes;
+
+    vector<std::pair<double, int> > full_task_list;
+    vector<int> arrival_task_nodes;
+    int query_cost;
+    int insert_cost;
+    int delete_cost;
+    OneThreadPool tp[2];
+    double alpha;
+    int test_n;
+    double fail_p;
+    int k;
+    int num_threads_all;
+    int num_threads_each;
+    vector<std::pair<double, int> > full_list;
+    vector<int> arrival_nodes;
+    int configurationId;
+
+
+public:
+    RandomTwoThreadPool_Control( int begin_node_val, int end_node_val, int num_threads_val, double alpha_val, int k_val, double fail_p_val,
+                         int test_n_val, double query_rate_val, double insert_rate_val, double delete_rate_val, int simulation_time_val,
+                         int query_cost_val,int insert_cost_val,int delete_cost_val,int configurationId_val) {
+        cout << "constructing RandomThreadPool..." << endl;
+        for(int ti = 0;ti<2;ti++)
+        {
+            tp[ti].threadpool_id=ti;
+            tp[ti].run_time = 0;
+            tp[ti]._needjoin = 0;
+            tp[ti].init_arrival_nodes.clear();
+            tp[ti].init_list.clear();
+            tp[ti].threshold_number = 0;
+            tp[ti].current_object_node.clear();
+            tp[ti].total_object_map.clear();
+            tp[ti].current_frame = 0;
+            tp[ti].begin_frame = 0;
+            tp[ti].global_start_q_id = 0;
+            tp[ti].num_intask = 0;
+            tp[ti].query_num = 0;
+            tp[ti].response_time = 0;
+        }
+        configurationId = configurationId_val;
+        begin_node = begin_node_val;
+        end_node = end_node_val;
+        simulation_time = simulation_time_val;
+        query_rate = query_rate_val;
+        insert_rate = insert_rate_val;
+        delete_rate = delete_rate_val;
+        test_n = test_n_val;
+//        if(DISPLAY)cout<<"num_threads_update:"<<num_threads_update<<" num_threads_query:"<<num_threads_query_val<<endl;
+        alpha = alpha_val;
+        fail_p = fail_p_val;
+        k = k_val;
+        total_queries_plan=0;
+        total_updates_plan=0;
+        total_queries_finished=0;
+        total_updates_finished=0;
+        query_cost = query_cost_val;
+        insert_cost = insert_cost_val;
+        delete_cost = delete_cost_val;
+        num_threads_all = num_threads_val;
+        num_threads_each = int((num_threads_all-3)/2);
+        first_init();
+    }
+
+    //释放线程池
+    ~RandomTwoThreadPool_Control() {
+        if(DISPLAY)cout << "hi, RandomThreadPooladPool()" << endl;
+//         for(int i = 0;i < _pool.size(); ++i){
+//             delete _pool[i];
+//         }
+
+    }
+
+    vector<int> generate_arrival_nodes(vector<std::pair<double, int> >& full_list, int begin, int end){
+
+        int rand_idx_update=0;
+        int rand_idx_query=0;
+        vector<int> object_list;
+        vector<int> non_object_list;
+        vector<int> arrival_node_list;
+        for (int i = begin; i < end; i++) {
+            non_object_list.push_back(i);
+        }
+
+        for(int i = 0;i<full_list.size();i++){
+            pair<double, int> event = full_list[i];
+            if (event.second == INSERT && object_list.size() >= test_n){
+                arrival_node_list.push_back(-1);
+            }
+            if(event.second == DELETE && object_list.size() <= 0){
+                arrival_node_list.push_back(-1);
+
+            }
+            if (event.second == INSERT && object_list.size() < test_n) {
+                total_updates_plan++;
+                int index = rand() % non_object_list.size();
+                rand_idx_update=(rand_idx_update+1)%rand_length+rand_length;
+                int non_object_node = non_object_list[index];
+                int last_index = non_object_list.size() - 1;
+
+                int tmp = non_object_list[index];
+                non_object_list[index] = non_object_list[last_index];
+                non_object_list[last_index] = tmp;
+                non_object_list.pop_back();
+
+                object_list.push_back(non_object_node);
+                arrival_node_list.push_back(non_object_node);
+            }
+            if (event.second == DELETE && object_list.size() > 0) {
+                total_updates_plan++;
+                int index = rand() % object_list.size();
+                rand_idx_update=(rand_idx_update+1)%rand_length;
+                int object_node = object_list[index];
+                int last_index = object_list.size() - 1;
+                int tmp = object_list[index];
+                object_list[index] = object_list[last_index];
+                object_list[last_index] = tmp;
+                object_list.pop_back();
+                non_object_list.push_back(object_node);
+                arrival_node_list.push_back(object_node);
+
+            }
+            if (event.second == QUERY) {
+                total_queries_plan++;
+                int query_node;
+                do {
+                    query_node = rand();
+                    rand_idx_query=(rand_idx_query+1)%rand_length;
+                    query_node = query_node % (test_n-1)+1;
+
+                } while (vStart[query_node] == 0);
+                arrival_node_list.push_back(query_node);
+            }
+
+        }
+        return arrival_node_list;
+    }
+    void first_init(){
+        full_task_list.clear();
+        arrival_task_nodes.clear();
+        full_list.clear();
+        arrival_nodes.clear();
+        vector<std::pair<double, int> > full_list;
+        int init_objects = multiTestPara.init_objects;
+        for (int i = 0; i < init_objects; i++) {
+            full_list.push_back(make_pair(0.0, INSERT));
+        }
+
+        std::ifstream queryfile;
+        queryfile.open(input_parameters.input_data_dir + "query_" + std::to_string(query_rate) + "_" +
+                       std::to_string(insert_rate) + "_" +
+                       std::to_string(delete_rate) + "_" + std::to_string(simulation_time) + ".txt",
+                       std::ios_base::in);
+        double f1;
+        int f2;
+        if (!queryfile.is_open()) {
+            cout << "can't load queryfile!" << endl;
+            vector<std::pair<double, int> > append_list = make_online_query_update_list(query_rate, insert_rate,
+                                                                                        delete_rate,
+                                                                                        simulation_time);
+            std::ofstream queryfile_w;
+            queryfile_w.open(input_parameters.input_data_dir + "query_" + std::to_string(query_rate) + "_" +
+                             std::to_string(insert_rate) + "_" +
+                             std::to_string(delete_rate) + "_" + std::to_string(simulation_time) + ".txt",
+                             std::ios_base::out);
+            for (pair<double, int> &item : append_list) {
+                full_list.push_back(item);
+                queryfile_w << item.first << " " << item.second << endl;
+            }
+            queryfile_w.close();
+            cout << "write to queryfile!" << endl;
+        } else {
+            while (!queryfile.eof()) {
+                queryfile >> f1 >> f2;
+//                cout<<f1<<" "<<f2<<endl;
+                full_list.push_back(make_pair(f1, f2));
+            }
+            queryfile.close();
+            cout << "read from queryfile!" << endl;
+        }
+
+        arrival_nodes = generate_arrival_nodes(full_list, begin_node, end_node);
+
+        full_task_list.assign(full_list.begin()+init_objects,full_list.end());
+        arrival_task_nodes.assign(arrival_nodes.begin()+init_objects,arrival_nodes.end());
+        vector<std::pair<double, int> > init_list;
+        init_list.assign(full_list.begin(),full_list.begin()+init_objects);
+        vector<int> init_arrival_node;
+        init_arrival_node.assign(arrival_nodes.begin(),arrival_nodes.begin()+init_objects);
+        cout << "full_list made..." << endl;
+        cout << "full list size: " << full_list.size() << endl;
+        for(int ti = 0;ti<2;ti++)
+        {
+            tp[ti].init_list.assign(init_list.begin(),init_list.end());
+            tp[ti].init_arrival_nodes.assign(init_arrival_node.begin(),init_arrival_node.end());
+        }
+        tp[0].num_threads_query = num_threads_each;
+        tp[0].num_thread_update = 1;
+        if(DISPLAY)cout<<"Pool 0 queries:"<<tp[0].num_threads_query<<" updates:"<<tp[0].num_thread_update<<endl;
+        int num_q = int(sqrt(num_threads_each));
+        int num_p = int((num_threads_each)/num_q);
+        tp[1].num_threads_query = max(num_q,num_p);
+        tp[1].num_thread_update = num_p+num_q-tp[1].num_threads_query;
+        if(DISPLAY)cout<<"Pool 0 queries:"<<tp[1].num_threads_query<<" updates:"<<tp[1].num_thread_update<<endl;
+        for(int ti=0;ti<2;ti++){
+            globalThreadVar[ti] = new GlobalThreadVar*[tp[ti].num_threads_query];
+            int k_star = compute_k_star(k, tp[ti].num_thread_update, alpha, fail_p);
+            for(int j =0;j<tp[ti].num_threads_query;j++) {
+                globalThreadVar[ti][j] = new GlobalThreadVar();
+                globalThreadVar[ti][j]->ran_threshold.clear();
+//            cout<<"query:"<<j<<" time:"<<globalThreadVar[j]->total_query_time<<" num:"<<globalThreadVar[j]->number_of_queries<<endl;
+                for (int i = 0; i <= QUERY_ID_FOLD; i++) globalThreadVar[ti][j]->ran_threshold.push_back(INT_MAX);
+            }
+            if(!multiTestPara.is_single_aggregate)
+                tp[ti]._aggregate_thread = new RandomAggregateThread* [tp[ti].num_threads_query];
+            if(multiTestPara.is_single_aggregate){
+                tp[ti]._single_aggregate_thread=new RandomAggregateThread(ti,0, k, tp[ti].num_thread_update);
+            }
+            if(DISPLAY)cout << "k_star: " << k_star << endl;
+            for(int j =0;j<tp[ti].num_threads_query;j++){
+
+                if(!multiTestPara.is_single_aggregate)
+                    tp[ti]._aggregate_thread[j] = new RandomAggregateThread(ti,j, k, tp[ti].num_thread_update);
+                for(int i=0;i<tp[ti].num_thread_update;i++) {
+                    if(!multiTestPara.is_single_aggregate) {
+                        RandomThread *t = new RandomThread(ti,j, i, k_star,query_cost,insert_cost,delete_cost, tp[i]._aggregate_thread[j]);
+                        tp[i]._pool.push_back(t);
+                    }
+                    else{
+                        RandomThread *t = new RandomThread(ti,j, i, k_star,query_cost,insert_cost,delete_cost, tp[i]._single_aggregate_thread);
+                        tp[i]._pool.push_back(t);
+                    }
+                }
+            }
+        }
+        mem_struct mems;
+
+        if(VERIFY){
+            allocate_mem(mems, test_n+1);
+            car_nodes = new int[test_n+1];
+            memset(car_nodes, 0, sizeof(int)*(test_n+1));
+        }
+        if(can_estimate)
+            gettimeofday(&global_start, NULL);
+        else{
+            estimate_mutex.lock();
+            gettimeofday(&global_start, NULL);
+            estimate_mutex.unlock();
+        }
+    }
+    void join() {
+        for(int ti = 0;ti<2;ti++){
+            if(DISPLAY)cout << "start joining" << endl;
+
+            if(!multiTestPara.is_single_aggregate) {
+                for (int j = 0; j < tp[ti].num_threads_query; j++) {
+                    tp[ti]._aggregate_thread[j]->join();
+                }
+            }
+            if(multiTestPara.is_single_aggregate){
+                tp[ti]._single_aggregate_thread->join();
+            }
+            if(DISPLAY)cout << "finish joining aggregatethreads" << endl;
+
+
+
+            int max_updates=0;
+            for (int i = 0; i < tp[ti]._pool.size(); i++) {
+                int remain_updates = tp[ti]._pool[i]->get_num_inserts_in_queue()+tp[ti]._pool[i]->get_num_deletes_in_queue();
+                if(remain_updates > max_updates){
+                    max_updates =  remain_updates;
+                }
+                tp[ti]._pool[i]->join();
+            }
+
+            update_finish_rate = max_updates*1.0/total_updates_plan;
+            for (int i = 0; i < tp[ti].num_threads_query; i++) {
+                total_queries_finished += globalThreadVar[tp[ti].threadpool_id][i]->number_of_queries;
+            }
+            query_finish_rate = total_queries_finished * 1.0 / total_queries_plan;
+
+            if(DISPLAY)cout << "finish joining threads" << endl;
+        }
+        if(_main_thread.joinable())
+            _main_thread.join();
+        if(DISPLAY)cout << "finish joining main thread" << endl;
+
+    }
+
+    int isNeedJoin() {
+        return tp[0]._needjoin&&tp[1]._needjoin;
+    }
+
+    void start() {
+        _main_thread = std::thread(&RandomTwoThreadPool_Control::run, this);
+    }
+
+    void task_init(int id){
+        struct timeval end;
+        tp[id].current_query_threads=0;
+        tp[id].rand_idx_query=0;
+        tp[id].rand_idx_update=rand_length;
+        tp[id].total_offset=0;
+        tp[id].total_queries=0;
+        for(int j =0;j<40;j++) {
+            vector<int> tmp;
+            for (int i = 0; i <= test_n; i++) {
+                tmp.push_back(0);
+            }
+            tp[id].total_object_map.push_back(tmp);
+        }
+        tp[id].global_start_q_id = 0;
+        for(int init_i=0;init_i<tp[id].init_list.size();init_i++){
+            if(can_estimate)
+                gettimeofday(&end, NULL);
+            else{
+                estimate_mutex.lock();
+                gettimeofday(&end, NULL);
+                estimate_mutex.unlock();
+            }
+            long current_time =
+                    (end.tv_sec - global_start.tv_sec) * MICROSEC_PER_SEC + end.tv_usec - global_start.tv_usec;
+
+            pair<double, int> &event = tp[id].init_list[init_i];
+            int non_object_node = tp[id].init_arrival_nodes[init_i];
+
+            int start_q_id = tp[id].global_start_q_id;
+            tp[id].global_start_q_id=(tp[id].global_start_q_id+1)%tp[id].num_thread_update;
+            tp[id].rand_idx_update=(tp[id].rand_idx_update+1)%rand_length+rand_length;
+
+            for(int z = 0; z<tp[id].num_threads_query;z++) {
+
+
+                pair<int, int> node_type_pair = std::make_pair(non_object_node, INSERT);
+                pair<long, pair<int, int> > task = std::make_pair(current_time, node_type_pair);
+
+
+                // assign insert tasks
+                int min_task_size = INT_MAX;
+
+                int pool_index=z * tp[id].num_thread_update + start_q_id;
+                tp[id]._pool[pool_index]->add_task(task);
+                tp[id].total_object_map[z][non_object_node] = pool_index;
+            }
+            tp[id].current_object_node.push_back(non_object_node);
+            if(VERIFY){
+//                    car_nodes[non_object_node]=1;
+                DijkstraKNNInsert(non_object_node, car_nodes);
+            }
+        }
+    }
+
+    void task_run(){
+        struct timeval end;
+        long offset_time;
+        int query_turn_flag = 0;
+        for (int i=0; i < full_task_list.size(); i++) {
+            if(overload_flag) break;
+            if(arrival_task_nodes[i]==-1) continue;
+            pair<double, int> &event = full_task_list[i];
+            long issue_time = floor(event.first * MICROSEC_PER_SEC);
+            if(can_estimate)
+                gettimeofday(&end, NULL);
+            else{
+                estimate_mutex.lock();
+                gettimeofday(&end, NULL);
+                estimate_mutex.unlock();
+            }
+            long current_time=(end.tv_sec - global_start.tv_sec) * MICROSEC_PER_SEC + end.tv_usec - global_start.tv_usec;
+            if(i==0) offset_time = current_time-issue_time;
+            if(!VERIFY) {
+
+                do {
+                    if (issue_time <= current_time-offset_time) {
+                        break;
+                    }
+                    if(can_estimate)
+                        gettimeofday(&end, NULL);
+                    else{
+                        estimate_mutex.lock();
+                        gettimeofday(&end, NULL);
+                        estimate_mutex.unlock();
+                    }
+                    current_time =
+                            (end.tv_sec - global_start.tv_sec) * MICROSEC_PER_SEC + end.tv_usec - global_start.tv_usec;
+
+                    if (issue_time > current_time) std::this_thread::sleep_for(std::chrono::microseconds(1));
+                } while (true);
+                issue_time = current_time;
+            }
+
+            // if insert
+            if (event.second == INSERT) {
+
+                int non_object_node = arrival_task_nodes[i];
+
+//                if(need_opt){
+//                    non_object_node%=1270000;
+//                }
+                for(int ti = 0;ti<2;ti++)
+                {
+                    int start_q_id = tp[ti].global_start_q_id;
+                    tp[ti].global_start_q_id=(tp[ti].global_start_q_id+1)%tp[ti].num_thread_update;
+                    tp[ti].rand_idx_update=(tp[ti].rand_idx_update+1)%rand_length+rand_length;
+
+                    for(int z = 0; z<tp[ti].num_threads_query;z++) {
+
+
+                        pair<int, int> node_type_pair = std::make_pair(non_object_node, INSERT);
+                        pair<long, pair<int, int> > task = std::make_pair(issue_time, node_type_pair);
+
+
+                        // assign insert tasks
+                        int min_task_size = INT_MAX;
+                        int pool_index=z * tp[ti].num_thread_update + start_q_id;
+                        tp[ti]._pool[pool_index]->add_task(task);
+                        tp[ti].total_object_map[z][non_object_node] = pool_index;
+                    }
+                    tp[ti].current_object_node.push_back(non_object_node);
+                }
+                if(VERIFY){
+//                    car_nodes[non_object_node]=1;
+                    DijkstraKNNInsert(non_object_node, car_nodes);
+                }
+            }
+            if (event.second == DELETE) {
+
+                int object_node = arrival_task_nodes[i];
+//                if(need_opt){
+//                    object_node%=1270000;
+//                }
+                for(int ti=0;ti<2;ti++)
+                {
+                    for(int z = 0; z<tp[i].num_threads_query;z++) {
+                        int start_q_id = tp[i].total_object_map[z][object_node];
+                        for (int j = start_q_id; j < 1 + start_q_id; j++) {
+                            int j_mod = j % tp[i].num_thread_update;
+                            pair<int, int> node_type_pair = std::make_pair(object_node, DELETE);
+                            pair<long, pair<int, int> > task = std::make_pair(issue_time, node_type_pair);
+                            tp[ti]._pool[z * tp[ti].num_thread_update + j_mod]->add_task(task);
+                        }
+                    }
+                    int key_obj = -1;
+                    for(int obj_i = 0;obj_i<tp[ti].current_object_node.size();obj_i++){
+                        if(tp[ti].current_object_node[obj_i]==object_node){
+                            key_obj = obj_i;
+                            break;
+                        }
+                    }
+                    if(key_obj!=-1){
+                        int last_index = tp[ti].current_object_node.size() - 1;
+                        int tmp = tp[ti].current_object_node[key_obj];
+                        tp[ti].current_object_node[key_obj] = tp[ti].current_object_node[last_index];
+                        tp[ti].current_object_node[last_index] = tmp;
+                        tp[ti].current_object_node.pop_back();
+                    }
+                    else{
+                        cout<<"not exist object node:"<<object_node<<endl<<endl<<endl;
+                    }
+                }
+                if(VERIFY){
+//                    car_nodes[object_node]=0;
+                    DijkstraKNNDelete(object_node, car_nodes);
+                }
+            }
+            if (event.second == QUERY) {
+                int ti = query_turn_flag;
+                query_turn_flag = (query_turn_flag+1)%2;
+//                cout<<"query "<<endl;
+                tp[ti].total_queries++;
+                if(can_estimate) {
+                    gettimeofday(&end, NULL);
+                }
+                else{
+                    estimate_mutex.lock();
+                    gettimeofday(&end, NULL);
+                    estimate_mutex.unlock();
+                }
+                current_time =
+                        (end.tv_sec - global_start.tv_sec) * MICROSEC_PER_SEC + end.tv_usec - global_start.tv_usec;
+
+                tp[ti].total_offset+=current_time-issue_time;
+
+                int query_node=arrival_task_nodes[i];
+//                if(need_opt){
+//                    query_node%=1270000;
+//                }
+
+//                if(VERIFY){
+//                    vector<KNode> result = DijkstraKNNQuery(k, query_node, mems.dist,
+//                                                            mems.visited, mems.q, car_nodes);
+//                    verify_results.push_back(result);
+//
+//                }
+                // put to query tasks
+                for (int j = 0; j < tp[ti].num_thread_update; j++) {
+                    pair<int, int> node_type_pair = std::make_pair(query_node, QUERY);
+                    pair<long, pair<int, int> > task = std::make_pair(issue_time, node_type_pair);
+//                    cout<<"query added to "<<current_query_threads * num_threads_update + j<<endl;
+                    if(multiTestPara.method_name.compare("dijk")!=0) {
+                        int use_thread_id=-1;
+                        long min_cost = INT_MAX;
+                        for(int u = tp[ti].current_query_threads;u < tp[ti].current_query_threads+tp[ti].num_threads_query; u++) {
+                            int u_mod = u % tp[ti].num_threads_query;
+                            long est_cost = tp[ti]._pool[u_mod * tp[ti].num_thread_update + j]->get_est_cost();
+                            if(min_cost>est_cost){
+                                min_cost = est_cost;
+                                use_thread_id = u_mod;
+                            }
+
+                        }
+                        tp[ti]._pool[use_thread_id * tp[ti].num_thread_update + j]->add_task(task);
+                    }
+                    else
+                        tp[ti]._pool[tp[ti].current_query_threads * tp[ti].num_thread_update + j]->add_task(task);
+                }
+
+                tp[ti].current_query_threads=(tp[ti].current_query_threads+1)%tp[ti].num_threads_query;
+//                cout<<"query assign cost: "<<clock()-start_1<<endl;
+            }
+//           if (i%1000 == 0)
+//           {
+//               cout<<"i:"<<i<<endl;
+//               for(int z = 0;z < num_threads_query;z++)
+//               {
+//                   for(int q_id = 0;q_id <num_threads_update;q_id++)
+//                   {
+//                       int pool_index=z * num_threads_update + q_id;
+//                       int num_queries = _pool[pool_index]->get_num_queries_in_queue();
+//                       int num_inserts = _pool[pool_index]->get_num_inserts_in_queue();
+//                       int num_deletes = _pool[pool_index]->get_num_deletes_in_queue();
+//                       cout<<"query:"<<z<<" update:"<<q_id<<" queries:"<<num_queries<<" inserts:"<<num_inserts<<" deletes:"<<num_deletes<<endl;
+//                   }
+//               }
+//           }
+
+        }
+    }
+
+    void wait_for_finish(int ti)
+    {
+        tp[ti].num_intask = 0;
+        while(1) {
+            for (int z = 0; z < tp[ti].num_threads_query; z++) {
+                for (int q_id = 0; q_id < tp[ti].num_thread_update; q_id++) {
+                    int pool_index = z * tp[ti].num_thread_update + q_id;
+                    int num_queries = tp[ti]._pool[pool_index]->get_num_queries_in_queue();
+                    int num_inserts = tp[ti]._pool[pool_index]->get_num_inserts_in_queue();
+                    int num_deletes = tp[ti]._pool[pool_index]->get_num_deletes_in_queue();
+                    tp[ti].num_intask += num_deletes + num_inserts + num_queries;
+//                    cout << "query:" << z << " update:" << q_id << " queries:" << num_queries << " inserts:"
+//                         << num_inserts << " deletes:" << num_deletes << endl;
+                }
+            }
+            if(tp[ti].num_intask == 0) break;
+            else tp[ti].num_intask = 0;
+        }
+    }
+
+    void set_stop(int ti){
+        for (int i = 0; i < tp[ti]._pool.size(); i++) {
+            tp[ti]._pool[i]->set_stop();
+            tp[ti]._pool[i]->notify();
+
+        }
+        if(!multiTestPara.is_single_aggregate) {
+            for (int j = 0; j < num_threads_query; j++) {
+                tp[ti]._aggregate_thread[j]->set_stop();
+                tp[ti]._aggregate_thread[j]->notify();
+
+            }
+        }
+        if(multiTestPara.is_single_aggregate){
+            tp[ti]._single_aggregate_thread->set_stop();
+            tp[ti]._single_aggregate_thread->notify();
+        }
+    }
+    void update_query_time(){
+        for(int id =0;id<2;id++) {
+            for (int i = 0; i < tp[id].num_threads_query; i++) {
+                tp[id].response_time += globalThreadVar[id][i]->total_query_time;
+                tp[id].query_num += globalThreadVar[id][i]->number_of_queries;
+            }
+        }
+    }
+    void Generate_results(){
+        long total_response_time = tp[0].response_time+tp[1].response_time;
+        number_of_queries = tp[0].query_num+tp[0].query_num;
+        cout<<"toal response time 0 :"<<tp[0].response_time<<" number of queries 0: "<<tp[0].query_num<<endl;
+        cout<<"toal response time 1 :"<<tp[1].response_time<<" number of queries 1: "<<tp[1].query_num<<endl;
+        cout << "expected response time: " << total_response_time / number_of_queries << " seconds" << endl;
+        cout << "total_response_time: " << total_response_time << endl;
+        cout << "number_of_queries: " << number_of_queries << endl;
+        cout << "expected_update_response_time: " << total_update_response_time / number_of_updates << endl;
+
+        cout << "expected_update_process_time: " << total_update_process_time / number_of_updates << endl;
+        std::ofstream outfile;
+
+        outfile.open(input_parameters.output_data_dir + "stone_outfile" + (multiTestPara.suffix), std::ios_base::app);
+        outfile << endl
+                << network_name<<" "
+                << "init: "<<multiTestPara.init_objects<<" "
+                << multiTestPara.method_name << " config simulation time: "
+                << multiTestPara.config_simulation_time << " test simulate time: "
+                << multiTestPara.test_simulation_time << " configure: "
+                << configurationId << " threshold: " << multiTestPara.is_thresholded << " fail_p: " << fail_p
+                << " "
+                << query_rate << " " << insert_rate
+                << " " << delete_rate << " " << multiTestPara.method_name << " singleAggregate: "
+                << multiTestPara.is_single_aggregate << " "
+                << multiTestPara.num_threads_update
+                << " " << multiTestPara.num_threads_query << " "
+                << "query response time: " << total_response_time / number_of_queries << " "
+                << "query process time: " << total_query_process_time / number_of_query_processings << " "
+                << "update response time: " << total_update_response_time / number_of_updates << " "
+                << "update process time: " << total_update_process_time / number_of_updates
+                << " overload: " << overload_flag
+                <<" query finish: "<<query_finish_rate
+                <<" update finish: "<<1.0-update_finish_rate
+                <<" schedule cost: "<<avg_offset
+                << endl;
+        outfile.close();
+    }
+    void run() {
+        task_init(0);
+        task_init(1);
+        long offset_time;
+        struct timeval global_start_2;
+        if(can_estimate)
+            gettimeofday(&global_start_2, NULL);
+        else{
+            estimate_mutex.lock();
+            gettimeofday(&global_start_2, NULL);
+            estimate_mutex.unlock();
+        }
+        task_run();
+        wait_for_finish(0);
+        wait_for_finish(1);
+        struct timeval end_2;
+        if(can_estimate)
+            gettimeofday(&end_2, NULL);
+        else{
+            estimate_mutex.lock();
+            gettimeofday(&end_2, NULL);
+            estimate_mutex.unlock();
+        }
+
+        long duration =
+                (end_2.tv_sec - global_start_2.tv_sec);
+        if(DISPLAY){
+            cout<<"duration: "<<duration<<" secs; fulllist size: "<<full_task_list.size()+tp[0].init_list.size()<<endl;
+            avg_offset = tp[0].total_offset/tp[0].total_queries;
+            cout<<"Pool 0 avg offset: "<<avg_offset<<"queries: "<<tp[0].total_queries<<endl;
+            avg_offset = tp[1].total_offset/tp[1].total_queries;
+            cout<<"Pool 1 avg offset: "<<avg_offset<<"queries: "<<tp[1].total_queries<<endl;
+        }
+        update_query_time();
+        set_stop(0);
+        set_stop(1);
+        tp[0]._needjoin = 1;
+        tp[1]._needjoin = 1;
+        if(DISPLAY)cout << "all set stopped!" << endl;
+        join();
+        Generate_results();
+    }
+};
 class RandomThreadPool_new {
 private:
     int threadpool_id;
