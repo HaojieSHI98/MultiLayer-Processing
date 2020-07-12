@@ -1092,7 +1092,7 @@ public:
                 } while (true);
                 issue_time = current_time;
             }
-            cout<<"step1: event-"<<event.second<<endl;
+//            cout<<"step1: event-"<<event.second<<endl;
             // if insert
             if (event.second == INSERT) {
 
