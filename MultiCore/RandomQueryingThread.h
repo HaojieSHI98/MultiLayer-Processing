@@ -1171,7 +1171,7 @@ public:
             if (event.second == QUERY) {
                 int ti = query_turn_flag;
                 query_turn_flag = 1-query_turn_flag;
-//                cout<<"query "<<endl;
+                cout<<"pool "<<query_turn_flag<<endl;
 //                int ti = 0;
                 tp[ti].total_queries++;
                 if(can_estimate) {
