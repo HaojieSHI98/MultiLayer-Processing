@@ -1172,7 +1172,7 @@ public:
             if (event.second == QUERY) {
                 int ti = query_turn_flag;
                 turn_num ++;
-                if(turn_num%10==0)
+                if(turn_num%100==0)
                 {
                     query_turn_flag = 1-query_turn_flag;
                     cout<<"pool "<<query_turn_flag<<endl;
