@@ -1058,6 +1058,7 @@ public:
         struct timeval end;
         long offset_time;
         int query_turn_flag = 0;
+        int turn_num = 0;
         for (int i=0; i < full_task_list.size(); i++) {
             if(overload_flag) break;
             if(arrival_task_nodes[i]==-1) continue;
@@ -1170,8 +1171,13 @@ public:
             }
             if (event.second == QUERY) {
                 int ti = query_turn_flag;
-                query_turn_flag = 1-query_turn_flag;
-                cout<<"pool "<<query_turn_flag<<endl;
+                turn_num ++;
+                if(turn_num%1000==0)
+                {
+                    query_turn_flag = 1-query_turn_flag;
+                    cout<<"pool "<<query_turn_flag<<endl;
+                }
+//                cout<<"pool "<<query_turn_flag<<endl;
 //                int ti = 0;
                 tp[ti].total_queries++;
                 if(can_estimate) {
