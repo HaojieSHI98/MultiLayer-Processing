@@ -1356,9 +1356,9 @@ public:
                 (end_2.tv_sec - global_start_2.tv_sec);
         if(DISPLAY){
             cout<<"duration: "<<duration<<" secs; fulllist size: "<<full_task_list.size()+tp[0].init_list.size()<<endl;
-            avg_offset = tp[0].total_offset/tp[0].total_queries;
+            avg_offset = tp[0].total_offset/(tp[0].total_queries+1);
             cout<<"Pool 0 avg offset: "<<avg_offset<<"queries: "<<tp[0].total_queries<<endl;
-            avg_offset = tp[1].total_offset/tp[1].total_queries;
+            avg_offset = tp[1].total_offset/(tp[1].total_queries+1);
             cout<<"Pool 1 avg offset: "<<avg_offset<<"queries: "<<tp[1].total_queries<<endl;
         }
         update_query_time();
