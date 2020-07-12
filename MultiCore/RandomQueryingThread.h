@@ -1039,12 +1039,13 @@ public:
 
                 // assign insert tasks
                 int min_task_size = INT_MAX;
-
+                if(id==1) cout<<"start_q_id"<<start_q_id<<"z:"<<z<<endl;
                 int pool_index=z * tp[id].num_thread_update + start_q_id;
                 tp[id]._pool[pool_index]->add_task(task);
+                if(id==1) cout<<"Step 2"<<endl;
                 tp[id].total_object_map[z][non_object_node] = pool_index;
             }
-            if(id==1) cout<<"Step 2"<<endl;
+            if(id==1) cout<<"Step 3"<<endl;
             tp[id].current_object_node.push_back(non_object_node);
             if(VERIFY){
 //                    car_nodes[non_object_node]=1;
