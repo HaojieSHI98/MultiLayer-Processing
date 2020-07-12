@@ -1337,7 +1337,9 @@ public:
             gettimeofday(&global_start_2, NULL);
             estimate_mutex.unlock();
         }
+        cout<<"ok"<<endl;
         task_run();
+        cout<<"okk"<<endl;
         wait_for_finish(0);
         wait_for_finish(1);
         struct timeval end_2;
