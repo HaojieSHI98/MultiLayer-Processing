@@ -172,8 +172,9 @@ public:
                     long current_time =
                             (end.tv_sec - global_start.tv_sec) * MICROSEC_PER_SEC + end.tv_usec - global_start.tv_usec;
                     long response_time = current_time - issue_time;
+                    thread_mutex.lock();
                     response_time_list.push_back(response_time);
-//                    thread_mutex.lock();
+                    thread_mutex.unlock();
 //                    if(response_time>0.01*MICROSEC_PER_SEC){
 //                        cout<<"response time too large:"<<response_time<<endl;
 ////                        cout<<"overloaded!"<<endl;
