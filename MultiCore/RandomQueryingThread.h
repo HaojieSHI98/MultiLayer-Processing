@@ -682,6 +682,7 @@ typedef struct {
     int num_intask;
     double response_time;
     int query_num;
+    int restart_flag;
 
 }OneThreadPool;
 
@@ -738,7 +739,9 @@ public:
             tp[ti].num_intask = 0;
             tp[ti].query_num = 0;
             tp[ti].response_time = 0;
+            tp[ti].restart_flag = 0;
         }
+        tp[1].threshold_number = 20000;
         configurationId = configurationId_val;
         begin_node = begin_node_val;
         end_node = end_node_val;
@@ -949,42 +952,45 @@ public:
             estimate_mutex.unlock();
         }
     }
-    void join() {
+    void join_all(){
         for(int ti = 0;ti<2;ti++){
-            if(DISPLAY)cout << "start joining" << endl;
-
-            if(!multiTestPara.is_single_aggregate) {
-                for (int j = 0; j < tp[ti].num_threads_query; j++) {
-                    tp[ti]._aggregate_thread[j]->join();
-                }
-            }
-            if(multiTestPara.is_single_aggregate){
-                tp[ti]._single_aggregate_thread->join();
-            }
-            if(DISPLAY)cout << "finish joining aggregatethreads" << endl;
-
-
-
-            int max_updates=0;
-            for (int i = 0; i < tp[ti]._pool.size(); i++) {
-                int remain_updates = tp[ti]._pool[i]->get_num_inserts_in_queue()+tp[ti]._pool[i]->get_num_deletes_in_queue();
-                if(remain_updates > max_updates){
-                    max_updates =  remain_updates;
-                }
-                tp[ti]._pool[i]->join();
-            }
-
-            update_finish_rate = max_updates*1.0/total_updates_plan;
-            for (int i = 0; i < tp[ti].num_threads_query; i++) {
-                total_queries_finished += globalThreadVar[tp[ti].threadpool_id][i]->number_of_queries;
-            }
-            query_finish_rate = total_queries_finished * 1.0 / total_queries_plan;
-
-            if(DISPLAY)cout << "finish joining threads" << endl;
+            join(ti);
         }
         if(_main_thread.joinable())
             _main_thread.join();
         if(DISPLAY)cout << "finish joining main thread" << endl;
+    }
+    void join(int ti) {
+        if(DISPLAY)cout << "start joining" << endl;
+
+        if(!multiTestPara.is_single_aggregate) {
+            for (int j = 0; j < tp[ti].num_threads_query; j++) {
+                tp[ti]._aggregate_thread[j]->join();
+            }
+        }
+        if(multiTestPara.is_single_aggregate){
+            tp[ti]._single_aggregate_thread->join();
+        }
+        if(DISPLAY)cout << "finish joining aggregatethreads" << endl;
+
+
+
+        int max_updates=0;
+        for (int i = 0; i < tp[ti]._pool.size(); i++) {
+            int remain_updates = tp[ti]._pool[i]->get_num_inserts_in_queue()+tp[ti]._pool[i]->get_num_deletes_in_queue();
+            if(remain_updates > max_updates){
+                max_updates =  remain_updates;
+            }
+            tp[ti]._pool[i]->join();
+        }
+
+        update_finish_rate = max_updates*1.0/total_updates_plan;
+        for (int i = 0; i < tp[ti].num_threads_query; i++) {
+            total_queries_finished += globalThreadVar[tp[ti].threadpool_id][i]->number_of_queries;
+        }
+        query_finish_rate = total_queries_finished * 1.0 / total_queries_plan;
+
+        if(DISPLAY)cout << "finish joining threads" << endl;
 
     }
 
@@ -1060,6 +1066,12 @@ public:
         int query_turn_flag = 0;
         int turn_num = 0;
         for (int i=0; i < full_task_list.size(); i++) {
+            if(i>=tp[1].threshold_number&&tp[1].run_time==0){
+                tp[1].restart_flag = 1;
+            }
+            if(tp[1].restart_flag==1){
+
+            }
             if(overload_flag) break;
             if(arrival_task_nodes[i]==-1) continue;
             pair<double, int> &event = full_task_list[i];
@@ -1172,11 +1184,13 @@ public:
             if (event.second == QUERY) {
                 int ti = query_turn_flag;
                 turn_num ++;
+                task_turn_mutex.lock();
                 if(turn_num%100==0)
                 {
                     query_turn_flag = 1-query_turn_flag;
                     cout<<"pool "<<query_turn_flag<<endl;
                 }
+                task_turn_mutex.unlock();
 //                cout<<"pool "<<query_turn_flag<<endl;
 //                int ti = 0;
                 tp[ti].total_queries++;
@@ -1247,7 +1261,26 @@ public:
 
         }
     }
-
+    void task_reinit(int ti)
+    {
+        wait_for_finish(ti);
+        set_stop(ti);
+        join(ti);
+        tp[ti].threadpool_id=ti;
+        tp[ti].run_time++;
+        tp[ti]._needjoin = 0;
+        tp[ti].init_arrival_nodes.clear();
+        tp[ti].init_list.clear();
+        tp[ti].threshold_number = 0;
+        tp[ti].current_object_node.clear();
+        tp[ti].total_object_map.clear();
+        tp[ti].current_frame = 0;
+        tp[ti].begin_frame = 0;
+        tp[ti].global_start_q_id = 0;
+        tp[ti].restart_flag = 0;
+        tp[ti].rand_idx_query = 0;
+        tp[ti].rand_idx_update = 0;
+    }
     void wait_for_finish(int ti)
     {
         tp[ti].num_intask = 0;
@@ -1267,7 +1300,6 @@ public:
             else tp[ti].num_intask = 0;
         }
     }
-
     void set_stop(int ti){
         for (int i = 0; i < tp[ti]._pool.size(); i++) {
             tp[ti]._pool[i]->set_stop();
@@ -1373,7 +1405,7 @@ public:
         tp[0]._needjoin = 1;
         tp[1]._needjoin = 1;
         if(DISPLAY)cout << "all set stopped!" << endl;
-        join();
+        join_all();
         Generate_results();
     }
 };

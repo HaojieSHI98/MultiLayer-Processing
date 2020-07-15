@@ -103,7 +103,7 @@ double total_query_process_time = 0.0;
 double avg_offset=0.0;
 std::mutex update_time_mutex;
 std::mutex estimate_mutex;
-
+std::mutex task_turn_mutex;
 std::mutex vtree_read_mutex;
 
 #endif //TOAIN_MULTICOREVARIABLES_H
