@@ -1188,7 +1188,7 @@ public:
                 if(turn_num%100==0)
                 {
                     query_turn_flag = 1-query_turn_flag;
-                    cout<<"pool "<<query_turn_flag<<endl;
+//                    cout<<"pool "<<query_turn_flag<<endl;
                 }
                 task_turn_mutex.unlock();
 //                cout<<"pool "<<query_turn_flag<<endl;
