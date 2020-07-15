@@ -141,13 +141,13 @@ public:
 
             if (!partial_result_queue.empty()) {
 
-                thread_mutex.lock();
+//                thread_mutex.lock();
                 // DO NOT use reference here!!
                 pair<int, vector<KNode> > partial_result = partial_result_queue.front();
                 long issue_time = issue_time_queue.front();
                 partial_result_queue.pop();
                 issue_time_queue.pop();
-                thread_mutex.unlock();
+//                thread_mutex.unlock();
 
                 int adjust_id = partial_result.first % QUERY_ID_FOLD;
                 merge_cnt[adjust_id]++;
