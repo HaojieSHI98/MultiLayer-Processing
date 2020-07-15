@@ -1184,6 +1184,7 @@ public:
             if (event.second == QUERY) {
 //                int ti = query_turn_flag;
 //                turn_num ++;
+                cout<<"step1"<<endl;
                 task_turn_mutex.lock();
 //                if(turn_num%100==0)
 //                {
@@ -1192,6 +1193,7 @@ public:
 //                }
                 task_turn_mutex.unlock();
                 int ti = query_turn_flag;
+                cout<<"step2"<<endl;
 //                cout<<"pool "<<query_turn_flag<<endl;
 //                int ti = 0;
                 tp[ti].total_queries++;
@@ -1207,7 +1209,7 @@ public:
                         (end.tv_sec - global_start.tv_sec) * MICROSEC_PER_SEC + end.tv_usec - global_start.tv_usec;
 
                 tp[ti].total_offset+=current_time-issue_time;
-
+                cout<<"step3"<<endl;
                 int query_node=arrival_task_nodes[i];
 //                if(need_opt){
 //                    query_node%=1270000;
@@ -1221,6 +1223,7 @@ public:
 //                }
                 // put to query tasks
                 for (int j = 0; j < tp[ti].num_thread_update; j++) {
+                    cout<<"step4"<<endl;
                     pair<int, int> node_type_pair = std::make_pair(query_node, QUERY);
                     pair<long, pair<int, int> > task = std::make_pair(issue_time, node_type_pair);
 //                    cout<<"query added to "<<current_query_threads * num_threads_update + j<<endl;
@@ -1240,8 +1243,9 @@ public:
                     else
                         tp[ti]._pool[tp[ti].current_query_threads * tp[ti].num_thread_update + j]->add_task(task);
                 }
-
+                cout<<"step5"<<endl;
                 tp[ti].current_query_threads=(tp[ti].current_query_threads+1)%tp[ti].num_threads_query;
+                cout<<"step6"<<endl;
 //                cout<<"query assign cost: "<<clock()-start_1<<endl;
             }
 //           if (i%1000 == 0)
