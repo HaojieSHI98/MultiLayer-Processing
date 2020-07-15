@@ -129,7 +129,7 @@ public:
                  if(!is_wait) {
                      if (partial_result_queue.empty()) {
                          std::unique_lock<std::mutex> aggregate_lock(thread_mutex);
-//                cv.wait(aggregate_lock, []{return true;});
+//                         cv.wait(aggregate_lock, []{return true;});
                          is_wait = true;
                          cv.wait(aggregate_lock, [this] { return !(partial_result_queue.empty()) || thread_stop; });
                          is_wait = false;
@@ -168,10 +168,12 @@ public:
                         gettimeofday(&end, NULL);
                         estimate_mutex.unlock();
                     }
+                    thread_mutex.lock();
                     long current_time =
                             (end.tv_sec - global_start.tv_sec) * MICROSEC_PER_SEC + end.tv_usec - global_start.tv_usec;
                     long response_time = current_time - issue_time;
                     response_time_list.push_back(response_time);
+                    thread_mutex.lock();
 //                    if(response_time>0.01*MICROSEC_PER_SEC){
 //                        cout<<"response time too large:"<<response_time<<endl;
 ////                        cout<<"overloaded!"<<endl;
