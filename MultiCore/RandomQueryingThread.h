@@ -1184,13 +1184,13 @@ public:
             if (event.second == QUERY) {
                 int ti = query_turn_flag;
                 turn_num ++;
-                task_turn_mutex.lock();
+//                task_turn_mutex.lock();
                 if(turn_num%100==0)
                 {
                     query_turn_flag = 1-query_turn_flag;
 //                    cout<<"pool "<<query_turn_flag<<endl;
                 }
-                task_turn_mutex.unlock();
+//                task_turn_mutex.unlock();
 //                cout<<"pool "<<query_turn_flag<<endl;
 //                int ti = 0;
                 tp[ti].total_queries++;
