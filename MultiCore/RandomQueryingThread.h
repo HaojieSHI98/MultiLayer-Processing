@@ -1294,8 +1294,8 @@ public:
                     int num_inserts = tp[ti]._pool[pool_index]->get_num_inserts_in_queue();
                     int num_deletes = tp[ti]._pool[pool_index]->get_num_deletes_in_queue();
                     tp[ti].num_intask += num_deletes + num_inserts + num_queries;
-//                    cout << "query:" << z << " update:" << q_id << " queries:" << num_queries << " inserts:"
-//                         << num_inserts << " deletes:" << num_deletes << endl;
+                    cout << "query:" << z << " update:" << q_id << " queries:" << num_queries << " inserts:"
+                         << num_inserts << " deletes:" << num_deletes << endl;
                 }
             }
             if(tp[ti].num_intask == 0) break;
@@ -1383,6 +1383,7 @@ public:
         cout<<"okk"<<endl;
         wait_for_finish(0);
         wait_for_finish(1);
+        cout<<"okkk"<<endl;
         struct timeval end_2;
         if(can_estimate)
             gettimeofday(&end_2, NULL);
