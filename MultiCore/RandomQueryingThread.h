@@ -1182,7 +1182,7 @@ public:
                 }
             }
             if (event.second == QUERY) {
-                int ti = query_turn_flag;
+//                int ti = query_turn_flag;
 //                turn_num ++;
 ////                task_turn_mutex.lock();
 //                if(turn_num%100==0)
