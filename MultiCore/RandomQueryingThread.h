@@ -190,7 +190,9 @@ public:
 
 
                     // cout top-k
+                    thread_mutex.lock();
                     merge_cnt[adjust_id] = 0;
+                    thread_mutex.unlock();
                     if(VERIFY) {
                         cout<<"start verifying"<<endl;
                         int res = verify_two_results_simple(knn_result[adjust_id], verify_results[adjust_id], k);
