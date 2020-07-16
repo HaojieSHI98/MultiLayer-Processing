@@ -104,9 +104,10 @@ public:
         thread_mutex.lock();
         issue_time_queue.push(issue_time);
         partial_result_queue.push(partial_result);
-        thread_mutex.unlock();
+
 //        if(is_wait)
             cv.notify_all();
+        thread_mutex.unlock();
 //        cout<<"aggregate task size: "<<partial_result_queue.size()<<endl;
     }
 
@@ -229,7 +230,6 @@ public:
 
                 }
             }
-
         }
 //        cout << endl << endl << "out aggregate" << endl;
     }
