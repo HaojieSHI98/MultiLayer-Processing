@@ -160,6 +160,7 @@ public:
                     knn_result[adjust_id] = merge_k(knn_result[adjust_id], partial_result.second, k);
                 }
                 thread_mutex.unlock();
+
                 if (merge_cnt[adjust_id] == num_threads_update) {
 
                     if(can_estimate)
@@ -174,7 +175,7 @@ public:
                             (end.tv_sec - global_start.tv_sec) * MICROSEC_PER_SEC + end.tv_usec - global_start.tv_usec;
                     long response_time = current_time - issue_time;
 //                    thread_mutex.lock();
-                    response_time_list.push_back(response_time);
+//                    response_time_list.push_back(response_time);
                     thread_mutex.unlock();
 //                    if(response_time>0.01*MICROSEC_PER_SEC){
 //                        cout<<"response time too large:"<<response_time<<endl;
