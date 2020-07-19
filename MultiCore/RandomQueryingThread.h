@@ -1302,9 +1302,10 @@ public:
         tp[ti].rand_idx_update = 0;
         tp[ti].restart_flag = 0;
         tp[ti]._pool.clear();
-
+        cout<<"init step1"<<endl;
         update_query_time();
         globalThreadVar[ti] = new GlobalThreadVar*[tp[ti].num_threads_query];
+        cout<<"init step2"<<endl;
         int k_star = compute_k_star(k, tp[ti].num_thread_update, alpha, fail_p);
         for(int j =0;j<tp[ti].num_threads_query;j++) {
             globalThreadVar[ti][j] = new GlobalThreadVar();
@@ -1312,6 +1313,7 @@ public:
 //            cout<<"query:"<<j<<" time:"<<globalThreadVar[j]->total_query_time<<" num:"<<globalThreadVar[j]->number_of_queries<<endl;
             for (int i = 0; i <= QUERY_ID_FOLD; i++) globalThreadVar[ti][j]->ran_threshold.push_back(INT_MAX);
         }
+        cout<<"init step3"<<endl;
         if(!multiTestPara.is_single_aggregate)
             tp[ti]._aggregate_thread = new RandomAggregateThread* [tp[ti].num_threads_query];
         if(multiTestPara.is_single_aggregate){
