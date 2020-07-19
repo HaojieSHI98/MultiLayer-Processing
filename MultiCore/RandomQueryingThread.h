@@ -1077,7 +1077,8 @@ public:
                 tp[1].restart_flag = 1;
             }
             if(tp[1].restart_flag==1){
-
+                cout<<"start reinit!!!"<<endl<<endl<<endl;
+                task_reinit(1);
             }
             if(overload_flag) break;
             if(arrival_task_nodes[i]==-1) continue;
@@ -1269,23 +1270,70 @@ public:
     }
     void task_reinit(int ti)
     {
+        int tj = 1-ti;
         wait_for_finish(ti);
         set_stop(ti);
         join(ti);
         tp[ti].threadpool_id=ti;
+        tp[ti].num_threads_query = tp[tj].num_threads_query;
+        tp[ti].num_thread_update = tp[tj].num_thread_update;
         tp[ti].run_time++;
         tp[ti]._needjoin = 0;
+        tp[ti].threshold_number = 0;
+
+        tp[ti].total_object_map.clear();
         tp[ti].init_arrival_nodes.clear();
         tp[ti].init_list.clear();
-        tp[ti].threshold_number = 0;
         tp[ti].current_object_node.clear();
-        tp[ti].total_object_map.clear();
+        tp[ti].init_arrival_nodes.assign(tp[tj].current_object_node.begin(),tp[tj].current_object_node.end());
+        for(int init_i = 0;init_i< tp[ti].init_arrival_nodes.size();init_i++)
+        {
+            tp[ti].init_list.push_back(make_pair(0.0, INSERT));
+        }
+
+
         tp[ti].current_frame = 0;
         tp[ti].begin_frame = 0;
+
         tp[ti].global_start_q_id = 0;
         tp[ti].restart_flag = 0;
         tp[ti].rand_idx_query = 0;
         tp[ti].rand_idx_update = 0;
+        tp[ti].restart_flag = 0;
+        tp[ti]._pool.clear();
+
+        update_query_time();
+        globalThreadVar[ti] = new GlobalThreadVar*[tp[ti].num_threads_query];
+        int k_star = compute_k_star(k, tp[ti].num_thread_update, alpha, fail_p);
+        for(int j =0;j<tp[ti].num_threads_query;j++) {
+            globalThreadVar[ti][j] = new GlobalThreadVar();
+            globalThreadVar[ti][j]->ran_threshold.clear();
+//            cout<<"query:"<<j<<" time:"<<globalThreadVar[j]->total_query_time<<" num:"<<globalThreadVar[j]->number_of_queries<<endl;
+            for (int i = 0; i <= QUERY_ID_FOLD; i++) globalThreadVar[ti][j]->ran_threshold.push_back(INT_MAX);
+        }
+        if(!multiTestPara.is_single_aggregate)
+            tp[ti]._aggregate_thread = new RandomAggregateThread* [tp[ti].num_threads_query];
+        if(multiTestPara.is_single_aggregate){
+            tp[ti]._single_aggregate_thread=new RandomAggregateThread(ti,0, k, tp[ti].num_thread_update);
+        }
+        if(DISPLAY)cout << "k_star: " << k_star << endl;
+        for(int j =0;j<tp[ti].num_threads_query;j++){
+
+            if(!multiTestPara.is_single_aggregate)
+                tp[ti]._aggregate_thread[j] = new RandomAggregateThread(ti,j, k, tp[ti].num_thread_update);
+            for(int i=0;i<tp[ti].num_thread_update;i++) {
+                if(!multiTestPara.is_single_aggregate) {
+                    RandomThread *t = new RandomThread(ti,j, i, k_star,query_cost,insert_cost,delete_cost, tp[ti]._aggregate_thread[j]);
+                    tp[ti]._pool.push_back(t);
+                }
+                else{
+                    RandomThread *t = new RandomThread(ti,j, i, k_star,query_cost,insert_cost,delete_cost, tp[ti]._single_aggregate_thread);
+                    tp[ti]._pool.push_back(t);
+                }
+            }
+        }
+        clear_query_time();
+        task_init(ti);
     }
     void wait_for_finish(int ti)
     {
@@ -1298,8 +1346,8 @@ public:
                     int num_inserts = tp[ti]._pool[pool_index]->get_num_inserts_in_queue();
                     int num_deletes = tp[ti]._pool[pool_index]->get_num_deletes_in_queue();
                     tp[ti].num_intask += num_deletes + num_inserts + num_queries;
-                    cout << "query:" << z << " update:" << q_id << " queries:" << num_queries << " inserts:"
-                         << num_inserts << " deletes:" << num_deletes << endl;
+//                    cout << "query:" << z << " update:" << q_id << " queries:" << num_queries << " inserts:"
+//                         << num_inserts << " deletes:" << num_deletes << endl;
                 }
             }
             if(tp[ti].num_intask == 0) break;
@@ -1329,6 +1377,14 @@ public:
             for (int i = 0; i < tp[id].num_threads_query; i++) {
                 tp[id].response_time += globalThreadVar[id][i]->total_query_time;
                 tp[id].query_num += globalThreadVar[id][i]->number_of_queries;
+            }
+        }
+    }
+    void clear_query_time(){
+        for(int id =0;id<2;id++) {
+            for (int i = 0; i < tp[id].num_threads_query; i++) {
+                globalThreadVar[id][i]->total_query_time=0;
+                globalThreadVar[id][i]->number_of_queries=0;
             }
         }
     }
