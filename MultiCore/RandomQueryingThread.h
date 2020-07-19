@@ -1275,6 +1275,7 @@ public:
         wait_for_finish(ti);
         set_stop(ti);
         join(ti);
+        update_query_time();
         tp[ti].threadpool_id=ti;
         tp[ti].num_threads_query = tp[tj].num_threads_query;
         tp[ti].num_thread_update = tp[tj].num_thread_update;
@@ -1303,7 +1304,7 @@ public:
         tp[ti].restart_flag = 0;
         tp[ti]._pool.clear();
         cout<<"init step1"<<endl;
-        update_query_time();
+
         globalThreadVar[ti] = new GlobalThreadVar*[tp[ti].num_threads_query];
         cout<<"init step2"<<endl;
         int k_star = compute_k_star(k, tp[ti].num_thread_update, alpha, fail_p);
