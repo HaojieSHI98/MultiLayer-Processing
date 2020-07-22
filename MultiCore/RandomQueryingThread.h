@@ -1394,7 +1394,7 @@ public:
     }
     void Generate_results(){
         long total_response_time = tp[0].response_time+tp[1].response_time;
-        number_of_queries = tp[0].query_num+tp[0].query_num;
+        number_of_queries = tp[0].query_num+tp[1].query_num;
         cout<<"toal response time 0 :"<<tp[0].response_time<<" number of queries 0: "<<tp[0].query_num<<endl;
         cout<<"toal response time 1 :"<<tp[1].response_time<<" number of queries 1: "<<tp[1].query_num<<endl;
         cout << "expected response time: " << total_response_time / number_of_queries << " seconds" << endl;
