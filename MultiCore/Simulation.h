@@ -63,9 +63,7 @@ vector<std::pair<double, int> > make_online_query_update_list_new(double query_r
         insert_sequence2[j] += simulation_time1;
         delete_sequence2[j] += simulation_time1;
     }
-    query_sequence2.push_back(simulation_time1+simulation_time2+1);
-    insert_sequence2.push_back(simulation_time1+simulation_time2+1);
-    delete_sequence2.push_back(simulation_time1+simulation_time2+1);
+
 
     query_sequence.insert(query_sequence.end(),query_sequence2.begin(),query_sequence2.end());
     insert_sequence.insert(insert_sequence.end(),insert_sequence2.begin(),insert_sequence2.end());
@@ -74,6 +72,10 @@ vector<std::pair<double, int> > make_online_query_update_list_new(double query_r
     int query_size = query_sequence.size();
     int insert_size = insert_sequence.size();
     int delete_size = delete_sequence.size();
+
+    query_sequence.push_back(simulation_time1+simulation_time2+1);
+    insert_sequence.push_back(simulation_time1+simulation_time2+1);
+    delete_sequence.push_back(simulation_time1+simulation_time2+1);
 
     int query_index=0, insert_index=0, delete_index=0;
 
