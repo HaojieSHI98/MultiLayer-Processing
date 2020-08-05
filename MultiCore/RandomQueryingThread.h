@@ -926,10 +926,10 @@ public:
         if(DISPLAY)cout<<"Pool 0 queries:"<<tp[0].num_threads_query<<" updates:"<<tp[0].num_thread_update<<endl;
         int num_q = int(sqrt(num_threads_each));
         int num_p = int((num_threads_each)/num_q);
-//        tp[1].num_threads_query = max(num_q,num_p);
-//        tp[1].num_thread_update = num_p+num_q-tp[1].num_threads_query;
-        tp[1].num_threads_query = num_threads_each;
-        tp[1].num_thread_update = 1;
+        tp[1].num_threads_query = max(num_q,num_p);
+        tp[1].num_thread_update = num_p+num_q-tp[1].num_threads_query;
+//        tp[1].num_threads_query = num_threads_each;
+//        tp[1].num_thread_update = 1;
         if(DISPLAY)cout<<"Pool 0 queries:"<<tp[1].num_threads_query<<" updates:"<<tp[1].num_thread_update<<endl;
         for(int ti=0;ti<2;ti++){
             globalThreadVar[ti] = new GlobalThreadVar*[tp[ti].num_threads_query];
@@ -1092,13 +1092,13 @@ public:
         int turn_num = 0;
         for (int i=0; i < full_task_list.size(); i++) {
             int restart_flag = 0;
-            if(i>=tp[0].threshold_number&&tp[0].run_time==0){
-                tp[0].restart_flag = 1;
+            if(i>=tp[1].threshold_number&&tp[1].run_time==0){
+                tp[1].restart_flag = 1;
                 cout<<"restart!"<<endl;
             }
-            if(tp[0].restart_flag==1){
+            if(tp[1].restart_flag==1){
                 cout<<"start reinit!!!"<<endl<<endl<<endl;
-                task_reinit(0);
+                task_reinit(1);
                 restart_flag = 1;
             }
             if(overload_flag) break;
@@ -1437,25 +1437,28 @@ public:
         cout << "expected_update_process_time: " << total_update_process_time / number_of_updates << endl;
         std::ofstream outfile;
 
-        outfile.open(input_parameters.output_data_dir + "stone_outfile" + (multiTestPara.suffix), std::ios_base::app);
+        outfile.open(input_parameters.output_data_dir + "stone_outfile1" + (multiTestPara.suffix), std::ios_base::app);
         outfile << endl
-                << network_name<<" "
-                << "init: "<<multiTestPara.init_objects<<" "
-                << multiTestPara.method_name << " config simulation time: "
-                << multiTestPara.config_simulation_time << " test simulate time: "
-                << multiTestPara.test_simulation_time << " configure: "
-                << configurationId << " threshold: " << multiTestPara.is_thresholded << " fail_p: " << fail_p
-                << " "
-                << query_rate << " " << insert_rate
-                << " " << delete_rate << " " << multiTestPara.method_name << " singleAggregate: "
-                << multiTestPara.is_single_aggregate << " "
-                << multiTestPara.num_threads_update
-                << " " << multiTestPara.num_threads_query << " "
-                << "query response time: " << total_response_time / number_of_queries << " "
+//                << network_name<<" "
+//                << "init: "<<multiTestPara.init_objects<<" "
+//                << multiTestPara.method_name << " config simulation time: "
+//                << multiTestPara.config_simulation_time << " test simulate time: "
+//                << multiTestPara.test_simulation_time << " configure: "
+//                << configurationId << " threshold: " << multiTestPara.is_thresholded << " fail_p: " << fail_p
+//                << " "
+                << "query "<<query_rate << " " << insert_rate
+                <<" " << delete_rate<< " "<<multiTestPara.test_simulation_time
+                <<" query2 "<<query_rate2 << " " << insert_rate2
+                <<" " << delete_rate2<< " "<<multiTestPara.test_simulation_time2
+//                << " " << delete_rate << " " << multiTestPara.method_name << " singleAggregate: "
+//                << multiTestPara.is_single_aggregate << " "
+//                << multiTestPara.num_threads_update
+//                << " " << multiTestPara.num_threads_query << " "
+                << "query response time: " << total_response_time / float(number_of_queries) << " "
                 << "query process time: " << total_query_process_time / number_of_query_processings << " "
                 << "update response time: " << total_update_response_time / number_of_updates << " "
                 << "update process time: " << total_update_process_time / number_of_updates
-                << " overload: " << overload_flag
+//                << " overload: " << overload_flag
                 <<" query finish: "<<query_finish_rate
                 <<" update finish: "<<1.0-update_finish_rate
                 <<" schedule cost: "<<avg_offset
