@@ -1091,6 +1091,7 @@ public:
         int query_turn_flag = 0;
         int turn_num = 0;
         for (int i=0; i < full_task_list.size(); i++) {
+            int restart_flag = 0;
             if(i>=tp[0].threshold_number&&tp[0].run_time==0){
                 tp[0].restart_flag = 1;
                 cout<<"restart!"<<endl;
@@ -1098,6 +1099,7 @@ public:
             if(tp[0].restart_flag==1){
                 cout<<"start reinit!!!"<<endl<<endl<<endl;
                 task_reinit(0);
+                restart_flag = 1;
             }
             if(overload_flag) break;
             if(arrival_task_nodes[i]==-1) continue;
@@ -1112,6 +1114,10 @@ public:
             }
             long current_time=(end.tv_sec - global_start.tv_sec) * MICROSEC_PER_SEC + end.tv_usec - global_start.tv_usec;
             if(i==0) offset_time = current_time-issue_time;
+            if(restart_flag){
+                offset_time = current_time-issue_time;
+                restart_flag = 0;
+            }
             if(!VERIFY) {
 
                 do {
