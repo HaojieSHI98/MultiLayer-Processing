@@ -880,6 +880,7 @@ public:
             cout << "can't load queryfile!" << endl;
             vector<std::pair<double, int> > append_list = make_online_query_update_list_new(query_rate, insert_rate,delete_rate,simulation_time,
                                                                                         query_rate2, insert_rate2,delete_rate2,simulation_time2);
+            cout<<"Generated!"<<endl;
             std::ofstream queryfile_w;
             queryfile_w.open(input_parameters.input_data_dir + "query_" + std::to_string(query_rate) + "_" +
                              std::to_string(insert_rate) + "_" +

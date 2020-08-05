@@ -78,7 +78,7 @@ vector<std::pair<double, int> > make_online_query_update_list_new(double query_r
     delete_sequence.push_back(simulation_time1+simulation_time2+1);
 
     int query_index=0, insert_index=0, delete_index=0;
-
+    cout<<"first step"<<endl;
     vector<std::pair<double, int> > full_list;
     while(query_index<query_size|| insert_index<insert_size || delete_index<delete_size){
         if(query_sequence[query_index]<= insert_sequence[insert_index] &&
