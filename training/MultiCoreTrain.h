@@ -65,6 +65,11 @@ MultiTestParameter anaylizeParameters(){
     }
     multiTestPara.test_simulation_time = atoi(paras["-testtime"].c_str());// simulation time (seconds)
 
+    if(paras.find("-testtime2")==paras.end()){
+        multiTestPara.test_simulation_time2 = multiTestPara.test_simulation_time;
+    }
+    multiTestPara.test_simulation_time2 = atoi(paras["-testtime2"].c_str());// simulation time (seconds)
+
     if(paras.find("-querythread")==paras.end()){
         multiTestPara.query_thread = multiTestPara.num_total_threads-1;
     }
@@ -176,6 +181,18 @@ MultiTestParameter anaylizeParameters(){
     }
 
     multiTestPara.delete_rate=stod(paras["-delete"].c_str());
+
+    if(paras.find("-query2")==paras.end()){
+        multiTestPara.query_rate2 = multiTestPara.query_rate;
+    }else multiTestPara.query_rate2=stod(paras["-query2"].c_str());
+
+    if(paras.find("-insert2")==paras.end()){
+        multiTestPara.insert_rate2 = multiTestPara.insert_rate;
+    }else multiTestPara.insert_rate2=stod(paras["-insert2"].c_str());
+
+    if(paras.find("-delete2")==paras.end()){
+        multiTestPara.delete_rate2 = multiTestPara.delete_rate;
+    }else multiTestPara.delete_rate2=stod(paras["-delete2"].c_str());
 
     if(paras.find("-autoconf")==paras.end()){
         multiTestPara.auto_config=0;

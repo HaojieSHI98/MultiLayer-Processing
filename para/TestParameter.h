@@ -15,6 +15,7 @@ struct MultiTestParameter{
 	int num_threads_update;
 	int config_simulation_time;// simulation time (seconds)
     int test_simulation_time;
+    int test_simulation_time2;
 	string suffix;
 	string method_name;
 	int is_thresholded;
@@ -24,6 +25,9 @@ struct MultiTestParameter{
 	double query_rate;
 	double insert_rate;
 	double delete_rate;
+    double query_rate2;
+    double insert_rate2;
+    double delete_rate2;
     int auto_config;
     double pfail;
     int toain_type;

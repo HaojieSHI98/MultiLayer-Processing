@@ -385,6 +385,9 @@ int main(int argc, char *argv[]) {
         double query_rate = multiTestPara.query_rate/multiTestPara.layer;
         double insert_rate = multiTestPara.insert_rate;
         double delete_rate = multiTestPara.delete_rate;
+        double query_rate2 = multiTestPara.query_rate2/multiTestPara.layer;
+        double insert_rate2 = multiTestPara.insert_rate2;
+        double delete_rate2 = multiTestPara.delete_rate2;
         multiTestPara.num_total_threads/=multiTestPara.layer;
         double alpha = 1.0;
         int k = 10;
@@ -476,7 +479,8 @@ int main(int argc, char *argv[]) {
 
                     is_simulation = 1;
                     RandomTwoThreadPool_Control *tp = new RandomTwoThreadPool_Control( 0, test_n, multiTestPara.num_total_threads, alpha, k, fail_p,test_n,query_rate, insert_rate,
-                                                                                delete_rate, multiTestPara.test_simulation_time,multiTestPara.query_cost,
+                                                                                delete_rate, multiTestPara.test_simulation_time,query_rate2, insert_rate2,
+                                                                                       delete_rate2, multiTestPara.test_simulation_time2,multiTestPara.query_cost,
                                                                                 multiTestPara.insert_cost,multiTestPara.delete_cost,configurationId);
                     tp->run();
 

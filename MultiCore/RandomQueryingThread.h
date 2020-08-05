@@ -701,7 +701,11 @@ private:
     double query_rate;
     double insert_rate;
     double delete_rate;
+    double query_rate2;
+    double insert_rate2;
+    double delete_rate2;
     int simulation_time;
+    int simulation_time2;
     long total_queries_plan;
     long total_updates_plan;
     long total_queries_finished;
@@ -728,7 +732,8 @@ private:
 public:
     RandomTwoThreadPool_Control( int begin_node_val, int end_node_val, int num_threads_val, double alpha_val, int k_val, double fail_p_val,
                          int test_n_val, double query_rate_val, double insert_rate_val, double delete_rate_val, int simulation_time_val,
-                         int query_cost_val,int insert_cost_val,int delete_cost_val,int configurationId_val) {
+                                 double query_rate_val2, double insert_rate_val2, double delete_rate_val2, int simulation_time_val2,
+                                 int query_cost_val,int insert_cost_val,int delete_cost_val,int configurationId_val) {
         cout << "constructing RandomThreadPool..." << endl;
         for(int ti = 0;ti<2;ti++)
         {
@@ -756,6 +761,10 @@ public:
         query_rate = query_rate_val;
         insert_rate = insert_rate_val;
         delete_rate = delete_rate_val;
+        simulation_time2 = simulation_time_val2;
+        query_rate2 = query_rate_val2;
+        insert_rate2 = insert_rate_val2;
+        delete_rate2 = delete_rate_val2;
         test_n = test_n_val;
 //        if(DISPLAY)cout<<"num_threads_update:"<<num_threads_update<<" num_threads_query:"<<num_threads_query_val<<endl;
         alpha = alpha_val;
@@ -860,19 +869,24 @@ public:
         std::ifstream queryfile;
         queryfile.open(input_parameters.input_data_dir + "query_" + std::to_string(query_rate) + "_" +
                        std::to_string(insert_rate) + "_" +
-                       std::to_string(delete_rate) + "_" + std::to_string(simulation_time) + ".txt",
+                       std::to_string(delete_rate) + "_" + std::to_string(simulation_time) +
+                       "query2_" + std::to_string(query_rate2) + "_" +
+                       std::to_string(insert_rate2) + "_" +
+                       std::to_string(delete_rate2) + "_" +std::to_string(simulation_time2)+".txt",
                        std::ios_base::in);
         double f1;
         int f2;
         if (!queryfile.is_open()) {
             cout << "can't load queryfile!" << endl;
-            vector<std::pair<double, int> > append_list = make_online_query_update_list(query_rate, insert_rate,
-                                                                                        delete_rate,
-                                                                                        simulation_time);
+            vector<std::pair<double, int> > append_list = make_online_query_update_list_new(query_rate, insert_rate,delete_rate,simulation_time,
+                                                                                        query_rate2, insert_rate2,delete_rate2,simulation_time2);
             std::ofstream queryfile_w;
             queryfile_w.open(input_parameters.input_data_dir + "query_" + std::to_string(query_rate) + "_" +
                              std::to_string(insert_rate) + "_" +
-                             std::to_string(delete_rate) + "_" + std::to_string(simulation_time) + ".txt",
+                             std::to_string(delete_rate) + "_" + std::to_string(simulation_time) +
+                             "query2_" + std::to_string(query_rate2) + "_" +
+                             std::to_string(insert_rate2) + "_" +
+                             std::to_string(delete_rate2) + "_" +std::to_string(simulation_time2)+".txt",
                              std::ios_base::out);
             for (pair<double, int> &item : append_list) {
                 full_list.push_back(item);
@@ -1450,12 +1464,9 @@ public:
             gettimeofday(&global_start_2, NULL);
             estimate_mutex.unlock();
         }
-        cout<<"ok"<<endl;
         task_run();
-        cout<<"okk"<<endl;
         wait_for_finish(0);
         wait_for_finish(1);
-        cout<<"okkk"<<endl;
         struct timeval end_2;
         if(can_estimate)
             gettimeofday(&end_2, NULL);
