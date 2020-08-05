@@ -753,7 +753,8 @@ public:
             tp[ti].response_time = 0;
             tp[ti].restart_flag = 0;
         }
-        tp[1].threshold_number = 10000;
+        tp[1].threshold_number = 20000;
+        tp[0].threshold_number = 20000;
         configurationId = configurationId_val;
         begin_node = begin_node_val;
         end_node = end_node_val;
@@ -1090,13 +1091,13 @@ public:
         int query_turn_flag = 0;
         int turn_num = 0;
         for (int i=0; i < full_task_list.size(); i++) {
-            if(i>=tp[1].threshold_number&&tp[1].run_time==0){
-                tp[1].restart_flag = 1;
+            if(i>=tp[0].threshold_number&&tp[0].run_time==0){
+                tp[0].restart_flag = 1;
                 cout<<"restart!"<<endl;
             }
-            if(tp[1].restart_flag==1){
+            if(tp[0].restart_flag==1){
                 cout<<"start reinit!!!"<<endl<<endl<<endl;
-                task_reinit(1);
+                task_reinit(0);
             }
             if(overload_flag) break;
             if(arrival_task_nodes[i]==-1) continue;
