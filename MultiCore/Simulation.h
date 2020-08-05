@@ -50,20 +50,24 @@ vector<std::pair<double, int> > make_online_query_update_list_new(double query_r
     vector<double> insert_sequence = poisson(insert_rate1, simulation_time1);
     vector<double> delete_sequence = poisson(delete_rate1, simulation_time1);
 
-    query_sequence.push_back(simulation_time1+1);
-    insert_sequence.push_back(simulation_time1+1);
-    delete_sequence.push_back(simulation_time1+1);
-
+//    query_sequence.push_back(simulation_time1+1);
+//    insert_sequence.push_back(simulation_time1+1);
+//    delete_sequence.push_back(simulation_time1+1);
     vector<double> query_sequence2 = poisson(query_rate2, simulation_time2);
     vector<double> insert_sequence2 = poisson(insert_rate2, simulation_time2);
     vector<double> delete_sequence2 = poisson(delete_rate2, simulation_time2);
     for(int j=0;j<query_sequence2.size();j++)
     {
         query_sequence2[j] += simulation_time1;
+    }
+    for(int j=0;j<insert_sequence2.size();j++)
+    {
         insert_sequence2[j] += simulation_time1;
+    }
+    for(int j=0;j<delete_sequence2.size();j++)
+    {
         delete_sequence2[j] += simulation_time1;
     }
-
 
     query_sequence.insert(query_sequence.end(),query_sequence2.begin(),query_sequence2.end());
     insert_sequence.insert(insert_sequence.end(),insert_sequence2.begin(),insert_sequence2.end());
@@ -78,7 +82,6 @@ vector<std::pair<double, int> > make_online_query_update_list_new(double query_r
     delete_sequence.push_back(simulation_time1+simulation_time2+1);
 
     int query_index=0, insert_index=0, delete_index=0;
-    cout<<"first step"<<endl;
     vector<std::pair<double, int> > full_list;
     while(query_index<query_size|| insert_index<insert_size || delete_index<delete_size){
         if(query_sequence[query_index]<= insert_sequence[insert_index] &&
