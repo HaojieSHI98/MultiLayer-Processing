@@ -1276,6 +1276,14 @@ public:
         set_stop(ti);
         join(ti);
         update_query_time();
+        long total_response_time = tp[0].response_time+tp[1].response_time;
+        number_of_queries = tp[0].query_num+tp[1].query_num;
+        cout<<"toal response time 0 :"<<tp[0].response_time<<" number of queries 0: "<<tp[0].query_num<<endl;
+        cout<<"toal response time 1 :"<<tp[1].response_time<<" number of queries 1: "<<tp[1].query_num<<endl;
+        cout << "expected response time: " << total_response_time / float(number_of_queries) << " seconds" << endl;
+        cout << "total_response_time: " << total_response_time << endl;
+        cout << "number_of_queries: " << number_of_queries << endl;
+
         tp[ti].threadpool_id=ti;
         tp[ti].num_threads_query = tp[tj].num_threads_query;
         tp[ti].num_thread_update = tp[tj].num_thread_update;
@@ -1397,7 +1405,7 @@ public:
         number_of_queries = tp[0].query_num+tp[1].query_num;
         cout<<"toal response time 0 :"<<tp[0].response_time<<" number of queries 0: "<<tp[0].query_num<<endl;
         cout<<"toal response time 1 :"<<tp[1].response_time<<" number of queries 1: "<<tp[1].query_num<<endl;
-        cout << "expected response time: " << total_response_time / number_of_queries << " seconds" << endl;
+        cout << "expected response time: " << total_response_time / float(number_of_queries) << " seconds" << endl;
         cout << "total_response_time: " << total_response_time << endl;
         cout << "number_of_queries: " << number_of_queries << endl;
         cout << "expected_update_response_time: " << total_update_response_time / number_of_updates << endl;
