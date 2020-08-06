@@ -1098,7 +1098,7 @@ public:
 
             int restart_flag = 0;
             int restart_pool = -1;
-            if(issue_time>=multiTestPara.config_simulation_time){
+            if(issue_time>=multiTestPara.config_simulation_time&&tp[0].run_time==0&&tp[1].run_time==0){
                 update_query_time();
                 clear_query_time();
                 if(tp[0].response_time>tp[1].response_time)
