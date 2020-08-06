@@ -1095,7 +1095,7 @@ public:
             if(arrival_task_nodes[i]==-1) continue;
             pair<double, int> &event = full_task_list[i];
             long issue_time = floor(event.first * MICROSEC_PER_SEC);
-
+            cout<<"issue_time:"<<issue_time<<endl;
             int restart_flag = 0;
             int restart_pool = -1;
             if(issue_time>=multiTestPara.config_simulation_time&&tp[0].run_time==0&&tp[1].run_time==0){
