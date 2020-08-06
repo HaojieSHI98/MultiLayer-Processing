@@ -1091,20 +1091,30 @@ public:
         int query_turn_flag = 0;
         int turn_num = 0;
         for (int i=0; i < full_task_list.size(); i++) {
-            int restart_flag = 0;
-            if(i>=tp[1].threshold_number&&tp[1].run_time==0){
-                tp[1].restart_flag = 1;
-                cout<<"restart!"<<endl;
-            }
-            if(tp[1].restart_flag==1){
-                cout<<"start reinit!!!"<<endl<<endl<<endl;
-                task_reinit(1);
-                restart_flag = 1;
-            }
             if(overload_flag) break;
             if(arrival_task_nodes[i]==-1) continue;
             pair<double, int> &event = full_task_list[i];
             long issue_time = floor(event.first * MICROSEC_PER_SEC);
+
+            int restart_flag = 0;
+            int restart_pool = -1;
+            if(issue_time>=multiTestPara.config_simulation_time){
+                update_query_time();
+                clear_query_time();
+                if(tp[0].response_time>tp[1].response_time)
+                    restart_pool = 0;
+                else restart_pool = 1;
+                tp[restart_pool].restart_flag = 1;
+                cout<<"restart!"<<endl;
+                task_reinit(restart_pool);
+                restart_flag = 1;
+            }
+//            if(tp[1].restart_flag==1){
+//                cout<<"start reinit!!!"<<endl<<endl<<endl;
+//                task_reinit(1);
+//                restart_flag = 1;
+//            }
+
             if(can_estimate)
                 gettimeofday(&end, NULL);
             else{
