@@ -690,6 +690,8 @@ typedef struct {
     double response_time;
     int query_num;
     int restart_flag;
+    double response_time_first;
+    int query_num_first;
 
 }OneThreadPool;
 
@@ -1101,11 +1103,11 @@ public:
             if(event.first>=multiTestPara.config_simulation_time&&tp[0].run_time==0&&tp[1].run_time==0){
                 update_query_time();
                 clear_query_time();
-                if(tp[0].response_time>tp[1].response_time)
+                if(tp[0].response_time*tp[1].query_num>tp[1].response_time*tp[0].query_num)
                     restart_pool = 0;
                 else restart_pool = 1;
                 tp[restart_pool].restart_flag = 1;
-                cout<<"restart!"<<endl;
+                cout<<"restart pool"<<restart_pool<<"!!"<<endl;
                 task_reinit(restart_pool);
                 restart_flag = 1;
             }
@@ -1317,7 +1319,10 @@ public:
         cout << "expected response time: " << total_response_time / float(number_of_queries) << " seconds" << endl;
         cout << "total_response_time: " << total_response_time << endl;
         cout << "number_of_queries: " << number_of_queries << endl;
-
+        tp[0].response_time_first = tp[0].response_time;
+        tp[0].query_num_first = tp[0].query_num;
+        tp[1].response_time_first = tp[1].response_time;
+        tp[1].query_num_first = tp[1].query_num;
         tp[ti].threadpool_id=ti;
         tp[ti].num_threads_query = tp[tj].num_threads_query;
         tp[ti].num_thread_update = tp[tj].num_thread_update;
@@ -1345,10 +1350,10 @@ public:
         tp[ti].rand_idx_update = 0;
         tp[ti].restart_flag = 0;
         tp[ti]._pool.clear();
-        cout<<"init step1"<<endl;
+//        cout<<"init step1"<<endl;
 
         globalThreadVar[ti] = new GlobalThreadVar*[tp[ti].num_threads_query];
-        cout<<"init step2"<<endl;
+//        cout<<"init step2"<<endl;
         int k_star = compute_k_star(k, tp[ti].num_thread_update, alpha, fail_p);
         for(int j =0;j<tp[ti].num_threads_query;j++) {
             globalThreadVar[ti][j] = new GlobalThreadVar();
@@ -1356,7 +1361,7 @@ public:
 //            cout<<"query:"<<j<<" time:"<<globalThreadVar[j]->total_query_time<<" num:"<<globalThreadVar[j]->number_of_queries<<endl;
             for (int i = 0; i <= QUERY_ID_FOLD; i++) globalThreadVar[ti][j]->ran_threshold.push_back(INT_MAX);
         }
-        cout<<"init step3"<<endl;
+//        cout<<"init step3"<<endl;
         if(!multiTestPara.is_single_aggregate)
             tp[ti]._aggregate_thread = new RandomAggregateThread* [tp[ti].num_threads_query];
         if(multiTestPara.is_single_aggregate){
@@ -1447,8 +1452,14 @@ public:
         cout << "expected_update_process_time: " << total_update_process_time / number_of_updates << endl;
         std::ofstream outfile;
 
+
         outfile.open(input_parameters.output_data_dir + "stone_outfile1" + (multiTestPara.suffix), std::ios_base::app);
         outfile << endl
+                <<" toal response time 0 first: "<<tp[0].response_time_first<<" number of queries 0: "<<tp[0].query_num_first
+                <<" toal response time 1 first: "<<tp[1].response_time_first<<" number of queries 1: "<<tp[1].query_num_first
+                <<" query response time first:"<<(tp[0].response_time_first+tp[1].response_time_first)/float(tp[0].query_num_first+tp[1].query_num_first)
+                <<" toal response time 0 :"<<tp[0].response_time<<" number of queries 0: "<<tp[0].query_num
+                <<" toal response time 1 :"<<tp[1].response_time<<" number of queries 1: "<<tp[1].query_num
 //                << network_name<<" "
 //                << "init: "<<multiTestPara.init_objects<<" "
 //                << multiTestPara.method_name << " config simulation time: "
