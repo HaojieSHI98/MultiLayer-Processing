@@ -692,6 +692,7 @@ typedef struct {
     int restart_flag;
     double response_time_first;
     int query_num_first;
+    int ontask_num;
 
 }OneThreadPool;
 
@@ -1228,13 +1229,32 @@ public:
                 }
             }
             if (event.second == QUERY) {
+                for(int qid =0;qid<2;qid++)
+                {
+                    tp[qid].ontask_num = 0;
+                    for(int z = 0;z < tp[qid].num_threads_query;z++)
+                    {
+                        for(int q_id = 0;q_id <tp[qid].num_thread_update;q_id++)
+                        {
+                            int pool_index=z * tp[qid].num_thread_update + q_id;
+                            int num_queries = tp[qid]._pool[pool_index]->get_num_queries_in_queue();
+                            int num_inserts = tp[qid]._pool[pool_index]->get_num_inserts_in_queue();
+                            int num_deletes = tp[qid]._pool[pool_index]->get_num_deletes_in_queue();
+                            tp[qid].ontask_num+= num_queries+num_inserts+num_deletes;
+                        }
+                    }
+                }
+                if(tp[0].ontask_num>tp[1].ontask_num)
+                {
+                    query_turn_flag = 1;
+                }else query_turn_flag = 0;
 //                int ti = query_turn_flag;
 //                turn_num ++;
 //                task_turn_mutex.lock();
 //                if(turn_num%100==0)
 //                {
-                    query_turn_flag = 1-query_turn_flag;
-////                    cout<<"pool "<<query_turn_flag<<endl;
+//                    query_turn_flag = 1-query_turn_flag;
+//                    cout<<"pool "<<query_turn_flag<<endl;
 //                }
 //                task_turn_mutex.unlock();
                 int ti = query_turn_flag;
@@ -1454,7 +1474,7 @@ public:
         std::ofstream outfile;
 
 
-        outfile.open(input_parameters.output_data_dir + "stone_outfile1" + (multiTestPara.suffix), std::ios_base::app);
+        outfile.open(input_parameters.output_data_dir + "stone_outfile_auto" + (multiTestPara.suffix), std::ios_base::app);
         outfile << endl
                 <<" toal response time 0 first: "<<tp[0].response_time_first<<" number of queries 0: "<<tp[0].query_num_first
                 <<" toal response time 1 first: "<<tp[1].response_time_first<<" number of queries 1: "<<tp[1].query_num_first
