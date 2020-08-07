@@ -318,8 +318,8 @@ int chooseSingleTOAINConfiguration(double fail_p, double alpha, int k,
         else{
             total_response_time += globalThreadVar[0][0]->total_query_time;
             number_of_queries += globalThreadVar[0][0]->number_of_queries;
-
         }
+
         cout << "expected response time: " << total_response_time / number_of_queries << " seconds" << endl;
         cout << "total_response_time: " << total_response_time << endl;
         cout << "update response time: "<<total_update_response_time/ number_of_updates<<endl;
@@ -333,6 +333,7 @@ int chooseSingleTOAINConfiguration(double fail_p, double alpha, int k,
             smallest_avg_response_time =  total_response_time / number_of_queries;
             best_conf=i;
         }
+
         total_response_time = 0.0;
         number_of_queries = 1;
         total_update_response_time = 0.0;
