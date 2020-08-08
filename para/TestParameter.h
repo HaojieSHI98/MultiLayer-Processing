@@ -18,6 +18,7 @@ struct MultiTestParameter{
     int test_simulation_time2;
 	string suffix;
 	string method_name;
+	string configstr;
 	int is_thresholded;
 	string parmethod;
 	int	is_single_aggregate;

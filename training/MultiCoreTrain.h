@@ -59,6 +59,14 @@ MultiTestParameter anaylizeParameters(){
     }
     multiTestPara.config_simulation_time = atoi(paras["-configtime"].c_str());// simulation time (seconds)
 
+    if(paras.find("-configstr")==paras.end()){
+        cout<<"miss configstr parameters!"<<endl;
+        stop_here();
+    }
+    multiTestPara.configstr = paras["-configstr"].c_str();// simulation time (seconds)
+    cout<<"Config String!!!"<<endl;
+    cout<<multiTestPara.configstr<<endl<<endl;
+
     if(paras.find("-testtime")==paras.end()){
         cout<<"miss testtime parameters!"<<endl;
         stop_here();
