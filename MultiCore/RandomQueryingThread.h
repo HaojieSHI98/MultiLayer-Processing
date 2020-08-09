@@ -860,7 +860,7 @@ public:
         int f2;
         if (!queryfile.is_open()) {
             cout << "can't load queryfile!" << endl;
-            vector<std::pair<double, int> > append_list = make_online_query_update_list_str(configstr);
+            vector<std::pair<double, int> > append_list = make_online_query_update_list_str(configstr,multiTestPara.init_objects,multiTestPara.layer);
             cout<<"Generated!"<<endl;
             std::ofstream queryfile_w;
             queryfile_w.open(queryfile_name,std::ios_base::out);
