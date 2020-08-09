@@ -701,20 +701,12 @@ private:
     std::thread _main_thread;
     int begin_node;
     int end_node;
-    double query_rate;
-    double insert_rate;
-    double delete_rate;
-    double query_rate2;
-    double insert_rate2;
-    double delete_rate2;
-    int simulation_time;
-    int simulation_time2;
     long total_queries_plan;
     long total_updates_plan;
     long total_queries_finished;
     long total_updates_finished;
     int* car_nodes;
-
+    string configstr;
     vector<std::pair<double, int> > full_task_list;
     vector<int> arrival_task_nodes;
     int query_cost;
@@ -734,9 +726,7 @@ private:
 
 public:
     RandomTwoThreadPool_Control( int begin_node_val, int end_node_val, int num_threads_val, double alpha_val, int k_val, double fail_p_val,
-                         int test_n_val, double query_rate_val, double insert_rate_val, double delete_rate_val, int simulation_time_val,
-                                 double query_rate_val2, double insert_rate_val2, double delete_rate_val2, int simulation_time_val2,
-                                 int query_cost_val,int insert_cost_val,int delete_cost_val,int configurationId_val) {
+                                int test_n_val, string configstr_val,int query_cost_val,int insert_cost_val,int delete_cost_val,int configurationId_val) {
         cout << "constructing RandomThreadPool..." << endl;
         for(int ti = 0;ti<2;ti++)
         {
@@ -761,14 +751,7 @@ public:
         configurationId = configurationId_val;
         begin_node = begin_node_val;
         end_node = end_node_val;
-        simulation_time = simulation_time_val;
-        query_rate = query_rate_val;
-        insert_rate = insert_rate_val;
-        delete_rate = delete_rate_val;
-        simulation_time2 = simulation_time_val2;
-        query_rate2 = query_rate_val2;
-        insert_rate2 = insert_rate_val2;
-        delete_rate2 = delete_rate_val2;
+        configstr = configstr_val;
         test_n = test_n_val;
 //        if(DISPLAY)cout<<"num_threads_update:"<<num_threads_update<<" num_threads_query:"<<num_threads_query_val<<endl;
         alpha = alpha_val;
@@ -871,19 +854,13 @@ public:
         }
 
         std::ifstream queryfile;
-        string queryfile_name = input_parameters.input_data_dir + "query_" + std::to_string(query_rate) + "_" +
-                                std::to_string(insert_rate) + "_" +
-                                std::to_string(delete_rate) + "_" + std::to_string(simulation_time) +
-                                "query2_" + std::to_string(query_rate2) + "_" +
-                                std::to_string(insert_rate2) + "_" +
-                                std::to_string(delete_rate2) + "_" +std::to_string(simulation_time2)+".txt";
+        string queryfile_name = input_parameters.input_data_dir + "query_" + configstr+".txt";
         queryfile.open(queryfile_name,std::ios_base::in);
         double f1;
         int f2;
         if (!queryfile.is_open()) {
             cout << "can't load queryfile!" << endl;
-            vector<std::pair<double, int> > append_list = make_online_query_update_list_new(query_rate, insert_rate,delete_rate,simulation_time,
-                                                                                        query_rate2, insert_rate2,delete_rate2,simulation_time2);
+            vector<std::pair<double, int> > append_list = make_online_query_update_list_str(configstr);
             cout<<"Generated!"<<endl;
             std::ofstream queryfile_w;
             queryfile_w.open(queryfile_name,std::ios_base::out);
@@ -908,12 +885,7 @@ public:
 
 //        vector<int> arrival_nodes;
         std::ifstream nodefile;
-        string nodefile_name = input_parameters.input_data_dir + "node_" + std::to_string(query_rate) + "_" +
-                               std::to_string(insert_rate) + "_" +
-                               std::to_string(delete_rate) + "_" + std::to_string(simulation_time) +
-                               "query2_" + std::to_string(query_rate2) + "_" +
-                               std::to_string(insert_rate2) + "_" +
-                               std::to_string(delete_rate2) + "_" +std::to_string(simulation_time2)+".txt";
+        string nodefile_name = input_parameters.input_data_dir + "node_" +configstr+".txt";
         nodefile.open(nodefile_name, std::ios_base::in);
 
         if(!nodefile.is_open())
@@ -1516,10 +1488,7 @@ public:
 //                << multiTestPara.test_simulation_time << " configure: "
 //                << configurationId << " threshold: " << multiTestPara.is_thresholded << " fail_p: " << fail_p
 //                << " "
-                << "query "<<query_rate << " " << insert_rate
-                <<" " << delete_rate<< " "<<multiTestPara.test_simulation_time
-                <<" query2 "<<query_rate2 << " " << insert_rate2
-                <<" " << delete_rate2<< " "<<multiTestPara.test_simulation_time2
+                << "query "<<configstr
 //                << " " << delete_rate << " " << multiTestPara.method_name << " singleAggregate: "
 //                << multiTestPara.is_single_aggregate << " "
 //                << multiTestPara.num_threads_update
