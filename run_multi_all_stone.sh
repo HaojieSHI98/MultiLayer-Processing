@@ -14,6 +14,8 @@ layer=$7
 
 display=$8
 
+configstrs=$9
+
 echo $quratio
 
 echo $cores
@@ -48,7 +50,7 @@ echo $insertnum2
 echo $deletenum2
 
 
-/home/siqiang/MPR/TOAIN/TOAIN -multicore $1 -part 1 -configtime 10 -testtime 20 -testtime2 20 -method dijk -threshold 0 -parmethod rand -out _NY_${cores}_${objects}_${updateratio}_${quratio}_${updateratio2}_${quratio2}_time_10_20 -single_aggr 1 -query $querynum -insert $insertnum -delete $deletenum -query2 $querynum2 -insert2 $insertnum2 -delete2 $deletenum2 -init $objects -layer 1 -toaintype q -network NY -DISPLAY $6
+/home/siqiang/MPR/TOAIN/TOAIN -multicore $1 -part 1 -configtime 10 -testtime 20 -testtime2 20 -method dijk -threshold 0 -parmethod rand -out _NY_${cores}_${objects}_${updateratio}_${quratio}_${updateratio2}_${quratio2}_time_10_20 -single_aggr 1 -query $querynum -insert $insertnum -delete $deletenum -query2 $querynum2 -insert2 $insertnum2 -delete2 $deletenum2 -init $objects -layer 1 -toaintype q -network NY -DISPLAY $6 -configstr $9
 #/home/siqiang/MPR/TOAIN/TOAIN -multicore $1 -part 1 -configtime 10 -testtime 20 -testtime2 20 -method dijk -threshold 0 -parmethod rand -out _NY_${cores}_${objects}_${updateratio}_${quratio}_${updateratio2}_${quratio2}_time_10_20 -single_aggr 1 -query $querynum -insert $insertnum -delete $deletenum -query2 $querynum2 -insert2 $insertnum2 -delete2 $deletenum2 -init $objects -layer 1 -toaintype q -network NY -DISPLAY $6
 #/home/siqiang/MPR/TOAIN/TOAIN -multicore $1 -part 1 -configtime 10 -testtime 20 -testtime2 20 -method dijk -threshold 0 -parmethod rand -out _NY_${cores}_${objects}_${updateratio}_${quratio}_${updateratio2}_${quratio2}_time_10_20 -single_aggr 1 -query $querynum -insert $insertnum -delete $deletenum -query2 $querynum2 -insert2 $insertnum2 -delete2 $deletenum2 -init $objects -layer 1 -toaintype q -network NY -DISPLAY $6
 #/home/siqiang/MPR/TOAIN/TOAIN -multicore $1 -part 1 -configtime 10 -testtime 20 -testtime2 20 -method dijk -threshold 0 -parmethod rand -out _NY_${cores}_${objects}_${updateratio}_${quratio}_${updateratio2}_${quratio2}_time_10_20 -single_aggr 1 -query $querynum -insert $insertnum -delete $deletenum -query2 $querynum2 -insert2 $insertnum2 -delete2 $deletenum2 -init $objects -layer 1 -toaintype q -network NY -DISPLAY $6
