@@ -1355,6 +1355,7 @@ public:
         set_stop(ti);
         join(ti);
         update_query_time();
+        observer.task_list.clear();
         long total_response_time = tp[0].response_time+tp[1].response_time;
         number_of_queries = tp[0].query_num+tp[1].query_num;
         cout<<"toal response time 0 :"<<tp[0].response_time<<" number of queries 0: "<<tp[0].query_num<<endl;
