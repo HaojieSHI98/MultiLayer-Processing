@@ -1110,7 +1110,7 @@ public:
             if(overload_flag) break;
             if(arrival_task_nodes[i]==-1) continue;
             pair<double, int> &event = full_task_list[i];
-            if(i%200000==0) update_param();
+//            if(i%200000==0) update_param();
             long issue_time = floor(event.first * MICROSEC_PER_SEC);
 //            cout<<"issue_time:"<<issue_time<<endl;
             int restart_flag = 0;
@@ -1166,12 +1166,12 @@ public:
                 issue_time = current_time;
             }
 
-            if(observer.task_list.size()>=multiTestPara.init_objects*NUM_OBV_T)
-            {
-                observer.task_list.erase(observer.task_list.begin(),observer.task_list.begin()+1);
-            }
-            if(event.second==QUERY) observer.task_list.push_back(make_pair(current_time,QUERY));
-            else observer.task_list.push_back(make_pair(current_time,1-QUERY));
+//            if(observer.task_list.size()>=multiTestPara.init_objects*NUM_OBV_T)
+//            {
+//                observer.task_list.erase(observer.task_list.begin(),observer.task_list.begin()+1);
+//            }
+//            if(event.second==QUERY) observer.task_list.push_back(make_pair(current_time,QUERY));
+//            else observer.task_list.push_back(make_pair(current_time,1-QUERY));
 
 
 //            cout<<"step1: event-"<<event.second<<endl;
