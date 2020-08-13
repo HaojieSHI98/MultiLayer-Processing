@@ -1166,12 +1166,12 @@ public:
                 issue_time = current_time;
             }
 
-            if(observer.task_list.size()>=multiTestPara.init_objects*NUM_OBV_T)
-            {
-                observer.task_list.erase(observer.task_list.begin(),observer.task_list.begin()+1);
-            }
-            if(event.second==QUERY) observer.task_list.push_back(make_pair(current_time,QUERY));
-            else observer.task_list.push_back(make_pair(current_time,1-QUERY));
+//            if(observer.task_list.size()>=multiTestPara.init_objects*NUM_OBV_T)
+//            {
+//                observer.task_list.erase(observer.task_list.begin(),observer.task_list.begin()+1);
+//            }
+//            if(event.second==QUERY) observer.task_list.push_back(make_pair(current_time,QUERY));
+//            else observer.task_list.push_back(make_pair(current_time,1-QUERY));
 
 
 //            cout<<"step1: event-"<<event.second<<endl;
