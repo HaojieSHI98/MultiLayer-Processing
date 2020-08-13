@@ -52,9 +52,25 @@ double PI = 3.1415926535;
 #define NW_OBJECTS 13000
 #define ZIPF_OBJECT 0
 #define ZIPF_QUERY 0
+#define NUM_OBV_T 10
 //#define DISPLAY 0
 //new
+typedef struct{
+    double query_rate=0;
+    double update_rate=0;
+    vector<pair<double,int>> task_list;
+    double ratio_x[2]={0};
+    vector<double> ts[2];
+    vector<double> ta[2];
+    vector<double> tq_ex[2];
+    vector<double> tu_ex[2];
+    double tq[2]={0};
+    double tu[2]={0};
+    double Vq[2]={0};
+    double Vu[2]={0};
+}Observer;
 
+Observer observer;
 int DISPLAY = 1;
 //
 int NEIGHBOR_SEARCH=0;

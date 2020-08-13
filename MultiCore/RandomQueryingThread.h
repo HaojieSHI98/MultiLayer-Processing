@@ -1088,7 +1088,19 @@ public:
             }
         }
     }
-
+    void update_param(void){
+        observer.query_rate = 0;
+        observer.update_rate = 0;
+        for(int s_i = 0;s_i<observer.task_list.size();s_i++)
+        {
+            if(observer.task_list[s_i].second == QUERY) observer.query_rate++;
+            else observer.update_rate++;
+        }
+        double time_val = (observer.task_list.end()->first- observer.task_list[0].first)/MICROSEC_PER_SEC;
+        observer.query_rate = observer.query_rate/time_val;
+        observer.update_rate = observer.update_rate/time_val;
+        cout<<"query rate : "<<observer.query_rate<<"update rate : "<<observer.update_rate<<endl<<endl<<endl;
+    }
     void task_run(){
         struct timeval end;
         long offset_time;
@@ -1098,6 +1110,7 @@ public:
             if(overload_flag) break;
             if(arrival_task_nodes[i]==-1) continue;
             pair<double, int> &event = full_task_list[i];
+            if(i%200000==0) update_param();
             long issue_time = floor(event.first * MICROSEC_PER_SEC);
 //            cout<<"issue_time:"<<issue_time<<endl;
             int restart_flag = 0;
@@ -1152,6 +1165,15 @@ public:
                 } while (true);
                 issue_time = current_time;
             }
+
+            if(observer.task_list.size()>=multiTestPara.init_objects*NUM_OBV_T)
+            {
+                observer.task_list.erase(observer.task_list.begin(),observer.task_list.begin()+1);
+            }
+            if(event.second==QUERY) observer.task_list.push_back(make_pair(current_time,QUERY));
+            else observer.task_list.push_back(make_pair(current_time,1-QUERY));
+
+
 //            cout<<"step1: event-"<<event.second<<endl;
             // if insert
             if (event.second == INSERT) {
