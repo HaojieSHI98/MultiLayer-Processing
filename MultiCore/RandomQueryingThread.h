@@ -922,6 +922,14 @@ public:
         init_arrival_node.assign(arrival_nodes.begin(),arrival_nodes.begin()+init_objects);
         cout << "full_list made..." << endl;
         cout << "full list size: " << full_list.size() << endl;
+
+        int query_n = 0,update_n=0;
+        for(int f_i=0;f_i<full_task_list.size();f_i++)
+        {
+            if(full_task_list[f_i].second==QUERY) query_n++;
+            else update_n++;
+        }
+        cout<<"full task list query: "<<query_n<<" update:"<<update_n<<endl;
         for(int ti = 0;ti<2;ti++)
         {
             tp[ti].init_list.assign(init_list.begin(),init_list.end());
@@ -1101,7 +1109,7 @@ public:
         double time_val = (observer.time_list.end()-observer.time_list.begin());
 //        observer.update_rate = observer.update_rate/time_val;
 //        observer.query_rate = observer.query_rate/time_val;
-        cout<<"update_rate:"<<observer.update_rate<<" query_rate:"<<observer.query_rate<<"time_val"<<time_val<<endl<<endl;
+        cout<<"update_rate:"<<observer.update_rate<<" query_rate:"<<observer.query_rate<<"time_val:"<<time_val<<endl<<endl;
     }
     void task_run(){
         struct timeval end;
