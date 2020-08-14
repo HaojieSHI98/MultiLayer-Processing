@@ -885,7 +885,7 @@ public:
 
 //        vector<int> arrival_nodes;
         std::ifstream nodefile;
-        string nodefile_name = input_parameters.input_data_dir + "node_" +configstr+".txt";
+        string nodefile_name = input_parameters.input_data_dir + "nodes_" +configstr+".txt";
         nodefile.open(nodefile_name, std::ios_base::in);
 
         if(!nodefile.is_open())
@@ -900,31 +900,7 @@ public:
                  nodesfile_w<<arrival_nodes[node_i]<<endl;
              }
             nodesfile_w.close();
-            nodesfile_m.open(nodefile_name, std::ios_base::in);
-            vector<int> nodes_new;
-            while(!nodesfile_m.eof())
-            {
-                int f3;
-                nodesfile_m >> f3;
-//            cout<<f3<<endl;
-                nodes_new.push_back(f3);
-            }
-            nodes_new.pop_back();
-            nodesfile_m.close();
-            if(nodes_new.size()!=arrival_nodes.size()){
-                cout<<"size not equal!!!"<<endl<<endl<<endl;
-                cout<<"size of nodes_new:"<<nodes_new.size()<<" else: "<<arrival_nodes.size()<<endl;
-                cout<<"first:"<<nodes_new[0]<<" - "<<arrival_nodes[0]<<endl;
-                cout<<"end:"<< nodes_new[nodes_new.size()-1]<<" - "<<arrival_nodes[arrival_nodes.size()-1]<<endl;
-                cout<<"end -1 " << nodes_new[nodes_new.size()-2]<<endl;
-            }
-                for(int n_i = 0;n_i<nodes_new.size();n_i++)
-                {
-                    if(nodes_new[n_i]!=arrival_nodes[n_i])
-                    {
-                        cout<<"not equal!"<<" num: "<<n_i<<" "<<nodes_new[n_i]<<" - "<<arrival_nodes[n_i]<<endl;
-                    }
-                }
+
         } else{
             while(!nodefile.eof())
             {
@@ -1193,12 +1169,12 @@ public:
                 issue_time = current_time;
             }
 
-//            if(observer.task_list.size()>=multiTestPara.init_objects*NUM_OBV_T)
-//            {
-//                observer.task_list.erase(observer.task_list.begin(),observer.task_list.begin()+1);
-//            }
-//            if(event.second==QUERY) observer.task_list.push_back(make_pair(current_time,QUERY));
-//            else observer.task_list.push_back(make_pair(current_time,1-QUERY));
+            if(observer.task_list.size()>=multiTestPara.init_objects*NUM_OBV_T)
+            {
+                observer.task_list.erase(observer.task_list.begin(),observer.task_list.begin()+1);
+            }
+            if(event.second==QUERY) observer.task_list.push_back(make_pair(current_time,QUERY));
+            else observer.task_list.push_back(make_pair(current_time,1-QUERY));
 
 
 //            cout<<"step1: event-"<<event.second<<endl;
