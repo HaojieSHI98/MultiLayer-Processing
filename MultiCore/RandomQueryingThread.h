@@ -1099,6 +1099,7 @@ public:
             if(observer.task_list[s_i].second == QUERY) observer.query_rate++;
             else observer.update_rate++;
         }
+        cout<<"ok1"<<endl;
         double time_val = (observer.task_list.end()->first- observer.task_list[0].first)/MICROSEC_PER_SEC;
         observer.query_rate = observer.query_rate/time_val;
         observer.update_rate = observer.update_rate/time_val;
