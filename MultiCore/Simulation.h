@@ -137,7 +137,7 @@ vector<std::pair<double, int> > make_online_query_update_list_str(string configs
         int query_ratio = atoi(configstring[j_c].c_str());
         int update_ratio = atoi(configstring[j_c+1].c_str());
         int test_time = atoi(configstring[j_c+2].c_str());
-        int updatenum = objectnum*query_ratio;
+        int updatenum = objectnum*update_ratio;
         int insertnum = updatenum/2;
         int deletenum = updatenum/2;
         int querynum = objectnum*query_ratio/layer;

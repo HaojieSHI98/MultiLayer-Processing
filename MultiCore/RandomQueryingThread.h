@@ -929,7 +929,7 @@ public:
             if(full_task_list[f_i].second==QUERY) query_n++;
             else update_n++;
         }
-        cout<<"full task list query: "<<query_n<<" update:"<<update_n<<endl;
+        cout<<"full task list query: "<<query_n<<" update:"<<update_n<<endl<<endl<<endl;
         for(int ti = 0;ti<2;ti++)
         {
             tp[ti].init_list.assign(init_list.begin(),init_list.end());
