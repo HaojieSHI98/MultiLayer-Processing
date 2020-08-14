@@ -1100,7 +1100,7 @@ public:
             else observer.update_rate++;
         }
         cout<<"ok1"<<endl;
-        double time_val = (observer.task_list.end()->first- observer.task_list[0].first)/MICROSEC_PER_SEC;
+        double time_val = (observer.task_list[observer.task_list.size()-1].first- observer.task_list[0].first)/MICROSEC_PER_SEC;
         observer.query_rate = observer.query_rate/time_val;
         observer.update_rate = observer.update_rate/time_val;
         cout<<"query rate : "<<observer.query_rate<<"update rate : "<<observer.update_rate<<endl<<endl<<endl;
@@ -1114,7 +1114,7 @@ public:
             if(overload_flag) break;
             if(arrival_task_nodes[i]==-1) continue;
             pair<double, int> &event = full_task_list[i];
-//            if(i%200000==0) update_param();
+            if(i%200000==0) update_param();
             long issue_time = floor(event.first * MICROSEC_PER_SEC);
 //            cout<<"issue_time:"<<issue_time<<endl;
             int restart_flag = 0;
