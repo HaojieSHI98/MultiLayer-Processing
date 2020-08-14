@@ -892,7 +892,8 @@ public:
         {
             cout<<"can't load nodefile!"<<endl;
             arrival_nodes = generate_arrival_nodes(full_list, begin_node, end_node);
-            std::ofstream nodesfile_w,nodesfile_m;
+            std::ofstream nodesfile_w;
+            std::ifstream nodesfile_m;
             nodesfile_w.open(nodefile_name, std::ios_base::out);
              for (int node_i=0;node_i<arrival_nodes.size();node_i++)
              {
@@ -904,7 +905,7 @@ public:
             while(!nodesfile_m.eof())
             {
                 int f3;
-                nodesfile_m>>f3;
+                nodesfile_m >> f3;
 //            cout<<f3<<endl;
                 nodes_new.push_back(f3);
             }
