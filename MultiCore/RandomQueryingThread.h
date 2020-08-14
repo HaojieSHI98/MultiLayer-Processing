@@ -913,6 +913,8 @@ public:
             if(nodes_new.size()!=arrival_nodes.size()){
                 cout<<"size not equal!!!"<<endl<<endl<<endl;
                 cout<<"size of nodes_new:"<<nodes_new.size()<<" else: "<<arrival_nodes.size()<<endl;
+                cout<<"first:"<<nodes_new[0]<<" - "<<arrival_nodes[0]<<endl;
+                cout<<"end:"<< nodes_new[nodes_new.size()-1]<<" - "<<arrival_nodes[arrival_nodes.size()-1]<<endl;
             } else{
                 for(int n_i = 0;n_i<nodes_new.size();n_i++)
                 {
