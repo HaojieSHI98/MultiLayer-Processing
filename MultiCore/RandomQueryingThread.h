@@ -1100,7 +1100,9 @@ public:
             else observer.update_rate++;
         }
         cout<<"ok1"<<endl;
-        double time_val = (observer.task_list[10000].first- observer.task_list[0].first)/MICROSEC_PER_SEC;
+//        double time_val = (observer.task_list[10000].first- observer.task_list[0].first)/MICROSEC_PER_SEC;
+        cout<<observer.task_list[0].first<<endl;
+        double time_val = 10;
         observer.query_rate = observer.query_rate/time_val;
         observer.update_rate = observer.update_rate/time_val;
         cout<<"query rate : "<<observer.query_rate<<"update rate : "<<observer.update_rate<<endl<<endl<<endl;
