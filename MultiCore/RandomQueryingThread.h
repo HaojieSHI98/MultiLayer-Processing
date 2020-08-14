@@ -1092,22 +1092,16 @@ public:
         }
     }
     void update_param(void){
-        observer.query_rate = 0;
         observer.update_rate = 0;
-        for(int s_i = 0;s_i<observer.task_list.size();s_i++)
-        {
-            if(observer.task_list[s_i].second == QUERY) observer.query_rate++;
+        observer.query_rate = 0;
+        for(int o_i=0;o_i<observer.task_list.size();o_i++){
+            if(observer.task_list[o_i]==QUERY) observer.query_rate++;
             else observer.update_rate++;
         }
-        cout<<"ok1"<<endl;
-//        double time_val = (observer.task_list[10000].first- observer.task_list[0].first)/MICROSEC_PER_SEC;
-//        cout<<observer.task_list[1].first<<endl;
-        cout<<observer.task_list[1].second<<endl;
-        cout<<observer.task_list[1].first<<endl;
-        double time_val = 10;
-        observer.query_rate = observer.query_rate/time_val;
+        double time_val = (observer.time_list.end()-observer.time_list.begin())/MICROSEC_PER_SEC;
         observer.update_rate = observer.update_rate/time_val;
-        cout<<"query rate : "<<observer.query_rate<<"update rate : "<<observer.update_rate<<endl<<endl<<endl;
+        observer.query_rate = observer.query_rate/time_val;
+        cout<<"update_rate:"<<observer.update_rate<<" query_rate:"<<observer.query_rate<<endl<<endl;
     }
     void task_run(){
         struct timeval end;
@@ -1177,10 +1171,13 @@ public:
             if(observer.task_list.size()>=multiTestPara.init_objects*NUM_OBV_T)
             {
                 observer.task_list.erase(observer.task_list.begin(),observer.task_list.begin()+1);
+                observer.time_list.erase(observer.time_list.begin(),observer.time_list.begin()+1);
             }
-            if(event.second==QUERY) observer.task_list.push_back(make_pair(current_time,QUERY));
-            else observer.task_list.push_back(make_pair(current_time,1-QUERY));
-
+            if(event.second==QUERY) {
+                observer.task_list.push_back(QUERY);
+            }
+            else observer.task_list.push_back(1-QUERY);
+            observer.time_list.push_back(current_time);
 
 //            cout<<"step1: event-"<<event.second<<endl;
             // if insert

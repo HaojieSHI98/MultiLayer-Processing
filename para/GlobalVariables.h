@@ -58,7 +58,8 @@ double PI = 3.1415926535;
 typedef struct{
     double query_rate=0;
     double update_rate=0;
-    vector<pair<double,int>> task_list;
+    vector<int> task_list;
+    vector<double> time_list;
     double ratio_x[2]={0};
     vector<double> ts[2];
     vector<double> ta[2];
