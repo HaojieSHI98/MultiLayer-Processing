@@ -1112,7 +1112,7 @@ public:
             if(overload_flag) break;
             if(arrival_task_nodes[i]==-1) continue;
             pair<double, int> &event = full_task_list[i];
-            if(i%200000==0) update_param();
+            if(i%20000==0) update_param();
             long issue_time = floor(event.first * MICROSEC_PER_SEC);
 //            cout<<"issue_time:"<<issue_time<<endl;
             int restart_flag = 0;
