@@ -892,13 +892,34 @@ public:
         {
             cout<<"can't load nodefile!"<<endl;
             arrival_nodes = generate_arrival_nodes(full_list, begin_node, end_node);
-            std::ofstream nodesfile_w;
+            std::ofstream nodesfile_w,nodesfile_m;
             nodesfile_w.open(nodefile_name, std::ios_base::out);
              for (int node_i=0;node_i<arrival_nodes.size();node_i++)
              {
                  nodesfile_w<<arrival_nodes[node_i]<<endl;
              }
             nodesfile_w.close();
+            nodesfile_m.open(nodefile_name, std::ios_base::in);
+            vector<int> nodes_new;
+            while(!nodesfile_m.eof())
+            {
+                int f3;
+                nodesfile_m>>f3;
+//            cout<<f3<<endl;
+                nodes_new.push_back(f3);
+            }
+            nodesfile_m.close();
+            if(nodes_new.size()!=arrival_nodes.size()){
+                cout<<"size not equal!!!"<<endl<<endl<<endl;
+            } else{
+                for(int n_i = 0;n_i<nodes_new.size();n_i++)
+                {
+                    if(nodes_new[n_i]!=arrival_nodes[n_i])
+                    {
+                        cout<<"not equal!"<<nodes_new[n_i]<<" - "<<arrival_nodes[n_i]<<endl;
+                    }
+                }
+            }
         } else{
             while(!nodefile.eof())
             {
