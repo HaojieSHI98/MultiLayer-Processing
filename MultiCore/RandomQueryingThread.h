@@ -1098,7 +1098,7 @@ public:
             if(observer.task_list[o_i]==QUERY) observer.query_rate++;
             else observer.update_rate++;
         }
-        double time_val = (observer.time_list.end()-observer.time_list.begin())/MICROSEC_PER_SEC;
+        double time_val = (observer.time_list.end()-observer.time_list.begin());
 //        observer.update_rate = observer.update_rate/time_val;
 //        observer.query_rate = observer.query_rate/time_val;
         cout<<"update_rate:"<<observer.update_rate<<" query_rate:"<<observer.query_rate<<"time_val"<<time_val<<endl<<endl;
@@ -1112,7 +1112,7 @@ public:
             if(overload_flag) break;
             if(arrival_task_nodes[i]==-1) continue;
             pair<double, int> &event = full_task_list[i];
-            if(i%20000==0) update_param();
+            if((i+1)%20000==0) update_param();
             long issue_time = floor(event.first * MICROSEC_PER_SEC);
 //            cout<<"issue_time:"<<issue_time<<endl;
             int restart_flag = 0;
@@ -1361,6 +1361,7 @@ public:
         join(ti);
         update_query_time();
         observer.task_list.clear();
+        observer.time_list.clear();
         long total_response_time = tp[0].response_time+tp[1].response_time;
         number_of_queries = tp[0].query_num+tp[1].query_num;
         cout<<"toal response time 0 :"<<tp[0].response_time<<" number of queries 0: "<<tp[0].query_num<<endl;
