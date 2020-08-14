@@ -1099,9 +1099,9 @@ public:
             else observer.update_rate++;
         }
         double time_val = (observer.time_list.end()-observer.time_list.begin())/MICROSEC_PER_SEC;
-        observer.update_rate = observer.update_rate/time_val;
-        observer.query_rate = observer.query_rate/time_val;
-        cout<<"update_rate:"<<observer.update_rate<<" query_rate:"<<observer.query_rate<<endl<<endl;
+//        observer.update_rate = observer.update_rate/time_val;
+//        observer.query_rate = observer.query_rate/time_val;
+        cout<<"update_rate:"<<observer.update_rate<<" query_rate:"<<observer.query_rate<<"time_val"<<time_val<<endl<<endl;
     }
     void task_run(){
         struct timeval end;
