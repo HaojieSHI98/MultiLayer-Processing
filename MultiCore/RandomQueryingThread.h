@@ -915,6 +915,7 @@ public:
                 cout<<"size of nodes_new:"<<nodes_new.size()<<" else: "<<arrival_nodes.size()<<endl;
                 cout<<"first:"<<nodes_new[0]<<" - "<<arrival_nodes[0]<<endl;
                 cout<<"end:"<< nodes_new[nodes_new.size()-1]<<" - "<<arrival_nodes[arrival_nodes.size()-1]<<endl;
+                cout<<"end -1 " << nodes_new[nodes_new.size()-2]<<endl;
             }
                 for(int n_i = 0;n_i<nodes_new.size();n_i++)
                 {
