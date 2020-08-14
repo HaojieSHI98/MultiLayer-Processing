@@ -909,6 +909,7 @@ public:
 //            cout<<f3<<endl;
                 nodes_new.push_back(f3);
             }
+            nodes_new.pop_back();
             nodesfile_m.close();
             if(nodes_new.size()!=arrival_nodes.size()){
                 cout<<"size not equal!!!"<<endl<<endl<<endl;
@@ -934,6 +935,7 @@ public:
             }
             nodefile.close();
             cout<<"read from nodefile!"<<endl;
+            arrival_nodes.pop_back();
         }
 
         full_task_list.assign(full_list.begin()+init_objects,full_list.end());
