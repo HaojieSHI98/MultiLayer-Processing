@@ -877,6 +877,7 @@ public:
                 full_list.push_back(make_pair(f1, f2));
             }
             queryfile.close();
+            full_list.pop_back();
             cout << "read from queryfile!" << endl;
         }
 
