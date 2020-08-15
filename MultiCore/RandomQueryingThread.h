@@ -928,8 +928,7 @@ public:
             }
             nodefile.close();
             cout<<"read from nodefile!"<<endl;
-            arrival_nodes.pop_back();
-            arrival_nodes.pop_back();
+            arrival_nodes.erase(arrival_nodes.end()-5,arrival_nodes.end());
             arrival_nodes.pop_back();
         }
 
