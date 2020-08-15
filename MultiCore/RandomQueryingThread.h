@@ -901,6 +901,7 @@ public:
                  nodesfile_w<<arrival_nodes[node_i]<<endl;
              }
             nodesfile_w.close();
+             cout<<"generated nodefile"<<endl;
             nodesfile_m.open(nodefile_name, std::ios_base::in);
             vector<int> arrival_cm;
             while(!nodesfile_m.eof())
