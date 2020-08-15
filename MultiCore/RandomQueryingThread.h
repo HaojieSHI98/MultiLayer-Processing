@@ -1125,7 +1125,7 @@ public:
             if(observer.task_list[o_i]==QUERY) observer.query_rate++;
             else observer.update_rate++;
         }
-        double time_val = (observer.time_list.end()-observer.time_list.begin());
+        double time_val = (observer.time_list[observer.task_list.size()-1]-observer.time_list[0]);
 //        observer.update_rate = observer.update_rate/time_val;
 //        observer.query_rate = observer.query_rate/time_val;
 
@@ -1196,7 +1196,7 @@ public:
                 issue_time = current_time;
             }
 
-            while((observer.time_list.size()>0)&&(event.first*MICROSEC_PER_SEC-observer.time_list[0]>=NUM_OBV_T*MICROSEC_PER_SEC))
+            while((observer.time_list.size()>0)&&(current_time-observer.time_list[0]>=NUM_OBV_T*MICROSEC_PER_SEC))
             {
                 observer.task_list.erase(observer.task_list.begin(),observer.task_list.begin()+1);
                 observer.time_list.erase(observer.time_list.begin(),observer.time_list.begin()+1);
@@ -1205,7 +1205,7 @@ public:
                 observer.task_list.push_back(QUERY);
             }
             else observer.task_list.push_back(1-QUERY);
-            observer.time_list.push_back(event.first*MICROSEC_PER_SEC);
+            observer.time_list.push_back(current_time);
 
 //            cout<<"step1: event-"<<event.second<<endl;
             // if insert
