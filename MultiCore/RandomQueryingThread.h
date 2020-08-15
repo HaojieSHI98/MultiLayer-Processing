@@ -929,6 +929,8 @@ public:
             nodefile.close();
             cout<<"read from nodefile!"<<endl;
             arrival_nodes.pop_back();
+            arrival_nodes.pop_back();
+            arrival_nodes.pop_back();
         }
 
         full_task_list.assign(full_list.begin()+init_objects,full_list.end());
