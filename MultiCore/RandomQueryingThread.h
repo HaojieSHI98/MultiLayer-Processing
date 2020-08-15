@@ -852,10 +852,10 @@ public:
         for (int i = 0; i < init_objects; i++) {
             full_list.push_back(make_pair(0.0, INSERT));
         }
-        string myversion = "v1";
+        string myversion = "v1_"+std::to_string(multiTestPara.init_objects)+"_";
         std::ifstream queryfile;
-        cout<<"file name:"<<multiTestPara.suffix<<endl;
-        string queryfile_name = input_parameters.input_data_dir + "query_"+myversion + multiTestPara.suffix+".txt";
+//        cout<<"file name:"<<multiTestPara.suffix<<endl;
+        string queryfile_name = input_parameters.input_data_dir + "query_"+myversion + multiTestPara.configstr+".txt";
         queryfile.open(queryfile_name,std::ios_base::in);
         double f1;
         int f2;
