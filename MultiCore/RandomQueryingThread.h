@@ -928,8 +928,9 @@ public:
             }
             nodefile.close();
             cout<<"read from nodefile!"<<endl;
-            arrival_nodes.erase(arrival_nodes.end()-5,arrival_nodes.end());
+//            arrival_nodes.erase(arrival_nodes.end()-5,arrival_nodes.end());
             arrival_nodes.pop_back();
+            cout<<"full list size:"<<full_list.size()<<" nodes size:"<<arrival_nodes.size()<<endl;
         }
 
         full_task_list.assign(full_list.begin()+init_objects,full_list.end());
