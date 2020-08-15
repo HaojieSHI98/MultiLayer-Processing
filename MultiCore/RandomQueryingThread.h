@@ -1202,7 +1202,7 @@ public:
                 issue_time = current_time;
             }
 
-            if((observer.time_list.size()>0)&&(current_time-observer.time_list[0]>=NUM_OBV_T*MICROSEC_PER_SEC))
+            if(observer.task_list.size()>=NUM_OBV_T*multiTestPara.init_objects)
             {
                 observer.task_list.erase(observer.task_list.begin(),observer.task_list.begin()+1);
                 observer.time_list.erase(observer.time_list.begin(),observer.time_list.begin()+1);
