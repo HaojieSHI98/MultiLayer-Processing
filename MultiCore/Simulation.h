@@ -128,7 +128,7 @@ vector<std::pair<double, int> > make_online_query_update_list_new(double query_r
 
 vector<std::pair<double, int> > make_online_query_update_list_str(string configstr, int objectnum,int layer){
     vector<string> configstring = split(configstr,"_");
-//    cout<<"config_String!!"<<endl;
+    cout<<"config_String!!"<<endl;
     if(configstring.size()%3!=0) stop_here();
     int test_time_all = 0;
     vector<double> query_sequence,insert_sequence,delete_sequence;
@@ -141,6 +141,7 @@ vector<std::pair<double, int> > make_online_query_update_list_str(string configs
         int insertnum = updatenum/2;
         int deletenum = updatenum/2;
         int querynum = objectnum*query_ratio/layer;
+        cout<<"update_num: "<<updatenum<<" query_num:"<<querynum<<endl;
         vector<double> query_sequence_sub = poisson(querynum, test_time);
         vector<double> insert_sequence_sub = poisson(insertnum, test_time);
         vector<double> delete_sequence_sub = poisson(deletenum, test_time);
