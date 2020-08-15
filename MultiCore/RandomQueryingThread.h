@@ -1125,7 +1125,7 @@ public:
             if(observer.task_list[o_i]==QUERY) observer.query_rate++;
             else observer.update_rate++;
         }
-        double time_val = (observer.time_list[observer.task_list.size()-1]-observer.time_list[0]);
+        double time_val = (observer.time_list[observer.task_list.size()-1]-observer.time_list[0])/MICROSEC_PER_SEC;
 //        observer.update_rate = observer.update_rate/time_val;
 //        observer.query_rate = observer.query_rate/time_val;
 
