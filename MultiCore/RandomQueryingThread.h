@@ -853,7 +853,7 @@ public:
             full_list.push_back(make_pair(0.0, INSERT));
         }
         std::ifstream queryfile;
-        string queryfile_name = input_parameters.input_data_dir + "query1_" + configstr+".txt";
+        string queryfile_name = input_parameters.input_data_dir + "query1_" + multiTestPara.suffix+".txt";
         queryfile.open(queryfile_name,std::ios_base::in);
         double f1;
         int f2;
@@ -885,7 +885,7 @@ public:
 //        vector<int> arrival_nodes;
 
         std::ifstream nodefile;
-        string nodefile_name = input_parameters.input_data_dir + "node1_" +configstr+".txt";
+        string nodefile_name = input_parameters.input_data_dir + "node1_" +multiTestPara.suffix+".txt";
         nodefile.open(nodefile_name, std::ios_base::in);
 
         if(!nodefile.is_open())
