@@ -852,8 +852,9 @@ public:
         for (int i = 0; i < init_objects; i++) {
             full_list.push_back(make_pair(0.0, INSERT));
         }
+        string myversion = "v1"
         std::ifstream queryfile;
-        string queryfile_name = input_parameters.input_data_dir + "query1_" + multiTestPara.suffix+".txt";
+        string queryfile_name = input_parameters.input_data_dir + "query_"+myversion + multiTestPara.suffix+".txt";
         queryfile.open(queryfile_name,std::ios_base::in);
         double f1;
         int f2;
@@ -885,7 +886,7 @@ public:
 //        vector<int> arrival_nodes;
 
         std::ifstream nodefile;
-        string nodefile_name = input_parameters.input_data_dir + "node1_" +multiTestPara.suffix+".txt";
+        string nodefile_name = input_parameters.input_data_dir + "node_"+myversion +multiTestPara.suffix+".txt";
         nodefile.open(nodefile_name, std::ios_base::in);
 
         if(!nodefile.is_open())
@@ -900,7 +901,22 @@ public:
                  nodesfile_w<<arrival_nodes[node_i]<<endl;
              }
             nodesfile_w.close();
-
+            nodesfile_m.open(nodefile_name, std::ios_base::in);
+            vector<int> arrival_cm;
+            while(!nodesfile_m.eof())
+            {
+                int f3;
+                nodesfile_m>>f3;
+//            cout<<f3<<endl;
+                arrival_cm.push_back(f3);
+            }
+            nodesfile_m.close();
+            cout<<"size:"<<arrival_nodes.size()<<" - "<<arrival_cm.size()<<endl;
+            for(int s_i = 0;s_i<arrival_nodes.size();s_i++)
+            {
+                if(arrival_nodes[s_i]!=arrival_cm[s_i]) cout<<"not equal! "<<s_i<<" "<<arrival_nodes[s_i]<<" - "<<arrival_cm[s_i]<<endl;
+            }
+            cout<<"Finish Compare!"<<endl<<endl;
         } else{
             while(!nodefile.eof())
             {
