@@ -1128,7 +1128,8 @@ public:
         double time_val = (observer.time_list.end()-observer.time_list.begin());
 //        observer.update_rate = observer.update_rate/time_val;
 //        observer.query_rate = observer.query_rate/time_val;
-        cout<<"update_rate:"<<observer.update_rate<<" query_rate:"<<observer.query_rate<<"time_val:"<<time_val<<endl<<endl;
+
+        cout<<"update_rate:"<<observer.update_rate<<" query_rate:"<<observer.query_rate<<"time_val:"<<time_val<<" size:"<<observer.time_list.size()<<" - "<<observer.task_list.size()<<endl;
     }
     void task_run(){
         struct timeval end;
@@ -1195,7 +1196,7 @@ public:
                 issue_time = current_time;
             }
 
-            if((observer.time_list.size()>0)&&(current_time-observer.time_list[0]>=MICROSEC_PER_SEC*NUM_OBV_T))
+            while((observer.time_list.size()>0)&&(current_time-observer.time_list[0]>=MICROSEC_PER_SEC*NUM_OBV_T))
             {
                 observer.task_list.erase(observer.task_list.begin(),observer.task_list.begin()+1);
                 observer.time_list.erase(observer.time_list.begin(),observer.time_list.begin()+1);
