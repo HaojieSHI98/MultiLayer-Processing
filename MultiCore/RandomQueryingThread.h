@@ -1133,7 +1133,7 @@ public:
         observer.update_rate = observer.update_rate/time_val;
         observer.query_rate = observer.query_rate/time_val;
 
-        cout<<"update_rate:"<<observer.update_rate<<" query_rate:"<<observer.query_rate<<"time_val:"<<time_val<<" size:"<<observer.time_list.size()<<" - "<<observer.task_list.size()<<endl;
+//        cout<<"update_rate:"<<observer.update_rate<<" query_rate:"<<observer.query_rate<<"time_val:"<<time_val<<" size:"<<observer.time_list.size()<<" - "<<observer.task_list.size()<<endl;
     }
     void task_run(){
         struct timeval end;
