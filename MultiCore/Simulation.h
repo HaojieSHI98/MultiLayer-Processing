@@ -160,6 +160,9 @@ vector<std::pair<double, int> > make_online_query_update_list_str(string configs
             }
         }
         test_time_all +=test_time;
+        if(query_sequence.size()>10){
+            cout<<"end time : "<<query_sequence[query_sequence.size()-1]<<endl;
+        }
         query_sequence.insert(query_sequence.end(),query_sequence_sub.begin(),query_sequence_sub.end());
         insert_sequence.insert(insert_sequence.end(),insert_sequence_sub.begin(),insert_sequence_sub.end());
         delete_sequence.insert(delete_sequence.end(),delete_sequence_sub.begin(),delete_sequence_sub.end());
