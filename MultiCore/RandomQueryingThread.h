@@ -854,7 +854,7 @@ public:
         }
 
         std::ifstream queryfile;
-        string queryfile_name = input_parameters.input_data_dir + "query_" + configstr+".txt";
+        string queryfile_name = input_parameters.input_data_dir + "querys_" + configstr+".txt";
         queryfile.open(queryfile_name,std::ios_base::in);
         double f1;
         int f2;
