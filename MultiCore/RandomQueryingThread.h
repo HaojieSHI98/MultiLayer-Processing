@@ -1178,6 +1178,7 @@ public:
 
             if(current_time-observer.time_list[0]>=MICROSEC_PER_SEC*NUM_OBV_T)
             {
+                
                 observer.task_list.erase(observer.task_list.begin(),observer.task_list.begin()+1);
                 observer.time_list.erase(observer.time_list.begin(),observer.time_list.begin()+1);
             }
