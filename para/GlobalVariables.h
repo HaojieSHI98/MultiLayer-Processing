@@ -52,7 +52,7 @@ double PI = 3.1415926535;
 #define NW_OBJECTS 13000
 #define ZIPF_OBJECT 0
 #define ZIPF_QUERY 0
-#define NUM_OBV_T 5
+#define NUM_OBV_T 10
 //#define DISPLAY 0
 //new
 typedef struct{
