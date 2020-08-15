@@ -854,8 +854,9 @@ public:
         }
         string myversion = "v1_"+std::to_string(multiTestPara.init_objects)+"_";
         std::ifstream queryfile;
-//        cout<<"file name:"<<multiTestPara.suffix<<endl;
+
         string queryfile_name = input_parameters.input_data_dir + "query_"+myversion + multiTestPara.configstr+".txt";
+        cout<<"query file name:"<<queryfile_name<<endl;
         queryfile.open(queryfile_name,std::ios_base::in);
         double f1;
         int f2;
@@ -888,7 +889,8 @@ public:
 //        vector<int> arrival_nodes;
 
         std::ifstream nodefile;
-        string nodefile_name = input_parameters.input_data_dir + "node_"+myversion +multiTestPara.suffix+".txt";
+        string nodefile_name = input_parameters.input_data_dir + "node_"+myversion +multiTestPara.configstr+".txt";
+        cout<<"node file name:"<<nodefile_name<<endl;
         nodefile.open(nodefile_name, std::ios_base::in);
 
         if(!nodefile.is_open())
