@@ -1147,17 +1147,19 @@ public:
 //            cout<<"issue_time:"<<issue_time<<endl;
             int restart_flag = 0;
             int restart_pool = -1;
-            if(event.first>=multiTestPara.config_simulation_time&&tp[0].run_time==0&&tp[1].run_time==0){
-                update_query_time();
-                clear_query_time();
-                if(tp[0].response_time*tp[1].query_num>tp[1].response_time*tp[0].query_num)
-                    restart_pool = 0;
-                else restart_pool = 1;
-                tp[restart_pool].restart_flag = 1;
-                cout<<"restart pool"<<restart_pool<<"!!"<<endl;
-                task_reinit(restart_pool);
-                restart_flag = 1;
-            }
+
+//            if(event.first>=multiTestPara.config_simulation_time&&tp[0].run_time==0&&tp[1].run_time==0){
+//                update_query_time();
+//                clear_query_time();
+//                if(tp[0].response_time*tp[1].query_num>tp[1].response_time*tp[0].query_num)
+//                    restart_pool = 0;
+//                else restart_pool = 1;
+//                tp[restart_pool].restart_flag = 1;
+//                cout<<"restart pool"<<restart_pool<<"!!"<<endl;
+//                task_reinit(restart_pool);
+//                restart_flag = 1;
+//            }
+
 //            if(tp[1].restart_flag==1){
 //                cout<<"start reinit!!!"<<endl<<endl<<endl;
 //                task_reinit(1);
