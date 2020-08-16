@@ -478,9 +478,16 @@ int main(int argc, char *argv[]) {
                     overload_flag = 0;
 
                     is_simulation = 1;
-                    RandomTwoThreadPool_Control *tp = new RandomTwoThreadPool_Control( 0, test_n, multiTestPara.num_total_threads, alpha, k, fail_p,test_n,multiTestPara.configstr,
-                                                        multiTestPara.query_cost,multiTestPara.insert_cost,multiTestPara.delete_cost,configurationId);
-                    tp->run();
+                    if(multiTestPara.mode == 0){
+                        RandomTwoThreadPool_Control *tp = new RandomTwoThreadPool_Control( 0, test_n, multiTestPara.num_total_threads, alpha, k, fail_p,test_n,multiTestPara.configstr,
+                                                                                           multiTestPara.query_cost,multiTestPara.insert_cost,multiTestPara.delete_cost,configurationId);
+                        tp->run();
+                    }else{
+                        RandomThreadPool *tp = new RandomThreadPool( 0,0, test_n, multiTestPara.num_total_threads, alpha, k, fail_p,test_n,multiTestPara.configstr,
+                                                                                           multiTestPara.query_cost,multiTestPara.insert_cost,multiTestPara.delete_cost,configurationId);
+                        tp->run();
+                    }
+
 
 
 //            RandomThreadPool *tp2 = new RandomThreadPool(0, test_n/2, test_n, multiTestPara.num_threads_query,

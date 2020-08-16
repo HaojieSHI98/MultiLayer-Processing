@@ -2577,26 +2577,23 @@ private:
     long total_updates_plan;
     long total_queries_finished;
     long total_updates_finished;
-
+    string configstr;
 
     // Algorithm data structure
 //    vector<int *> dijkstra_object_map_vec;
 public:
-    RandomThreadPool(int threadpool_id_val, int begin_node_val, int end_node_val, int num_threads_query_val, int num_threads_update_val, double alpha_val, int k_val, double fail_p_val,
-                     int test_n_val, double query_rate_val, double insert_rate_val, double delete_rate_val, int simulation_time_val,int query_cost,int insert_cost,int delete_cost) {
+    RandomThreadPool(int threadpool_id_val, int begin_node_val, int end_node_val, int num_threads_val, double alpha_val, int k_val, double fail_p_val,
+                     int test_n_val, string configstr_val,int query_cost,int insert_cost,int delete_cost, int configurationId_val) {
         cout << "constructing RandomThreadPool..." << endl;
         if(overload_flag)
             overload_flag=0;
         threadpool_id = threadpool_id_val;
+        configstr = configstr_val;
         begin_node = begin_node_val;
         end_node = end_node_val;
-        simulation_time = simulation_time_val;
-        num_threads_query=num_threads_query_val; //replication
-        query_rate = query_rate_val;
-        insert_rate = insert_rate_val;
-        delete_rate = delete_rate_val;
+        num_threads_query=(num_threads_val-2); //replication
         test_n = test_n_val;
-        num_threads_update = num_threads_update_val; //partition
+        num_threads_update = 1; //partition
         alpha = alpha_val;
         fail_p = fail_p_val;
         k = k_val;
@@ -2816,6 +2813,66 @@ public:
 
     }
 
+    void Generate_results(){
+        double total_response_time=0;
+        double number_of_queries=0;
+        for (int i = 0; i < num_threads_query; i++) {
+            total_response_time += globalThreadVar[threadpool_id][i]->total_query_time;
+            number_of_queries += globalThreadVar[threadpool_id][i]->number_of_queries;
+        }
+        cout << "expected response time: " << total_response_time / float(number_of_queries) << " seconds" << endl;
+        cout << "total_response_time: " << total_response_time << endl;
+        cout << "number_of_queries: " << number_of_queries << endl;
+        cout << "expected_update_response_time: " << total_update_response_time / number_of_updates << endl;
+
+        cout << "expected_update_process_time: " << total_update_process_time / number_of_updates << endl;
+        std::ofstream outfile;
+
+
+        outfile.open(input_parameters.output_data_dir + "stone_outfile_auto" + (multiTestPara.suffix), std::ios_base::app);
+        outfile << endl
+                //                << network_name<<" "
+                //                << "init: "<<multiTestPara.init_objects<<" "
+                //                << multiTestPara.method_name << " config simulation time: "
+                //                << multiTestPara.config_simulation_time << " test simulate time: "
+                //                << multiTestPara.test_simulation_time << " configure: "
+                //                << configurationId << " threshold: " << multiTestPara.is_thresholded << " fail_p: " << fail_p
+                //                << " "
+                << "query "<<configstr
+                //                << " " << delete_rate << " " << multiTestPara.method_name << " singleAggregate: "
+                //                << multiTestPara.is_single_aggregate << " "
+                //                << multiTestPara.num_threads_update
+                //                << " " << multiTestPara.num_threads_query << " "
+                << "query response time: " << total_response_time / float(number_of_queries) << " "
+                << "query process time: " << total_query_process_time / number_of_query_processings << " "
+                << "update response time: " << total_update_response_time / number_of_updates << " "
+                << "update process time: " << total_update_process_time / number_of_updates
+                //                << " overload: " << overload_flag
+                <<" query finish: "<<query_finish_rate
+                <<" update finish: "<<1.0-update_finish_rate
+                <<" schedule cost: "<<avg_offset
+                << endl;
+        outfile.close();
+    }
+    void wait_for_finish(void)
+    {
+        int num_intask = 0;
+        while(1) {
+            for (int z = 0; z < num_threads_query; z++) {
+                for (int q_id = 0; q_id < num_threads_update; q_id++) {
+                    int pool_index = z * num_threads_update + q_id;
+                    int num_queries = _pool[pool_index]->get_num_queries_in_queue();
+                    int num_inserts = _pool[pool_index]->get_num_inserts_in_queue();
+                    int num_deletes = _pool[pool_index]->get_num_deletes_in_queue();
+                    num_intask += num_deletes + num_inserts + num_queries;
+//                    cout << "query:" << z << " update:" << q_id << " queries:" << num_queries << " inserts:"
+//                         << num_inserts << " deletes:" << num_deletes << endl;
+                }
+            }
+            if(num_intask == 0) break;
+            else num_intask = 0;
+        }
+    }
     void run() {
         mem_struct mems;
         int* car_nodes;
@@ -2854,69 +2911,90 @@ public:
             full_list.push_back(make_pair(0.0, INSERT));
         }
 
+        string myversion = "v1_"+std::to_string(multiTestPara.init_objects)+"_";
         std::ifstream queryfile;
-        queryfile.open(input_parameters.input_data_dir + "query_" +std::to_string(query_rate)+"_"+std::to_string(insert_rate)+"_"+
-                               std::to_string(delete_rate)+"_"+std::to_string(simulation_time)+".txt", std::ios_base::in);
+
+        string queryfile_name = input_parameters.input_data_dir + "query_"+myversion + multiTestPara.configstr+".txt";
+        cout<<"query file name:"<<queryfile_name<<endl;
+        queryfile.open(queryfile_name,std::ios_base::in);
         double f1;
         int f2;
-        if(!queryfile.is_open())
-        {
-            cout<<"can't load queryfile!"<<endl;
-            vector<std::pair<double, int> > append_list = make_online_query_update_list(query_rate, insert_rate,
-                                                                                         delete_rate,
-                                                                                         simulation_time);
+        if (!queryfile.is_open()) {
+            cout << "can't load queryfile!" << endl;
+            vector<std::pair<double, int> > append_list = make_online_query_update_list_str(configstr,multiTestPara.init_objects,multiTestPara.layer);
+            cout<<"Generated!"<<endl;
             std::ofstream queryfile_w;
-            queryfile_w.open(input_parameters.input_data_dir + "query_" +std::to_string(query_rate)+"_"+std::to_string(insert_rate)+"_"+
-                           std::to_string(delete_rate)+"_"+std::to_string(simulation_time)+".txt", std::ios_base::out);
-            for (pair<double, int> &item : append_list)
-             {
-                 full_list.push_back(item);
-                 queryfile_w<<item.first<<" "<<item.second<<endl;
-             }
+            queryfile_w.open(queryfile_name,std::ios_base::out);
+            for (pair<double, int> &item : append_list) {
+                full_list.push_back(item);
+                queryfile_w << item.first << " " << item.second << endl;
+            }
             queryfile_w.close();
-            cout<<"write to queryfile!"<<endl;
-        }
-        else{
-            while(!queryfile.eof())
-            {
-                queryfile>>f1>>f2;
+            cout << "write to queryfile!" << endl;
+        } else {
+            while (!queryfile.eof()) {
+                queryfile >> f1 >> f2;
 //                cout<<f1<<" "<<f2<<endl;
-                full_list.push_back(make_pair(f1,f2));
+                full_list.push_back(make_pair(f1, f2));
             }
             queryfile.close();
-            cout<<"read from queryfile!"<<endl;
+            full_list.pop_back();
+            cout << "read from queryfile!" << endl;
         }
 
-        vector<int> arrival_nodes = generate_arrival_nodes(full_list, begin_node, end_node);
+//        arrival_nodes = generate_arrival_nodes(full_list, begin_node, end_node);
+//        vector<int> arrival_nodes = generate_arrival_nodes(full_list, begin_node, end_node);
 
-//        vector<int> arrival_nodes;
-//        std::ifstream nodefile;
-//        nodefile.open(input_parameters.input_data_dir + "node_" +std::to_string(query_rate)+"_"+std::to_string(insert_rate)+"_"+
-//                      std::to_string(delete_rate)+"_"+std::to_string(simulation_time)+".txt", std::ios_base::in);
-//
-//        if(!nodefile.is_open())
-//        {
-//            cout<<"can't load nodefile!"<<endl;
-//            arrival_nodes = generate_arrival_nodes(full_list, begin_node, end_node);
-//            std::ofstream nodesfile_w;
-//            nodesfile_w.open(input_parameters.input_data_dir + "node_" +std::to_string(query_rate)+"_"+std::to_string(insert_rate)+"_"+
-//                             std::to_string(delete_rate)+"_"+std::to_string(simulation_time)+".txt", std::ios_base::out);
-//             for (int node_i=0;node_i<arrival_nodes.size();node_i++)
-//             {
-//                 nodesfile_w<<arrival_nodes[node_i]<<endl;
-//             }
-//            nodesfile_w.close();
-//        } else{
-//            while(!nodefile.eof())
-//            {
-//                int f3;
-//                nodefile>>f3;
-////            cout<<f3<<endl;
-//                arrival_nodes.push_back(f3);
-//            }
-//            nodefile.close();
-//            cout<<"read from nodefile!"<<endl;
-//        }
+        vector<int> arrival_nodes;
+
+        std::ifstream nodefile;
+        string nodefile_name = input_parameters.input_data_dir + "node_"+myversion +multiTestPara.configstr+".txt";
+        cout<<"node file name:"<<nodefile_name<<endl;
+        nodefile.open(nodefile_name, std::ios_base::in);
+
+        if(!nodefile.is_open())
+        {
+            cout<<"can't load nodefile!"<<endl;
+            arrival_nodes = generate_arrival_nodes(full_list, begin_node, end_node);
+            std::ofstream nodesfile_w;
+            std::ifstream nodesfile_m;
+            nodesfile_w.open(nodefile_name, std::ios_base::out);
+            for (int node_i=0;node_i<arrival_nodes.size();node_i++)
+            {
+                nodesfile_w<<arrival_nodes[node_i]<<endl;
+            }
+            nodesfile_w.close();
+            cout<<"generated nodefile"<<endl;
+            nodesfile_m.open(nodefile_name, std::ios_base::in);
+            vector<int> arrival_cm;
+            while(!nodesfile_m.eof())
+            {
+                int f3;
+                nodesfile_m>>f3;
+//            cout<<f3<<endl;
+                arrival_cm.push_back(f3);
+            }
+            nodesfile_m.close();
+            cout<<"size:"<<arrival_nodes.size()<<" - "<<arrival_cm.size()<<endl;
+            for(int s_i = 0;s_i<arrival_nodes.size();s_i++)
+            {
+                if(arrival_nodes[s_i]!=arrival_cm[s_i]) cout<<"not equal! "<<s_i<<" "<<arrival_nodes[s_i]<<" - "<<arrival_cm[s_i]<<endl;
+            }
+            cout<<"Finish Compare!"<<endl<<endl;
+        } else{
+            while(!nodefile.eof())
+            {
+                int f3;
+                nodefile>>f3;
+//            cout<<f3<<endl;
+                arrival_nodes.push_back(f3);
+            }
+            nodefile.close();
+            cout<<"read from nodefile!"<<endl;
+//            arrival_nodes.erase(arrival_nodes.end()-5,arrival_nodes.end());
+            arrival_nodes.pop_back();
+            cout<<"full list size:"<<full_list.size()<<" nodes size:"<<arrival_nodes.size()<<endl;
+        }
 
         cout << "full_list made..." << endl;
         cout << "full list size: " << full_list.size() << endl;
@@ -3030,9 +3108,10 @@ public:
 
                     if (issue_time > current_time) std::this_thread::sleep_for(std::chrono::microseconds(1));
                 } while (true);
-                if(i<init_objects){
-                    issue_time = current_time;
-                }
+//                if(i<init_objects){
+//                    issue_time = current_time;
+//                }
+                issue_time = current_time;
                 if(i==init_objects){
                     if(can_estimate)
                         gettimeofday(&global_start, NULL);
@@ -3046,92 +3125,26 @@ public:
                 }
                 // start from queue id $start_q_id, we list num_queues_selected consecutive queues to hold random updates
             }
-//            cout<<"get here"<<endl;
-//            if(!VERIFY) {
-//                long current_time;
-////                do {
-//                    gettimeofday(&end, NULL);
-//                    current_time =
-//                            (end.tv_sec - global_start.tv_sec) * MICROSEC_PER_SEC + end.tv_usec - global_start.tv_usec;
-//                    if (issue_time <= current_time) {
-//                        if(event.second==QUERY) {
-//                            cout << "current time >= issue time" << endl;
-//                            cout << "current time: " << current_time << endl;
-//                            cout << "issue time : " << issue_time << endl;
-//                        }
-//                    }
-//                    else std::this_thread::sleep_for(std::chrono::microseconds(issue_time-current_time));
-////                } while (true);
-//                // start from queue id $start_q_id, we list num_queues_selected consecutive queues to hold random updates
-//                if(i<init_objects){
-//                    issue_time = current_time;
-//                }
-//                if(i==init_objects){
-//                    gettimeofday(&global_start, NULL);
-//
-//                }
-//            }
-
 
             // if insert
             if (event.second == INSERT) {
-
-
-
-
-//                long start_1 = clock();
-//                int index = global_random_numbers[rand_idx_update] % non_object_list.size();
-//                rand_idx_update=(rand_idx_update+1)%rand_length+rand_length;
-//                int non_object_node = non_object_list[index];
-//                int last_index = non_object_list.size() - 1;
-//
-//                int tmp = non_object_list[index];
-//                non_object_list[index] = non_object_list[last_index];
-//                non_object_list[last_index] = tmp;
-//                non_object_list.pop_back();
-//
-//                object_list.push_back(non_object_node);
-//                cout<<"INSERT "<< endl;
                 int non_object_node = arrival_nodes[i];
 
                 if(need_opt){
                     non_object_node%=1270000;
                 }
 
-
-
 //                int start_q_id = global_random_numbers[rand_idx_update] % num_threads_update;
                 int start_q_id = global_start_q_id;
                 global_start_q_id=(global_start_q_id+1)%num_threads_update;
                 rand_idx_update=(rand_idx_update+1)%rand_length+rand_length;
-//                object_list.push_back(non_object_node);
-
-
-//                cout<<"here"<<endl;
-//                distribute_sizes[non_object_node] = num_queues_selected;
-
                 for(int z = 0; z<num_threads_query;z++) {
-
 
                     pair<int, int> node_type_pair = std::make_pair(non_object_node, INSERT);
                     pair<long, pair<int, int> > task = std::make_pair(issue_time, node_type_pair);
 
-
                     // assign insert tasks
                     int min_task_size = INT_MAX;
-//                    int pool_index = -1;
-//                    for (int j = start_q_id; j < start_q_id+num_threads_update; j++) {
-//                        int j_mod = j % num_threads_update;
-//
-//                        if(_pool[z * num_threads_update + j_mod]->get_task_size()<min_task_size){
-//                            pool_index=z * num_threads_update + j_mod;
-//                            min_task_size=_pool[z * num_threads_update + j_mod]->get_task_size();
-//
-//                        }
-////                        cout<<"insert added to : "<<z * num_threads_update + j_mod<<endl;
-////                        cout<<num_threads_update<<" "<<z<<" "<<_pool.size()<<" "<<z * num_threads_update + j_mod<<endl;
-//
-//                    }
                     int pool_index=z * num_threads_update + start_q_id;
                     _pool[pool_index]->add_task(task);
                     total_object_map[z][non_object_node] = pool_index;
@@ -3140,24 +3153,9 @@ public:
 //                    car_nodes[non_object_node]=1;
                     DijkstraKNNInsert(non_object_node, car_nodes);
                 }
-//                cout<<"insert assign cost : "<<clock()-start_1<<endl;
-//                cout<<"end insert"<<endl;
             }
             if (event.second == DELETE) {
 
-
-//                long start_1 = clock();
-//                int index = global_random_numbers[rand_idx_update] % object_list.size();
-//                rand_idx_update=(rand_idx_update+1)%rand_length;
-//                int object_node = object_list[index];
-//                int last_index = object_list.size() - 1;
-//                int tmp = object_list[index];
-//                object_list[index] = object_list[last_index];
-//                object_list[last_index] = tmp;
-//                object_list.pop_back();
-//
-//                non_object_list.push_back(object_node);
-//                cout<<"DELETE "<<endl;
                 int object_node = arrival_nodes[i];
                 if(need_opt){
                     object_node%=1270000;
@@ -3177,9 +3175,6 @@ public:
 //                    car_nodes[object_node]=0;
                     DijkstraKNNDelete(object_node, car_nodes);
                 }
-
-//                cout<<"delete assign cost: "<<clock()-start_1<<endl;
-
             }
             if (event.second == QUERY) {
 
@@ -3210,10 +3205,6 @@ public:
 
                 }
                 // put to query tasks
-//                gettimeofday(&end, NULL);
-//                current_time =
-//                        (end.tv_sec - global_start.tv_sec) * MICROSEC_PER_SEC + end.tv_usec - global_start.tv_usec;
-
                 for (int j = 0; j < num_threads_update; j++) {
                     pair<int, int> node_type_pair = std::make_pair(query_node, QUERY);
                     pair<long, pair<int, int> > task = std::make_pair(issue_time, node_type_pair);
@@ -3241,26 +3232,11 @@ public:
                 current_query_threads=(current_query_threads+1)%num_threads_query;
 //                cout<<"query assign cost: "<<clock()-start_1<<endl;
             }
-//           if (i%1000 == 0)
-//           {
-//               cout<<"i:"<<i<<endl;
-//               for(int z = 0;z < num_threads_query;z++)
-//               {
-//                   for(int q_id = 0;q_id <num_threads_update;q_id++)
-//                   {
-//                       int pool_index=z * num_threads_update + q_id;
-//                       int num_queries = _pool[pool_index]->get_num_queries_in_queue();
-//                       int num_inserts = _pool[pool_index]->get_num_inserts_in_queue();
-//                       int num_deletes = _pool[pool_index]->get_num_deletes_in_queue();
-//                       cout<<"query:"<<z<<" update:"<<q_id<<" queries:"<<num_queries<<" inserts:"<<num_inserts<<" deletes:"<<num_deletes<<endl;
-//                   }
-//               }
-//           }
-
         }
         while(globalThreadVar[threadpool_id][0]->number_of_queries<2){
             std::this_thread::sleep_for(std::chrono::microseconds(1));
         }
+        wait_for_finish();
         struct timeval end_2;
         if(can_estimate)
             gettimeofday(&end_2, NULL);
@@ -3298,6 +3274,7 @@ public:
         }
         _needjoin = 1;
         cout << "all set stopped!" << endl;
+        Generate_results();
     }
 
 };
