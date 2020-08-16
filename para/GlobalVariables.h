@@ -57,6 +57,9 @@ double PI = 3.1415926535;
 //new
 #define EXP_SIZE 1000
 typedef struct{
+    std::mutex ta_mutex[2];
+    std::mutex tq_mutex[2];
+    std::mutex tu_mutex[2];
     double query_rate=0;
     double update_rate=0;
     vector<int> task_list;
