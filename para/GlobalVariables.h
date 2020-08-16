@@ -55,6 +55,7 @@ double PI = 3.1415926535;
 #define NUM_OBV_T 1
 //#define DISPLAY 0
 //new
+#define EXP_SIZE 1000
 typedef struct{
     double query_rate=0;
     double update_rate=0;

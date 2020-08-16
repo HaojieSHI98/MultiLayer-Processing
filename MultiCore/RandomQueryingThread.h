@@ -22,6 +22,7 @@
 #include <sys/time.h>
 #include "util.h"
 #include <condition_variable>
+#include<numeric>
 
 //std::mutex global_locker;
 
@@ -149,6 +150,15 @@ public:
                 partial_result_queue.pop();
                 issue_time_queue.pop();
 
+                if(can_estimate)
+                    gettimeofday(&end, NULL);
+                else{
+                    estimate_mutex.lock();
+                    gettimeofday(&end, NULL);
+                    estimate_mutex.unlock();
+                }
+                long current_time1 =
+                        (end.tv_sec - global_start.tv_sec) * MICROSEC_PER_SEC + end.tv_usec - global_start.tv_usec;
 
                 int adjust_id = partial_result.first % QUERY_ID_FOLD;
                 merge_cnt[adjust_id]++;
@@ -190,7 +200,17 @@ public:
                     globalThreadVar[pool_id][copy_id]->number_of_queries++;
                     globalThreadVar[pool_id][copy_id]->ran_global_locker.unlock();
 
+                    if(observer.tq_ex[pool_id].size()>EXP_SIZE)
+                    {
+                        observer.tq_ex[pool_id].erase(observer.tq_ex[pool_id].begin(),observer.tq_ex[pool_id].begin()+1);
+                    }
+                    observer.tq_ex[pool_id].push_back(response_time * 1.0 / MICROSEC_PER_SEC);
 
+                    if(observer.ta[pool_id].size()>EXP_SIZE)
+                    {
+                        observer.ta[pool_id].erase(observer.ta[pool_id].begin(),observer.ta[pool_id].begin()+1);
+                    }
+                    observer.ta[pool_id].push_back((current_time-current_time1)/double(MICROSEC_PER_SEC));
                     // cout top-k
                     thread_mutex.lock();
                     merge_cnt[adjust_id] = 0;
@@ -595,6 +615,10 @@ public:
 //                        update_time_list.push_back(processing_time);
                         number_of_updates++;
                         update_time_mutex.unlock();
+                        if(observer.tu_ex[pool_id].size()>EXP_SIZE){
+                            observer.tu_ex[pool_id].erase(observer.tu_ex[pool_id].begin(),observer.tu_ex[pool_id].begin()+1);
+                        }
+                        observer.tu_ex[pool_id].clear();
                         // need lock
 //                        last_delete_cost = processing_time;
                     }
@@ -1133,7 +1157,34 @@ public:
         observer.update_rate = observer.update_rate/time_val;
         observer.query_rate = observer.query_rate/time_val;
 
-//        cout<<"update_rate:"<<observer.update_rate<<" query_rate:"<<observer.query_rate<<"time_val:"<<time_val<<" size:"<<observer.time_list.size()<<" - "<<observer.task_list.size()<<endl;
+        for(int id = 0;id<2;id++)
+        {
+            double ta_sum = std::accumulate(observer.ta[id].begin(),observer.ta[id].end(),0);
+            double ta_mean = ta_sum/observer.ta[id].size();
+            double ts_sum = std::accumulate(observer.ts[id].begin(),observer.ts[id].end(),0);
+            double ts_mean = ts_sum/observer.ts[id].size();
+            double tq_sum = std::accumulate(observer.tq_ex[id].begin(),observer.tq_ex[id].end(),0);
+            double tq_mean = tq_sum/observer.tq_ex[id].size();
+            observer.tq[id] = tq_mean;
+            double accum  = 0.0;
+            std::for_each (std::begin(observer.tq_ex[id]), std::end(observer.tq_ex[id]), [&](const double d) {
+                accum  += (d-tq_mean)*(d-tq_mean);
+            });
+            observer.Vq[id] = sqrt(accum/(observer.tq_ex[id].size()-1));
+
+            double tu_sum = std::accumulate(observer.tu_ex[id].begin(),observer.tu_ex[id].end(),0);
+            double tu_mean = tu_sum/observer.tu_ex[id].size();
+            observer.tu[id] = tu_mean;
+            accum  = 0.0;
+            std::for_each (std::begin(observer.tu_ex[id]), std::end(observer.tu_ex[id]), [&](const double d) {
+                accum  += (d-tu_mean)*(d-tu_mean);
+            });
+            observer.Vu[id] = sqrt(accum/(observer.tu_ex[id].size()-1));
+
+            cout<<"pool "<<id<<" ta - "<<ta_mean<<" ts - "<<ts_mean<<" tq - "<<tq_mean<<" Vq - "<<observer.Vq[id]<<" tu - "<<tu_mean<<" Vu - "<<observer.Vu[id]<<endl;
+        }
+
+        cout<<"update_rate:"<<observer.update_rate<<" query_rate:"<<observer.query_rate<<"time_val:"<<time_val<<endl;
     }
     void task_run(){
         struct timeval end;
@@ -1150,17 +1201,17 @@ public:
             int restart_flag = 0;
             int restart_pool = -1;
 
-//            if(event.first>=multiTestPara.config_simulation_time&&tp[0].run_time==0&&tp[1].run_time==0){
-//                update_query_time();
-//                clear_query_time();
-//                if(tp[0].response_time*tp[1].query_num>tp[1].response_time*tp[0].query_num)
-//                    restart_pool = 0;
-//                else restart_pool = 1;
-//                tp[restart_pool].restart_flag = 1;
-//                cout<<"restart pool"<<restart_pool<<"!!"<<endl;
-//                task_reinit(restart_pool);
-//                restart_flag = 1;
-//            }
+            if(event.first>=multiTestPara.config_simulation_time&&tp[0].run_time==0&&tp[1].run_time==0){
+                update_query_time();
+                clear_query_time();
+                if(tp[0].response_time*tp[1].query_num>tp[1].response_time*tp[0].query_num)
+                    restart_pool = 0;
+                else restart_pool = 1;
+                tp[restart_pool].restart_flag = 1;
+                cout<<"restart pool"<<restart_pool<<"!!"<<endl;
+                task_reinit(restart_pool);
+                restart_flag = 1;
+            }
 
 //            if(tp[1].restart_flag==1){
 //                cout<<"start reinit!!!"<<endl<<endl<<endl;
@@ -1330,10 +1381,11 @@ public:
                     gettimeofday(&end, NULL);
                     estimate_mutex.unlock();
                 }
-                current_time =
+                long current_time2 =
                         (end.tv_sec - global_start.tv_sec) * MICROSEC_PER_SEC + end.tv_usec - global_start.tv_usec;
 
-                tp[ti].total_offset+=current_time-issue_time;
+                tp[ti].total_offset+=current_time2-issue_time;
+
                 int query_node=arrival_task_nodes[i];
 //                if(need_opt){
 //                    query_node%=1270000;
@@ -1367,6 +1419,22 @@ public:
                         tp[ti]._pool[tp[ti].current_query_threads * tp[ti].num_thread_update + j]->add_task(task);
                 }
                 tp[ti].current_query_threads=(tp[ti].current_query_threads+1)%tp[ti].num_threads_query;
+
+                if(can_estimate) {
+                    gettimeofday(&end, NULL);
+                }
+                else{
+                    estimate_mutex.lock();
+                    gettimeofday(&end, NULL);
+                    estimate_mutex.unlock();
+                }
+                long current_time3 =
+                        (end.tv_sec - global_start.tv_sec) * MICROSEC_PER_SEC + end.tv_usec - global_start.tv_usec;
+                if(observer.ts[ti].size()>EXP_SIZE)
+                {
+                    observer.ts[ti].erase(observer.ts[ti].begin(),observer.ts[ti].begin()+1);
+                }
+                observer.ts[ti].push_back((current_time3-issue_time)/double(MICROSEC_PER_SEC));
 //                cout<<"query assign cost: "<<clock()-start_1<<endl;
             }
 //           if (i%1000 == 0)
@@ -1396,6 +1464,14 @@ public:
         update_query_time();
         observer.task_list.clear();
         observer.time_list.clear();
+        observer.ts[0].clear();
+        observer.ta[0].clear();
+        observer.tu_ex[0].clear();
+        observer.tq_ex[0].clear();
+        observer.ts[1].clear();
+        observer.ta[1].clear();
+        observer.tu_ex[1].clear();
+        observer.tq_ex[1].clear();
         long total_response_time = tp[0].response_time+tp[1].response_time;
         number_of_queries = tp[0].query_num+tp[1].query_num;
         cout<<"toal response time 0 :"<<tp[0].response_time<<" number of queries 0: "<<tp[0].query_num<<endl;
