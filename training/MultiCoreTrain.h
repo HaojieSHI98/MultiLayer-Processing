@@ -286,10 +286,8 @@ int chooseSingleTOAINConfiguration(double fail_p, double alpha, int k,
         cout<<"testing configuration "<<i<<endl;
         if (multiTestPara.parmethod.compare("rand") == 0) {
 
-            RandomThreadPool *tp = new RandomThreadPool(0, 0, test_n, multiTestPara.num_threads_query, multiTestPara.num_threads_update,
-                                                        alpha, k, fail_p, test_n,
-                                                        query_rate, insert_rate,
-                                                        delete_rate, multiTestPara.config_simulation_time/5,
+            RandomThreadPool *tp = new RandomThreadPool(0, 0, test_n, multiTestPara.num_total_threads,
+                                                        alpha, k, fail_p, test_n,multiTestPara.configstr, multiTestPara.config_simulation_time/5,
                                                         multiTestPara.query_cost,multiTestPara.insert_cost,multiTestPara.delete_cost);
             tp->start(); //run the thread
 
@@ -402,10 +400,8 @@ void ChooseTOAINPRConfiguration(double fail_p, double alpha, int k,
 
         if (multiTestPara.parmethod.compare("rand") == 0) {
 
-            RandomThreadPool *tp = new RandomThreadPool(0, 0, test_n, multiTestPara.num_threads_query, multiTestPara.num_threads_update,
-                                                        alpha, k, fail_p, test_n,
-                                                        query_rate, insert_rate,
-                                                        delete_rate, multiTestPara.config_simulation_time,
+            RandomThreadPool *tp = new RandomThreadPool(0, 0, test_n, multiTestPara.num_total_threads,
+                                                        alpha, k, fail_p, test_n,multiTestPara.configstr, multiTestPara.config_simulation_time/5,
                                                         multiTestPara.query_cost,multiTestPara.insert_cost,multiTestPara.delete_cost);
             tp->start();
 
@@ -526,10 +522,8 @@ void ChooseVtreePRConfiguration(double fail_p, double alpha, int k, MultiTestPar
         }
 
         if (multiTestPara.parmethod.compare("rand") == 0) {
-            RandomThreadPool *tp = new RandomThreadPool(0, 0, test_n, multiTestPara.num_threads_query, multiTestPara.num_threads_update,
-                                                        alpha, k, fail_p, test_n,
-                                                        query_rate, insert_rate,
-                                                        delete_rate, multiTestPara.config_simulation_time,
+            RandomThreadPool *tp = new RandomThreadPool(0, 0, test_n, multiTestPara.num_total_threads,
+                                                        alpha, k, fail_p, test_n,multiTestPara.configstr, multiTestPara.config_simulation_time/5,
                                                         multiTestPara.query_cost,multiTestPara.insert_cost,multiTestPara.delete_cost);
             tp->start();
 
@@ -637,10 +631,8 @@ void ChooseDIJKPRConfiguration(double fail_p, double alpha, int k, MultiTestPara
         cout << "copies: " << multiTestPara.num_threads_query << endl;
         if (multiTestPara.parmethod.compare("rand") == 0) {
 
-            RandomThreadPool *tp = new RandomThreadPool(0, 0, test_n, multiTestPara.num_threads_query, multiTestPara.num_threads_update,
-                                                        alpha, k, fail_p, test_n,
-                                                        query_rate, insert_rate,
-                                                        delete_rate, multiTestPara.config_simulation_time,
+            RandomThreadPool *tp = new RandomThreadPool(0, 0, test_n, multiTestPara.num_total_threads,
+                                                        alpha, k, fail_p, test_n,multiTestPara.configstr, multiTestPara.config_simulation_time/5,
                                                         multiTestPara.query_cost,multiTestPara.insert_cost,multiTestPara.delete_cost);
             tp->start();
 

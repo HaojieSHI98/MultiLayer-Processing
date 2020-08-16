@@ -14,7 +14,7 @@ struct MultiTestParameter{
 	int num_total_threads;
 	int num_threads_update;
 	int config_simulation_time;// simulation time (seconds)
-//    int test_simulation_time;
+    int test_simulation_time;
 //    int test_simulation_time2;
     int mode;
 	string suffix;
@@ -24,9 +24,9 @@ struct MultiTestParameter{
 	string parmethod;
 	int	is_single_aggregate;
 	int num_threads_query;
-//	double query_rate;
-//	double insert_rate;
-//	double delete_rate;
+	double query_rate;
+	double insert_rate;
+	double delete_rate;
 //    double query_rate2;
 //    double insert_rate2;
 //    double delete_rate2;

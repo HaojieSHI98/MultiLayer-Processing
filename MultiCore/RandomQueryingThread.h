@@ -2355,8 +2355,7 @@ public:
                 << network_name<<" "
                 << "init: "<<multiTestPara.init_objects<<" "
                 << multiTestPara.method_name << " config simulation time: "
-                << multiTestPara.config_simulation_time << " test simulate time: "
-                << multiTestPara.test_simulation_time << " configure: "
+                << multiTestPara.config_simulation_time  << " configure: "
                 << configurationId << " threshold: " << multiTestPara.is_thresholded << " fail_p: " << fail_p
                 << " "
                 << query_rate << " " << insert_rate
