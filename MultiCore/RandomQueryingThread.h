@@ -204,13 +204,13 @@ public:
                     {
                         observer.tq_ex[pool_id].erase(observer.tq_ex[pool_id].begin(),observer.tq_ex[pool_id].begin()+1);
                     }
-                    observer.tq_ex[pool_id].push_back(response_time * 1.0 / MICROSEC_PER_SEC);
+                    observer.tq_ex[pool_id].push_back(response_time);
 
                     if(observer.ta[pool_id].size()>EXP_SIZE)
                     {
                         observer.ta[pool_id].erase(observer.ta[pool_id].begin(),observer.ta[pool_id].begin()+1);
                     }
-                    observer.ta[pool_id].push_back((current_time-current_time1)/double(MICROSEC_PER_SEC));
+                    observer.ta[pool_id].push_back(current_time-current_time1);
                     // cout top-k
                     thread_mutex.lock();
                     merge_cnt[adjust_id] = 0;
@@ -572,6 +572,11 @@ public:
 //                            update_time_list.push_back(processing_time);
                             number_of_updates++;
                             update_time_mutex.unlock();
+
+                            if(observer.tu_ex[pool_id].size()>EXP_SIZE){
+                                observer.tu_ex[pool_id].erase(observer.tu_ex[pool_id].begin(),observer.tu_ex[pool_id].begin()+1);
+                            }
+                            observer.tu_ex[pool_id].push_back(current_time - _task_time);
                         }
 //                        last_insert_cost = processing_time;
                     }
@@ -618,7 +623,7 @@ public:
                         if(observer.tu_ex[pool_id].size()>EXP_SIZE){
                             observer.tu_ex[pool_id].erase(observer.tu_ex[pool_id].begin(),observer.tu_ex[pool_id].begin()+1);
                         }
-                        observer.tu_ex[pool_id].clear();
+                        observer.tu_ex[pool_id].push_back(current_time - _task_time);
                         // need lock
 //                        last_delete_cost = processing_time;
                     }
@@ -1434,7 +1439,7 @@ public:
                 {
                     observer.ts[ti].erase(observer.ts[ti].begin(),observer.ts[ti].begin()+1);
                 }
-                observer.ts[ti].push_back((current_time3-issue_time)/double(MICROSEC_PER_SEC));
+                observer.ts[ti].push_back(current_time3-issue_time);
 //                cout<<"query assign cost: "<<clock()-start_1<<endl;
             }
 //           if (i%1000 == 0)
