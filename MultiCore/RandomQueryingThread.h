@@ -573,10 +573,10 @@ public:
                             number_of_updates++;
                             update_time_mutex.unlock();
 
-                            if(observer.tu_ex[pool_id].size()>EXP_SIZE){
-                                observer.tu_ex[pool_id].erase(observer.tu_ex[pool_id].begin(),observer.tu_ex[pool_id].begin()+1);
-                            }
-                            observer.tu_ex[pool_id].push_back(current_time - _task_time);
+//                            if(observer.tu_ex[pool_id].size()>EXP_SIZE){
+//                                observer.tu_ex[pool_id].erase(observer.tu_ex[pool_id].begin(),observer.tu_ex[pool_id].begin()+1);
+//                            }
+//                            observer.tu_ex[pool_id].push_back(current_time - _task_time);
                         }
 //                        last_insert_cost = processing_time;
                     }
@@ -620,10 +620,10 @@ public:
 //                        update_time_list.push_back(processing_time);
                         number_of_updates++;
                         update_time_mutex.unlock();
-                        if(observer.tu_ex[pool_id].size()>EXP_SIZE){
-                            observer.tu_ex[pool_id].erase(observer.tu_ex[pool_id].begin(),observer.tu_ex[pool_id].begin()+1);
-                        }
-                        observer.tu_ex[pool_id].push_back(current_time - _task_time);
+//                        if(observer.tu_ex[pool_id].size()>EXP_SIZE){
+//                            observer.tu_ex[pool_id].erase(observer.tu_ex[pool_id].begin(),observer.tu_ex[pool_id].begin()+1);
+//                        }
+//                        observer.tu_ex[pool_id].push_back(current_time - _task_time);
                         // need lock
 //                        last_delete_cost = processing_time;
                     }
