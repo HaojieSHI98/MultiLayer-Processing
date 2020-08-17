@@ -1176,7 +1176,7 @@ public:
             double ta_mean = ta_sum/observer.ta[id].size();
             double ts_sum = std::accumulate(observer.ts[id].begin(),observer.ts[id].end(),0);
             double ts_mean = ts_sum/observer.ts[id].size();
-            observer.ratio_x[id]=(ta_sum+ts_sum)/tp[id].num_thread_update;
+            observer.ratio_x[id]=(ta_mean+ts_mean)/tp[id].num_thread_update;
             double tq_sum = std::accumulate(observer.tq_ex[id].begin(),observer.tq_ex[id].end(),0);
             double tq_mean = tq_sum/observer.tq_ex[id].size();
             observer.tq[id] = tq_mean;
