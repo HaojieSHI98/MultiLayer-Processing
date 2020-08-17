@@ -1176,6 +1176,7 @@ public:
             double ta_mean = ta_sum/observer.ta[id].size();
             double ts_sum = std::accumulate(observer.ts[id].begin(),observer.ts[id].end(),0);
             double ts_mean = ts_sum/observer.ts[id].size();
+            observer.ratio_x[id]=(ta_sum+ts_sum)/tp[id].num_thread_update;
             double tq_sum = std::accumulate(observer.tq_ex[id].begin(),observer.tq_ex[id].end(),0);
             double tq_mean = tq_sum/observer.tq_ex[id].size();
             observer.tq[id] = tq_mean;
@@ -1192,12 +1193,39 @@ public:
             std::for_each (std::begin(observer.tu_ex[id]), std::end(observer.tu_ex[id]), [&](const double d) {
                 accum  += (d-tu_mean)*(d-tu_mean);
             });
-            observer.Vu[id] = sqrt(accum/(observer.tu_ex[id].size()-1));
+            observer.Vu[id] = accum/(observer.tu_ex[id].size()-1);
 
             cout<<"pool "<<id<<" ta - "<<ta_mean<<" ts - "<<ts_mean<<" tq - "<<tq_mean<<" Vq - "<<observer.Vq[id]<<" tu - "<<tu_mean<<" Vu - "<<observer.Vu[id]<<endl;
         }
 
         cout<<"update_rate:"<<observer.update_rate<<" query_rate:"<<observer.query_rate<<"time_val:"<<time_val<<endl;
+    }
+    double functionx(int ti,int x,int core){
+        double y = floor(core/x);
+        double gama_q = observer.Vq[ti]/(observer.tq[ti]*observer.tq[ti]);
+        double gama_u = observer.Vu[ti]/(observer.tu[ti]*observer.tu[ti]);
+        double t_w = (observer.query_rate*observer.tq[ti]*observer.tq[ti]*(1+gama_q)/y+
+                observer.update_rate*observer.tu[ti]*observer.tu[ti]*(1+gama_u)/x)/
+                (2*(MICROSEC_PER_SEC-observer.query_rate*observer.tq[ti]/y-observer.update_rate*observer.tu[ti]/x));
+        double t_all = t_w+observer.tq[ti]+observer.ratio_x[ti]*x;
+        cout<<"pool: "<< ti<<" x - "<<x<<" tw - "<<t_w<<"t_all - "<<t_all<<endl;
+        return t_all;
+    }
+    void compute_x_star(){
+        for(int id =0;id<2;id++)
+        {
+            double t_min;
+            double x_star=1;
+            for(int x = 1;x<=num_threads_each;x++){
+                double t_ = functionx(id,x,num_threads_each);
+                if(x == 1) t_min = t_;
+                if(t_<t_min){
+                    x_star = x;
+                    t_min = t_;
+                }
+            }
+            cout<<"pool : "<<id<<" x_star : "<<x_star<<endl;
+        }
     }
     void task_run(){
         struct timeval end;
