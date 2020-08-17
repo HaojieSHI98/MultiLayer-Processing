@@ -1220,6 +1220,7 @@ public:
             for(int x = 1;x<=num_threads_each;x++){
                 double t_ = functionx(id,x,num_threads_each);
                 if(t_<=0) continue;
+                
                 if(x == 1) t_min = t_;
                 if(t_<t_min){
                     x_star = x;
