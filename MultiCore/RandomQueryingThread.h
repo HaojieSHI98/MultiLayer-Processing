@@ -1209,15 +1209,17 @@ public:
                 (2*(MICROSEC_PER_SEC-observer.query_rate*observer.tq[ti]/y-observer.update_rate*observer.tu[ti]/x));
         double t_all = t_w+observer.tq[ti]+observer.ratio_x[ti]*x;
         cout<<"pool: "<< ti<<" x - "<<x<<" tw - "<<t_w<<"t_all - "<<t_all<<" tx - "<<observer.ratio_x[ti]*x<<" tq - "<<observer.tq[ti]<<endl;
+        if(t_w<=0) t_all = -1;
         return t_all;
     }
     void compute_x_star(){
         for(int id =0;id<2;id++)
         {
-            double t_min;
+            double t_min=MICROSEC_PER_SEC;
             double x_star=1;
             for(int x = 1;x<=num_threads_each;x++){
                 double t_ = functionx(id,x,num_threads_each);
+                if(t_<=0) continue;
                 if(x == 1) t_min = t_;
                 if(t_<t_min){
                     x_star = x;
