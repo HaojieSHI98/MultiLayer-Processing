@@ -200,13 +200,13 @@ public:
                     globalThreadVar[pool_id][copy_id]->number_of_queries++;
                     globalThreadVar[pool_id][copy_id]->ran_global_locker.unlock();
 
-//                    observer.tq_mutex[pool_id].lock();
-//                    if(observer.tq_ex[pool_id].size()>EXP_SIZE)
-//                    {
-//                        observer.tq_ex[pool_id].erase(observer.tq_ex[pool_id].begin(),observer.tq_ex[pool_id].begin()+1);
-//                    }
-//                    observer.tq_ex[pool_id].push_back(response_time);
-//                    observer.tq_mutex[pool_id].unlock();
+                    observer.tq_mutex[pool_id].lock();
+                    if(observer.tq_ex[pool_id].size()>EXP_SIZE)
+                    {
+                        observer.tq_ex[pool_id].erase(observer.tq_ex[pool_id].begin(),observer.tq_ex[pool_id].begin()+1);
+                    }
+                    observer.tq_ex[pool_id].push_back(response_time);
+                    observer.tq_mutex[pool_id].unlock();
 
                     observer.ta_mutex[pool_id].lock();
                     if(observer.ta[pool_id].size()>EXP_SIZE)
@@ -504,13 +504,13 @@ public:
                         update_time_mutex.unlock();
                         last_query_cost = processing_time;
 
-                        observer.tq_mutex[pool_id].lock();
-                        if(observer.tq_ex[pool_id].size()>EXP_SIZE)
-                        {
-                            observer.tq_ex[pool_id].erase(observer.tq_ex[pool_id].begin(),observer.tq_ex[pool_id].begin()+1);
-                        }
-                        observer.tq_ex[pool_id].push_back(processing_time);
-                        observer.tq_mutex[pool_id].unlock();
+//                        observer.tq_mutex[pool_id].lock();
+//                        if(observer.tq_ex[pool_id].size()>EXP_SIZE)
+//                        {
+//                            observer.tq_ex[pool_id].erase(observer.tq_ex[pool_id].begin(),observer.tq_ex[pool_id].begin()+1);
+//                        }
+//                        observer.tq_ex[pool_id].push_back(processing_time);
+//                        observer.tq_mutex[pool_id].unlock();
                     }
                     if (multiTestPara.is_thresholded) {
                         if (kNNs.size() == k) {
