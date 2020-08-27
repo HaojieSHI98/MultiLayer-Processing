@@ -278,15 +278,15 @@ int chooseSingleTOAINConfiguration(double fail_p, double alpha, int k,
         mode = scobConfiguration.mode;
         prepare_reverse_shortcut(test_n, tradeoff_level, cut_level, mode);
         cout << "num of threads: " << multiTestPara.num_threads_update << endl;
-        multiTestPara.num_threads_query=1;
-        multiTestPara.num_threads_update=1;
-        multiTestPara.num_total_threads=2;
+//        multiTestPara.num_threads_query=1;
+//        multiTestPara.num_threads_update=1;
+//        multiTestPara.num_total_threads=2;
         cout << "copies: " << multiTestPara.num_threads_query << endl;
 
         cout<<"testing configuration "<<i<<endl;
         if (multiTestPara.parmethod.compare("rand") == 0) {
 
-            RandomThreadPool *tp = new RandomThreadPool(0, 0, test_n, multiTestPara.num_total_threads,
+            RandomThreadPool *tp = new RandomThreadPool(0, 0, test_n,3,
                                                         alpha, k, fail_p, test_n,multiTestPara.configstr, multiTestPara.config_simulation_time/5,
                                                         multiTestPara.query_cost,multiTestPara.insert_cost,multiTestPara.delete_cost);
             tp->start(); //run the thread
