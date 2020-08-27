@@ -2789,6 +2789,7 @@ public:
                 _aggregate_thread[j]->join();
             }
         }
+        cout << "start joining aggregatethreads" << endl;
         if(multiTestPara.is_single_aggregate){
             _single_aggregate_thread->join();
         }
