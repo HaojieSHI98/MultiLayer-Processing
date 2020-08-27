@@ -410,7 +410,7 @@ void ChooseTOAINPRConfiguration(double fail_p, double alpha, int k,
             RandomThreadPool *tp = new RandomThreadPool(0, 0, test_n, multiTestPara.num_total_threads,
                                                         alpha, k, fail_p, test_n,multiTestPara.configstr, multiTestPara.config_simulation_time/5,
                                                         multiTestPara.query_cost,multiTestPara.insert_cost,multiTestPara.delete_cost);
-            tp->start();
+            tp->run();
 
             while (true) {
                 std::this_thread::sleep_for(std::chrono::microseconds(1));
@@ -532,7 +532,7 @@ void ChooseVtreePRConfiguration(double fail_p, double alpha, int k, MultiTestPar
             RandomThreadPool *tp = new RandomThreadPool(0, 0, test_n, multiTestPara.num_total_threads,
                                                         alpha, k, fail_p, test_n,multiTestPara.configstr, multiTestPara.config_simulation_time/5,
                                                         multiTestPara.query_cost,multiTestPara.insert_cost,multiTestPara.delete_cost);
-            tp->start();
+            tp->run();
 
             while (true) {
                 std::this_thread::sleep_for(std::chrono::microseconds(1));
@@ -641,7 +641,7 @@ void ChooseDIJKPRConfiguration(double fail_p, double alpha, int k, MultiTestPara
             RandomThreadPool *tp = new RandomThreadPool(0, 0, test_n, multiTestPara.num_total_threads,
                                                         alpha, k, fail_p, test_n,multiTestPara.configstr, multiTestPara.config_simulation_time/5,
                                                         multiTestPara.query_cost,multiTestPara.insert_cost,multiTestPara.delete_cost);
-            tp->start();
+            tp->run();
 
             while (true) {
                 std::this_thread::sleep_for(std::chrono::microseconds(1));
