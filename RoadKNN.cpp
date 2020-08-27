@@ -424,21 +424,21 @@ int main(int argc, char *argv[]) {
                                                              multiTestPara);
             cout<<"configurationID: "<<configurationId<<endl;
 //            multiTestPara = anaylizeParameters();
-            multiTestPara.num_total_threads/=multiTestPara.layer;
-            multiTestPara.num_threads_query=get_num_threads_query(multiTestPara.num_threads_update, multiTestPara.is_single_aggregate,
-                                                                  multiTestPara.num_total_threads);
-            if(multiTestPara.auto_config) {
-                ChooseTOAINPRConfiguration(fail_p, alpha, k,
-                                           configurationId, multiTestPara);
-            }
-            else {
+//            multiTestPara.num_total_threads/=multiTestPara.layer;
+//            multiTestPara.num_threads_query=get_num_threads_query(multiTestPara.num_threads_update, multiTestPara.is_single_aggregate,
+//                                                                  multiTestPara.num_total_threads);
+//            if(multiTestPara.auto_config) {
+//                ChooseTOAINPRConfiguration(fail_p, alpha, k,
+//                                           configurationId, multiTestPara);
+//            }
+//            else {
                 prepare_environment_with_scob_conf(configurationId);
-            }
-	        multiTestPara.num_threads_query = multiTestPara.query_thread;
-            multiTestPara.num_threads_update = multiTestPara.update_thread;
+//            }
+//	        multiTestPara.num_threads_query = multiTestPara.query_thread;
+//            multiTestPara.num_threads_update = multiTestPara.update_thread;
             cout << "finish choosing configuration!" << endl;
-            cout << "multiTestPara.num_threads_query: " << multiTestPara.num_threads_query << endl;
-            cout << "multiTestPara.num_threads_update: " << multiTestPara.num_threads_update << endl;
+//            cout << "multiTestPara.num_threads_query: " << multiTestPara.num_threads_query << endl;
+//            cout << "multiTestPara.num_threads_update: " << multiTestPara.num_threads_update << endl;
             cout << "start online running" << endl;
         }
         if (multiTestPara.method_name.compare("dijk") == 0) {
