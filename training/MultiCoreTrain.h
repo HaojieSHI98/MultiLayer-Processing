@@ -295,14 +295,14 @@ int chooseSingleTOAINConfiguration(double fail_p, double alpha, int k,
 
             while (true) {
 //                std::this_thread::sleep_for(std::chrono::microseconds(1));
-                if (tp->isNeedJoin() == 2) break;
+                if (tp->isNeedJoin()) break;
 //                    if(can_estimate)
 //                        gettimeofday(&start, NULL); //start time clock
 //                    else{
 //                        estimate_mutex.lock();
 //                        gettimeofday(&start, NULL);
 //                        estimate_mutex.unlock();
-
+//
 //                    tp->join();
 //                    break;
             }

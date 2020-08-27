@@ -3409,11 +3409,10 @@ public:
             _single_aggregate_thread->set_stop();
             _single_aggregate_thread->notify();
         }
-        _needjoin = 1;
         cout << "all set stopped!" << endl;
-        join();
         Generate_results();
-
+        _needjoin = 1;
+        join();
     }
 
 };
