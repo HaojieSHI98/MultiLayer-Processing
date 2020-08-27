@@ -292,31 +292,31 @@ int chooseSingleTOAINConfiguration(double fail_p, double alpha, int k,
             tp->start(); //run the thread
 
             while (true) {
-                std::this_thread::sleep_for(std::chrono::microseconds(1));
-                if (tp->isNeedJoin()) {
-                    if(can_estimate)
-                        gettimeofday(&start, NULL); //start time clock
-                    else{
-                        estimate_mutex.lock();
-                        gettimeofday(&start, NULL);
-                        estimate_mutex.unlock();
+//                std::this_thread::sleep_for(std::chrono::microseconds(1));
+                if (tp->isNeedJoin()==2) {break;
+//                    if(can_estimate)
+//                        gettimeofday(&start, NULL); //start time clock
+//                    else{
+//                        estimate_mutex.lock();
+//                        gettimeofday(&start, NULL);
+//                        estimate_mutex.unlock();
                     }
-                    tp->join();
-                    break;
-                }
-            }
-        } else {
-        }
+//                    tp->join();
+//                    break;
+//                }
+//            }
+//        } else {
+//        }
 
-        if(can_estimate)
-            gettimeofday(&end, NULL);
-        else{
-            estimate_mutex.lock();
-            gettimeofday(&end, NULL);
-            estimate_mutex.unlock();
-        }
-        cout << end.tv_sec << " " << start.tv_sec << endl;
-        cout << "finish in : " << end.tv_sec - start.tv_sec << " secs" << endl;
+//        if(can_estimate)
+//            gettimeofday(&end, NULL);
+//        else{
+//            estimate_mutex.lock();
+//            gettimeofday(&end, NULL);
+//            estimate_mutex.unlock();
+//        }
+//        cout << end.tv_sec << " " << start.tv_sec << endl;
+//        cout << "finish in : " << end.tv_sec - start.tv_sec << " secs" << endl;
 
 //        if(!multiTestPara.is_single_aggregate) {
 //            for (int i = 0; i < multiTestPara.num_threads_query; i++) {

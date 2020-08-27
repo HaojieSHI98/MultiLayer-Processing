@@ -125,7 +125,7 @@ public:
         }
         while (true) {
             if(overload_flag) break;
-            if(is_simulation && thread_stop){
+            if(thread_stop){
                 break;
             }
 //            if(!thread_stop)
@@ -2987,6 +2987,7 @@ public:
                 <<" schedule cost: "<<avg_offset
                 << endl;
         outfile.close();
+        _needjoin = 2;
     }
     void wait_for_finish(void)
     {
@@ -3408,7 +3409,9 @@ public:
         }
         _needjoin = 1;
         cout << "all set stopped!" << endl;
+        join();
         Generate_results();
+
     }
 
 };
