@@ -54,8 +54,9 @@ MultiTestParameter anaylizeParameters(){
     multiTestPara.num_total_threads = atoi(paras["-multicore"].c_str());
 
     if(paras.find("-configtime")==paras.end()){
-        cout<<"miss configtime parameters!"<<endl;
-        stop_here();
+//        cout<<"miss configtime parameters!"<<endl;
+//        stop_here();
+        multiTestPara.config_simulation_time =10;
     }
     multiTestPara.config_simulation_time = atoi(paras["-configtime"].c_str());// simulation time (seconds)
 
