@@ -65,6 +65,12 @@ MultiTestParameter anaylizeParameters(){
     }
     multiTestPara.configstr = paras["-configstr"];// simulation time (seconds)
 
+    if(paras.find("-teststr")==paras.end()){
+        cout<<"miss configstr parameters!"<<endl;
+        stop_here();
+    }
+    multiTestPara.teststr = paras["-teststr"];// simulation time (seconds)
+
     if(paras.find("-mode")==paras.end()){
         multiTestPara.mode = 0;
     }
@@ -287,10 +293,9 @@ int chooseSingleTOAINConfiguration(double fail_p, double alpha, int k,
         if (multiTestPara.parmethod.compare("rand") == 0) {
 
             RandomThreadPool *tp = new RandomThreadPool(0, 0, test_n, 3,
-                                                        alpha, k, fail_p, test_n, multiTestPara.configstr,
-                                                        multiTestPara.config_simulation_time / 5,
+                                                        alpha, k, fail_p, test_n, multiTestPara.teststr,
                                                         multiTestPara.query_cost, multiTestPara.insert_cost,
-                                                        multiTestPara.delete_cost);
+                                                        multiTestPara.delete_cost,i);
             tp->run(); //run the thread
 
             while (true) {
@@ -530,8 +535,8 @@ void ChooseVtreePRConfiguration(double fail_p, double alpha, int k, MultiTestPar
 
         if (multiTestPara.parmethod.compare("rand") == 0) {
             RandomThreadPool *tp = new RandomThreadPool(0, 0, test_n, multiTestPara.num_total_threads,
-                                                        alpha, k, fail_p, test_n,multiTestPara.configstr, multiTestPara.config_simulation_time/5,
-                                                        multiTestPara.query_cost,multiTestPara.insert_cost,multiTestPara.delete_cost);
+                                                        alpha, k, fail_p, test_n,multiTestPara.configstr,
+                                                        multiTestPara.query_cost,multiTestPara.insert_cost,multiTestPara.delete_cost,12);
             tp->run();
 
             while (true) {

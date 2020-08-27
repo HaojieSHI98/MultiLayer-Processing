@@ -420,9 +420,9 @@ int main(int argc, char *argv[]) {
             init_memory();
             cout<<"network_name: "<<network_name<<endl;
             cout<<"toain type: "<<multiTestPara.toain_type<<endl;
-            configurationId = chooseSingleTOAINConfiguration(fail_p, alpha, k,
-                                                             multiTestPara);
-            cout<<"configurationID: "<<configurationId<<endl;
+//            configurationId = chooseSingleTOAINConfiguration(fail_p, alpha, k,
+//                                                             multiTestPara);
+//            cout<<"configurationID: "<<configurationId<<endl;
 //            multiTestPara = anaylizeParameters();
 //            multiTestPara.num_total_threads/=multiTestPara.layer;
 //            multiTestPara.num_threads_query=get_num_threads_query(multiTestPara.num_threads_update, multiTestPara.is_single_aggregate,
@@ -432,8 +432,33 @@ int main(int argc, char *argv[]) {
 //                                           configurationId, multiTestPara);
 //            }
 //            else {
-                prepare_environment_with_scob_conf(configurationId);
+//                prepare_environment_with_scob_conf(configurationId);
 //            }
+            string myversion = "v1_"+std::to_string(multiTestPara.init_objects)+"_";
+            std::ifstream configfile;
+
+            string configfile_name = input_parameters.input_data_dir + "configurationID_"+myversion + multiTestPara.teststr+".txt";
+            cout<<"Configuration file name:"<<configfile_name<<endl;
+            configfile.open(configfile_name,std::ios_base::in);
+            int f2;
+            if (!configfile.is_open()) {
+                cout << "can't load configuration file!" << endl;
+                configurationId = chooseSingleTOAINConfiguration(fail_p, alpha, k,
+                                                                 multiTestPara);
+                cout<<"configurationID: "<<configurationId<<endl;
+                std::ofstream configfile_w;
+                configfile_w.open(configfile_name,std::ios_base::out);
+
+                configfile_w << configurationId << endl;
+                configfile_w.close();
+                cout << "write to configuration file!" << endl;
+            } else {
+                configfile>>f2;
+                cout << "read from configfile!" << endl;
+                configurationId = f2;
+                cout<<"configurationID: "<<configurationId<<endl;
+            }
+            prepare_environment_with_scob_conf(configurationId);
 //	        multiTestPara.num_threads_query = multiTestPara.query_thread;
 //            multiTestPara.num_threads_update = multiTestPara.update_thread;
             cout << "finish choosing configuration!" << endl;

@@ -20,6 +20,7 @@ struct MultiTestParameter{
 	string suffix;
 	string method_name;
 	string configstr;
+	string teststr;
 	int is_thresholded;
 	string parmethod;
 	int	is_single_aggregate;
