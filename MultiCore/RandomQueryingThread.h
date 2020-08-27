@@ -2816,10 +2816,10 @@ public:
 
         cout << "finish joining threads" << endl;
 
-        if(_main_thread.joinable())
-            _main_thread.join();
-
-        cout << "finish joining main thread" << endl;
+//        if(_main_thread.joinable())
+//            _main_thread.join();
+//
+//        cout << "finish joining main thread" << endl;
 
     }
 
@@ -2926,10 +2926,10 @@ public:
         }
     }
 
-    void start() {
-
-        _main_thread = std::thread(&RandomThreadPool::run, this);
-    }
+//    void start() {
+//
+//        _main_thread = std::thread(&RandomThreadPool::run, this);
+//    }
 
 
     long get_max_remain_time(){

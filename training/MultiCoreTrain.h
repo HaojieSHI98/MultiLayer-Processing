@@ -291,7 +291,7 @@ int chooseSingleTOAINConfiguration(double fail_p, double alpha, int k,
                                                         multiTestPara.config_simulation_time / 5,
                                                         multiTestPara.query_cost, multiTestPara.insert_cost,
                                                         multiTestPara.delete_cost);
-            tp->start(); //run the thread
+            tp->run(); //run the thread
 
             while (true) {
 //                std::this_thread::sleep_for(std::chrono::microseconds(1));
