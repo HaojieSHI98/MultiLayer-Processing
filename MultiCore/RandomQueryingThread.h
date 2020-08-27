@@ -2950,7 +2950,9 @@ public:
     void Generate_results(){
         double total_response_time=0;
         double number_of_queries=0;
+        cout<<"ok"<<endl;
         for (int i = 0; i < num_threads_query; i++) {
+            cout<<i<<endl;
             total_response_time += globalThreadVar[threadpool_id][i]->total_query_time;
             number_of_queries += globalThreadVar[threadpool_id][i]->number_of_queries;
         }
