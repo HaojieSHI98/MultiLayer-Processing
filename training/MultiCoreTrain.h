@@ -271,7 +271,7 @@ int chooseSingleTOAINConfiguration(double fail_p, double alpha, int k,
     double smallest_avg_response_time=INT_MAX*1.0;
     int best_conf=-1;
 
-    for(int i = configurations.size()/2;i < configurations.size();i++){
+    for(int i = configurations.size()/2;i < configurations.size();i++) {
         ScobConfiguration scobConfiguration = configurations[i];
         tradeoff_level = scobConfiguration.tradeoff_level;
         cut_level = scobConfiguration.cut_level;
@@ -283,27 +283,29 @@ int chooseSingleTOAINConfiguration(double fail_p, double alpha, int k,
 //        multiTestPara.num_total_threads=2;
         cout << "copies: " << multiTestPara.num_threads_query << endl;
 
-        cout<<"testing configuration "<<i<<endl;
+        cout << "testing configuration " << i << endl;
         if (multiTestPara.parmethod.compare("rand") == 0) {
 
-            RandomThreadPool *tp = new RandomThreadPool(0, 0, test_n,3,
-                                                        alpha, k, fail_p, test_n,multiTestPara.configstr, multiTestPara.config_simulation_time/5,
-                                                        multiTestPara.query_cost,multiTestPara.insert_cost,multiTestPara.delete_cost);
+            RandomThreadPool *tp = new RandomThreadPool(0, 0, test_n, 3,
+                                                        alpha, k, fail_p, test_n, multiTestPara.configstr,
+                                                        multiTestPara.config_simulation_time / 5,
+                                                        multiTestPara.query_cost, multiTestPara.insert_cost,
+                                                        multiTestPara.delete_cost);
             tp->start(); //run the thread
 
             while (true) {
 //                std::this_thread::sleep_for(std::chrono::microseconds(1));
-                if (tp->isNeedJoin()==2) {break;
+                if (tp->isNeedJoin() == 2) break;
 //                    if(can_estimate)
 //                        gettimeofday(&start, NULL); //start time clock
 //                    else{
 //                        estimate_mutex.lock();
 //                        gettimeofday(&start, NULL);
 //                        estimate_mutex.unlock();
-                    }
+
 //                    tp->join();
 //                    break;
-//                }
+            }
 //            }
 //        } else {
 //        }
@@ -329,31 +331,32 @@ int chooseSingleTOAINConfiguration(double fail_p, double alpha, int k,
 //            number_of_queries += globalThreadVar[0][0]->number_of_queries;
 //        }
 
-        for (int i = 0; i < num_threads_query; i++) {
-            total_response_time += globalThreadVar[0][i]->total_query_time;
-            number_of_queries += globalThreadVar[0][i]->number_of_queries;
+            for (int i = 0; i < num_threads_query; i++) {
+                total_response_time += globalThreadVar[0][i]->total_query_time;
+                number_of_queries += globalThreadVar[0][i]->number_of_queries;
+            }
+            cout << "expected response time: " << total_response_time / number_of_queries << " seconds" << endl;
+            cout << "total_response_time: " << total_response_time << endl;
+            cout << "update response time: " << total_update_response_time / number_of_updates << endl;
+            cout << "number_of_queries: " << number_of_queries << endl;
+            cout << "query process time: " << total_query_process_time / number_of_query_processings << " ";
+
+            cout << "expected_update_response_time: " << total_update_response_time / number_of_updates << endl;
+            cout << "expected_update_process_time: " << total_update_process_time / number_of_updates << endl;
+
+            if (overload_flag == 0 && smallest_avg_response_time > total_response_time / number_of_queries) {
+                smallest_avg_response_time = total_response_time / number_of_queries;
+                best_conf = i;
+            }
+
+            total_response_time = 0.0;
+            number_of_queries = 1;
+            total_update_response_time = 0.0;
+            number_of_updates = 1;
+            total_update_process_time = 0.0;
+            total_query_process_time = 0.0;
+            number_of_query_processings = 1;
         }
-        cout << "expected response time: " << total_response_time / number_of_queries << " seconds" << endl;
-        cout << "total_response_time: " << total_response_time << endl;
-        cout << "update response time: "<<total_update_response_time/ number_of_updates<<endl;
-        cout << "number_of_queries: " << number_of_queries << endl;
-        cout << "query process time: "<<total_query_process_time / number_of_query_processings <<" ";
-
-        cout << "expected_update_response_time: " << total_update_response_time / number_of_updates<< endl;
-        cout << "expected_update_process_time: " << total_update_process_time / number_of_updates<< endl;
-
-        if(overload_flag==0 && smallest_avg_response_time > total_response_time / number_of_queries){
-            smallest_avg_response_time =  total_response_time / number_of_queries;
-            best_conf=i;
-        }
-
-        total_response_time = 0.0;
-        number_of_queries = 1;
-        total_update_response_time = 0.0;
-        number_of_updates = 1;
-        total_update_process_time=0.0;
-        total_query_process_time=0.0;
-        number_of_query_processings=1;
     }
     return best_conf;
 }
