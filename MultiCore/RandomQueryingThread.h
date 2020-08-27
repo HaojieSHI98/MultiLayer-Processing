@@ -62,7 +62,9 @@ public:
 
     void join() {
         if(_thread.joinable())
+            cout<<"join!"<<endl;
             _thread.join();
+            cout<<"ok!"<<endl;
     }
 
     void set_stop() {
