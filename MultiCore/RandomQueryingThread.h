@@ -3051,7 +3051,7 @@ public:
         string myversion = "v1_"+std::to_string(multiTestPara.init_objects)+"_";
         std::ifstream queryfile;
 
-        string queryfile_name = input_parameters.input_data_dir + "query_"+myversion + multiTestPara.configstr+".txt";
+        string queryfile_name = input_parameters.input_data_dir + "query_"+myversion + configstr+".txt";
         cout<<"query file name:"<<queryfile_name<<endl;
         queryfile.open(queryfile_name,std::ios_base::in);
         double f1;
@@ -3085,7 +3085,7 @@ public:
         vector<int> arrival_nodes;
 
         std::ifstream nodefile;
-        string nodefile_name = input_parameters.input_data_dir + "node_"+myversion +multiTestPara.configstr+".txt";
+        string nodefile_name = input_parameters.input_data_dir + "node_"+myversion +configstr+".txt";
         cout<<"node file name:"<<nodefile_name<<endl;
         nodefile.open(nodefile_name, std::ios_base::in);
 
