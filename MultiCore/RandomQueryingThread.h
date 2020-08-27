@@ -2809,7 +2809,7 @@ public:
         }
 
         update_finish_rate = max_updates*1.0/total_updates_plan;
-        for (int i = 0; i < multiTestPara.num_threads_query; i++) {
+        for (int i = 0; i < num_threads_query; i++) {
             total_queries_finished += globalThreadVar[threadpool_id][i]->number_of_queries;
         }
         query_finish_rate = total_queries_finished * 1.0 / total_queries_plan;
