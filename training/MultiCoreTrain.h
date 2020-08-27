@@ -318,17 +318,21 @@ int chooseSingleTOAINConfiguration(double fail_p, double alpha, int k,
         cout << end.tv_sec << " " << start.tv_sec << endl;
         cout << "finish in : " << end.tv_sec - start.tv_sec << " secs" << endl;
 
-        if(!multiTestPara.is_single_aggregate) {
-            for (int i = 0; i < multiTestPara.num_threads_query; i++) {
-                total_response_time += globalThreadVar[0][i]->total_query_time;
-                number_of_queries += globalThreadVar[0][i]->number_of_queries;
-            }
-        }
-        else{
-            total_response_time += globalThreadVar[0][0]->total_query_time;
-            number_of_queries += globalThreadVar[0][0]->number_of_queries;
-        }
+//        if(!multiTestPara.is_single_aggregate) {
+//            for (int i = 0; i < multiTestPara.num_threads_query; i++) {
+//                total_response_time += globalThreadVar[0][i]->total_query_time;
+//                number_of_queries += globalThreadVar[0][i]->number_of_queries;
+//            }
+//        }
+//        else{
+//            total_response_time += globalThreadVar[0][0]->total_query_time;
+//            number_of_queries += globalThreadVar[0][0]->number_of_queries;
+//        }
 
+        for (int i = 0; i < num_threads_query; i++) {
+            total_response_time += globalThreadVar[0][i]->total_query_time;
+            number_of_queries += globalThreadVar[0][i]->number_of_queries;
+        }
         cout << "expected response time: " << total_response_time / number_of_queries << " seconds" << endl;
         cout << "total_response_time: " << total_response_time << endl;
         cout << "update response time: "<<total_update_response_time/ number_of_updates<<endl;
