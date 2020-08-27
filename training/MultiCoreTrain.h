@@ -331,7 +331,7 @@ int chooseSingleTOAINConfiguration(double fail_p, double alpha, int k,
 //            number_of_queries += globalThreadVar[0][0]->number_of_queries;
 //        }
 
-            for (int i = 0; i < num_threads_query; i++) {
+            for (int i = 0; i < 1; i++) {
                 total_response_time += globalThreadVar[0][i]->total_query_time;
                 number_of_queries += globalThreadVar[0][i]->number_of_queries;
             }
