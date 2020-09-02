@@ -2724,9 +2724,10 @@ public:
         configstr = configstr_val;
         begin_node = begin_node_val;
         end_node = end_node_val;
-        num_threads_query=(num_threads_val-2); //replication
+
         test_n = test_n_val;
-        num_threads_update = 1; //partition
+        num_threads_update = multiTestPara.update_thread; //partition
+        num_threads_query=floor((num_threads_val-2)/num_threads_update); //replication
         alpha = alpha_val;
         fail_p = fail_p_val;
         k = k_val;
@@ -2735,7 +2736,7 @@ public:
         total_queries_finished=0;
         total_updates_finished=0;
         init();
-        cout<<"num_threads_query: "<<num_threads_query<<endl;
+        cout<<"num_threads_query: "<<num_threads_query<<"num_update_query: "<<num_threads_update<<endl;
         globalThreadVar[threadpool_id] = new GlobalThreadVar*[num_threads_query];
         int k_star = compute_k_star(k, num_threads_update, alpha, fail_p);
         for(int j =0;j<num_threads_query;j++) {
