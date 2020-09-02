@@ -2966,7 +2966,7 @@ public:
         std::ofstream outfile;
 
 
-        outfile.open(input_parameters.output_data_dir + "stone_outfile_auto" + (multiTestPara.suffix), std::ios_base::app);
+        outfile.open(input_parameters.output_data_dir + "stone_outfile_auto_" + configstr, std::ios_base::app);
         outfile << endl
                 << " update thread "<<num_threads_update
                 << " query thread "<<num_threads_query
