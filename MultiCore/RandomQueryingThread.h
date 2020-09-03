@@ -1206,10 +1206,10 @@ public:
             });
             observer.Vu[id] = accum/(observer.tu_ex[id].size()-1);
 
-            cout<<"pool "<<id<<" ta - "<<ta_mean<<" ts - "<<ts_mean<<" tq - "<<tq_mean<<" Vq - "<<observer.Vq[id]<<" tu - "<<tu_mean<<" Vu - "<<observer.Vu[id]<<" Ratio - "<<observer.ratio_x[id]<<endl;
+//            cout<<"pool "<<id<<" ta - "<<ta_mean<<" ts - "<<ts_mean<<" tq - "<<tq_mean<<" Vq - "<<observer.Vq[id]<<" tu - "<<tu_mean<<" Vu - "<<observer.Vu[id]<<" Ratio - "<<observer.ratio_x[id]<<endl;
         }
 
-        cout<<"update_rate:"<<observer.update_rate<<" query_rate:"<<observer.query_rate<<"time_val:"<<time_val<<endl;
+//        cout<<"update_rate:"<<observer.update_rate<<" query_rate:"<<observer.query_rate<<"time_val:"<<time_val<<endl;
     }
     double functionx(int ti,int x,int core){
         double y = floor(core/x);
@@ -1238,8 +1238,29 @@ public:
                     t_min = t_;
                 }
             }
-            cout<<"pool : "<<id<<" x_star : "<<x_star<<endl;
+            if(x_stars.size()>=STAR_NUM)
+            {
+                x_stars.erase(x_stars.begin(),x_stars.begin()+2);
+            }
+            x_stars.push_back(x_star);
+            if(x_stars.size()>=STAR_NUM)
+            {
+                for(int i = 1;i<=num_threads_each;i++)
+                {
+                    int index_num =0;
+                    for(int j =1;j<x_stars.size();j++)
+                    {
+                        if(x_stars[j]==i)
+                        {
+                            index_num++;
+                        }
+                    }
+                    if(index_num> STAR_NUM/2) cout<<"x_star :"<<i<<" num_of_times: "<<index_num<<endl;
+                }
+            }
+//            cout<<"pool : "<<id<<" x_star : "<<x_star<<endl;
         }
+
     }
     void task_run(){
         struct timeval end;
@@ -1250,7 +1271,7 @@ public:
             if(overload_flag) break;
             if(arrival_task_nodes[i]==-1) continue;
             pair<double, int> &event = full_task_list[i];
-            if((i+1)%20000==0) {
+            if((i+1)%10000==0) {
                 update_param();
                 compute_x_star();
             }

@@ -56,6 +56,7 @@ double PI = 3.1415926535;
 //#define DISPLAY 0
 //new
 #define EXP_SIZE 1000
+#define STAR_NUM 20
 typedef struct{
     std::mutex ta_mutex[2];
     std::mutex tq_mutex[2];
@@ -74,7 +75,7 @@ typedef struct{
     double Vq[2]={0};
     double Vu[2]={0};
 }Observer;
-
+vector<int> x_stars;
 Observer observer;
 int DISPLAY = 1;
 //
