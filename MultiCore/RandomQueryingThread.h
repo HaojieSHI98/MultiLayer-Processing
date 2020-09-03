@@ -1281,7 +1281,7 @@ public:
             int restart_pool = -1;
 
 //            if(event.first>=multiTestPara.config_simulation_time&&tp[0].run_time==0&&tp[1].run_time==0){
-            if(observer.update_rate>=20*observer.query_rate&&tp[0].run_time==0&&tp[1].run_time==0){
+            if(observer.update_rate>20*observer.query_rate&&tp[0].run_time==0&&tp[1].run_time==0&&event.first>=5){
                 update_query_time();
                 clear_query_time();
                 if(tp[0].response_time*tp[1].query_num>tp[1].response_time*tp[0].query_num)
