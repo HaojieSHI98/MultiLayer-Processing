@@ -1699,7 +1699,7 @@ public:
         std::ofstream outfile;
 
 
-        outfile.open(input_parameters.output_data_dir + "stone_outfile_auto" + (multiTestPara.suffix), std::ios_base::app);
+        outfile.open(input_parameters.output_data_dir + "stone1_outfile_auto_threadeach_"+to_string(num_threads_each) +"_"+ configstr+".txt", std::ios_base::app);
         outfile << endl
                 <<" toal response time 0 first: "<<tp[0].response_time_first<<" number of queries 0: "<<tp[0].query_num_first
                 <<" toal response time 1 first: "<<tp[1].response_time_first<<" number of queries 1: "<<tp[1].query_num_first
@@ -2994,7 +2994,7 @@ public:
         std::ofstream outfile;
 
 
-        outfile.open(input_parameters.output_data_dir + "stone1_outfile_auto_query_"+to_string(num_threads_query)+"_update_"+to_string(num_threads_update) + configstr+".txt", std::ios_base::app);
+        outfile.open(input_parameters.output_data_dir + "stone1_outfile_auto_query_"+to_string(num_threads_query)+"_update_"+to_string(num_threads_update) +"_"+ configstr+".txt", std::ios_base::app);
         outfile << endl
                 << " update thread "<<num_threads_update
                 << " query thread "<<num_threads_query
