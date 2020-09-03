@@ -1284,13 +1284,13 @@ public:
             if(observer.update_rate>20*observer.query_rate&&tp[0].run_time==0&&tp[1].run_time==0&&event.first>=5){
                 update_query_time();
                 clear_query_time();
-                if(tp[0].response_time*tp[1].query_num>tp[1].response_time*tp[0].query_num)
-                    restart_pool = 0;
-                else restart_pool = 1;
+//                if(tp[0].response_time*tp[1].query_num>tp[1].response_time*tp[0].query_num)
+//                    restart_pool = 0;
+//                else restart_pool = 1;
                 tp[restart_pool].restart_flag = 1;
                 cout<<"time now: "<<event.first<<endl;
                 cout<<"restart pool"<<restart_pool<<"!!"<<endl<<endl<<endl;
-                task_reinit(restart_pool);
+                task_reinit(0);
                 restart_flag = 1;
             }
 
