@@ -1594,6 +1594,11 @@ public:
 //        cout<<"init step1"<<endl;
 
         globalThreadVar[ti] = new GlobalThreadVar*[tp[ti].num_threads_query];
+
+        for(int id =0;id<2;id++)
+        {
+            cout<<"pool: "<<id<<"update: "<<tp[id].num_thread_update<<"query: "<<tp[id].num_threads_query<<endl;
+        }
 //        cout<<"init step2"<<endl;
         int k_star = compute_k_star(k, tp[ti].num_thread_update, alpha, fail_p);
         for(int j =0;j<tp[ti].num_threads_query;j++) {
