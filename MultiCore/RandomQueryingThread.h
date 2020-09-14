@@ -1294,12 +1294,6 @@ public:
                 restart_flag = 1;
             }
 
-//            if(tp[1].restart_flag==1){
-//                cout<<"start reinit!!!"<<endl<<endl<<endl;
-//                task_reinit(1);
-//                restart_flag = 1;
-//            }
-
             if(can_estimate)
                 gettimeofday(&end, NULL);
             else{
