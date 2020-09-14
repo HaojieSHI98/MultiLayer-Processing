@@ -1208,10 +1208,10 @@ public:
             });
             observer.Vu[id] = accum/(observer.tu_ex[id].size()-1);
 
-//            cout<<"pool "<<id<<" ta - "<<ta_mean<<" ts - "<<ts_mean<<" tq - "<<tq_mean<<" Vq - "<<observer.Vq[id]<<" tu - "<<tu_mean<<" Vu - "<<observer.Vu[id]<<" Ratio - "<<observer.ratio_x[id]<<endl;
+            cout<<"pool "<<id<<" ta - "<<ta_mean<<" ts - "<<ts_mean<<" tq - "<<tq_mean<<" Vq - "<<observer.Vq[id]<<" tu - "<<tu_mean<<" Vu - "<<observer.Vu[id]<<" Ratio - "<<observer.ratio_x[id]<<endl;
         }
 
-//        cout<<"update_rate:"<<observer.update_rate<<" query_rate:"<<observer.query_rate<<"time_val:"<<time_val<<endl;
+        cout<<"update_rate:"<<observer.update_rate<<" query_rate:"<<observer.query_rate<<"time_val:"<<time_val<<endl;
     }
     double functionx(int ti,int x,int core){
         double y = floor(core/x);
