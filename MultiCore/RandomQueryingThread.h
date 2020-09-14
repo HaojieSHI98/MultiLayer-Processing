@@ -1219,7 +1219,7 @@ public:
                 observer.update_rate*observer.tu[ti]*observer.tu[ti]*(1+gama_u)/x)/
                 (2*(MICROSEC_PER_SEC-observer.query_rate*observer.tq[ti]/y-observer.update_rate*observer.tu[ti]/x));
         double t_all = t_w+observer.tq[ti]+observer.ratio_x[ti]*x;
-        cout<<"pool: "<< ti<<" x - "<<x<<" tw - "<<t_w<<"t_all - "<<t_all<<" tx - "<<observer.ratio_x[ti]*x<<" tq - "<<observer.tq[ti]<<endl;
+//        cout<<"pool: "<< ti<<" x - "<<x<<" tw - "<<t_w<<"t_all - "<<t_all<<" tx - "<<observer.ratio_x[ti]*x<<" tq - "<<observer.tq[ti]<<endl;
         if(t_w<=0) t_all = -1;
         return t_all;
     }
