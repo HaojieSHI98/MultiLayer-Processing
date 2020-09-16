@@ -1458,7 +1458,11 @@ public:
                 if(tp[0].ontask_num>tp[1].ontask_num)
                 {
                     query_turn_flag = 1;
-                }else query_turn_flag = 0;
+                }else if(tp[0].ontask_num<tp[1].ontask_num) {
+                    query_turn_flag = 0;
+                }else{
+                    query_turn_flag = 1-query_turn_flag;
+                }
 //                int ti = query_turn_flag;
 //                turn_num ++;
 //                task_turn_mutex.lock();
