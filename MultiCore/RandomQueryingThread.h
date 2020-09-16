@@ -209,14 +209,17 @@ public:
 //                    }
 //                    observer.tq_ex[pool_id].push_back(response_time);
 //                    observer.tq_mutex[pool_id].unlock();
-
-                    observer.ta_mutex[pool_id].lock();
-                    if(observer.ta[pool_id].size()>EXP_SIZE)
+                    if(X_STAR_MODE)
                     {
-                        observer.ta[pool_id].erase(observer.ta[pool_id].begin(),observer.ta[pool_id].begin()+1);
+                        observer.ta_mutex[pool_id].lock();
+                        if(observer.ta[pool_id].size()>EXP_SIZE)
+                        {
+                            observer.ta[pool_id].erase(observer.ta[pool_id].begin(),observer.ta[pool_id].begin()+1);
+                        }
+                        observer.ta[pool_id].push_back(current_time-current_time1);
+                        observer.ta_mutex[pool_id].unlock();
                     }
-                    observer.ta[pool_id].push_back(current_time-current_time1);
-                    observer.ta_mutex[pool_id].unlock();
+
                     // cout top-k
                     thread_mutex.lock();
                     merge_cnt[adjust_id] = 0;
@@ -507,13 +510,17 @@ public:
                         last_query_cost = processing_time;
 
 //                        update_time_mutex.lock();
-                        observer.tq_mutex[pool_id].lock();
-                        if(observer.tq_ex[pool_id].size()>EXP_SIZE)
+                        if(X_STAR_MODE)
                         {
-                            observer.tq_ex[pool_id].erase(observer.tq_ex[pool_id].begin(),observer.tq_ex[pool_id].begin()+1);
+                            observer.tq_mutex[pool_id].lock();
+                            if(observer.tq_ex[pool_id].size()>EXP_SIZE)
+                            {
+                                observer.tq_ex[pool_id].erase(observer.tq_ex[pool_id].begin(),observer.tq_ex[pool_id].begin()+1);
+                            }
+                            observer.tq_ex[pool_id].push_back(processing_time);
+                            observer.tq_mutex[pool_id].unlock();
                         }
-                        observer.tq_ex[pool_id].push_back(processing_time);
-                        observer.tq_mutex[pool_id].unlock();
+
 //                        update_time_mutex.unlock();
                     }
                     if (multiTestPara.is_thresholded) {
@@ -588,12 +595,15 @@ public:
                             number_of_updates++;
                             update_time_mutex.unlock();
 
-                            observer.tu_mutex[pool_id].lock();
-                            if(observer.tu_ex[pool_id].size()>EXP_SIZE){
-                                observer.tu_ex[pool_id].erase(observer.tu_ex[pool_id].begin(),observer.tu_ex[pool_id].begin()+1);
+                            if(X_STAR_MODE)
+                            {
+                                observer.tu_mutex[pool_id].lock();
+                                if(observer.tu_ex[pool_id].size()>EXP_SIZE){
+                                    observer.tu_ex[pool_id].erase(observer.tu_ex[pool_id].begin(),observer.tu_ex[pool_id].begin()+1);
+                                }
+                                observer.tu_ex[pool_id].push_back(processing_time);
+                                observer.tu_mutex[pool_id].unlock();
                             }
-                            observer.tu_ex[pool_id].push_back(processing_time);
-                            observer.tu_mutex[pool_id].unlock();
                         }
 //                        last_insert_cost = processing_time;
                     }
@@ -637,12 +647,16 @@ public:
 //                        update_time_list.push_back(processing_time);
                         number_of_updates++;
                         update_time_mutex.unlock();
-                        observer.tu_mutex[pool_id].lock();
-                        if(observer.tu_ex[pool_id].size()>EXP_SIZE){
-                            observer.tu_ex[pool_id].erase(observer.tu_ex[pool_id].begin(),observer.tu_ex[pool_id].begin()+1);
+
+                        if(X_STAR_MODE)
+                        {
+                            observer.tu_mutex[pool_id].lock();
+                            if(observer.tu_ex[pool_id].size()>EXP_SIZE){
+                                observer.tu_ex[pool_id].erase(observer.tu_ex[pool_id].begin(),observer.tu_ex[pool_id].begin()+1);
+                            }
+                            observer.tu_ex[pool_id].push_back(processing_time);
+                            observer.tu_mutex[pool_id].unlock();
                         }
-                        observer.tu_ex[pool_id].push_back(processing_time);
-                        observer.tu_mutex[pool_id].unlock();
                         // need lock
 //                        last_delete_cost = processing_time;
                     }
@@ -1183,33 +1197,37 @@ public:
         observer.update_rate = observer.update_rate/time_val;
         observer.query_rate = observer.query_rate/time_val;
 
-        for(int id = 0;id<2;id++)
+        if(X_STAR_MODE)
         {
-            double ta_sum = std::accumulate(observer.ta[id].begin(),observer.ta[id].end(),0);
-            double ta_mean = ta_sum/observer.ta[id].size();
-            double ts_sum = std::accumulate(observer.ts[id].begin(),observer.ts[id].end(),0);
-            double ts_mean = ts_sum/observer.ts[id].size();
-            observer.ratio_x[id]=(ta_mean+ts_mean)/tp[id].num_thread_update;
-            double tq_sum = std::accumulate(observer.tq_ex[id].begin(),observer.tq_ex[id].end(),0);
-            double tq_mean = tq_sum/observer.tq_ex[id].size();
-            observer.tq[id] = tq_mean;
-            double accum  = 0.0;
-            std::for_each (std::begin(observer.tq_ex[id]), std::end(observer.tq_ex[id]), [&](const double d) {
-                accum  += (d-tq_mean)*(d-tq_mean);
-            });
-            observer.Vq[id] = sqrt(accum/(observer.tq_ex[id].size()-1));
+            for(int id = 0;id<2;id++)
+            {
+                double ta_sum = std::accumulate(observer.ta[id].begin(),observer.ta[id].end(),0);
+                double ta_mean = ta_sum/observer.ta[id].size();
+                double ts_sum = std::accumulate(observer.ts[id].begin(),observer.ts[id].end(),0);
+                double ts_mean = ts_sum/observer.ts[id].size();
+                observer.ratio_x[id]=(ta_mean+ts_mean)/tp[id].num_thread_update;
+                double tq_sum = std::accumulate(observer.tq_ex[id].begin(),observer.tq_ex[id].end(),0);
+                double tq_mean = tq_sum/observer.tq_ex[id].size();
+                observer.tq[id] = tq_mean;
+                double accum  = 0.0;
+                std::for_each (std::begin(observer.tq_ex[id]), std::end(observer.tq_ex[id]), [&](const double d) {
+                    accum  += (d-tq_mean)*(d-tq_mean);
+                });
+                observer.Vq[id] = sqrt(accum/(observer.tq_ex[id].size()-1));
 
-            double tu_sum = std::accumulate(observer.tu_ex[id].begin(),observer.tu_ex[id].end(),0);
-            double tu_mean = tu_sum/observer.tu_ex[id].size();
-            observer.tu[id] = tu_mean;
-            accum  = 0.0;
-            std::for_each (std::begin(observer.tu_ex[id]), std::end(observer.tu_ex[id]), [&](const double d) {
-                accum  += (d-tu_mean)*(d-tu_mean);
-            });
-            observer.Vu[id] = accum/(observer.tu_ex[id].size()-1);
+                double tu_sum = std::accumulate(observer.tu_ex[id].begin(),observer.tu_ex[id].end(),0);
+                double tu_mean = tu_sum/observer.tu_ex[id].size();
+                observer.tu[id] = tu_mean;
+                accum  = 0.0;
+                std::for_each (std::begin(observer.tu_ex[id]), std::end(observer.tu_ex[id]), [&](const double d) {
+                    accum  += (d-tu_mean)*(d-tu_mean);
+                });
+                observer.Vu[id] = accum/(observer.tu_ex[id].size()-1);
 
-            cout<<"pool "<<id<<" ta - "<<ta_mean<<" ts - "<<ts_mean<<" tq - "<<tq_mean<<" Vq - "<<observer.Vq[id]<<" tu - "<<tu_mean<<" Vu - "<<observer.Vu[id]<<" Ratio - "<<observer.ratio_x[id]<<endl;
+//                cout<<"pool "<<id<<" ta - "<<ta_mean<<" ts - "<<ts_mean<<" tq - "<<tq_mean<<" Vq - "<<observer.Vq[id]<<" tu - "<<tu_mean<<" Vu - "<<observer.Vu[id]<<" Ratio - "<<observer.ratio_x[id]<<endl;
+            }
         }
+
 
         cout<<"update_rate:"<<observer.update_rate<<" query_rate:"<<observer.query_rate<<"time_val:"<<time_val<<endl;
     }
@@ -1273,11 +1291,12 @@ public:
             if(overload_flag) break;
             if(arrival_task_nodes[i]==-1) continue;
             pair<double, int> &event = full_task_list[i];
-            if((i+1)%10000==0) {
-                update_param();
-                compute_x_star();
-            }
+
             long issue_time = floor(event.first * MICROSEC_PER_SEC);
+            if(int(issue_time+1)%MICROSEC_PER_SEC==0) {
+                update_param();
+                if(X_STAR_MODE)   compute_x_star();
+            }
 //            cout<<"issue_time:"<<issue_time<<endl;
             int restart_flag = 0;
             int restart_pool = -1;

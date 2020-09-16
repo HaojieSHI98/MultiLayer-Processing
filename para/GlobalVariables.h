@@ -57,6 +57,7 @@ double PI = 3.1415926535;
 //new
 #define EXP_SIZE 1000
 #define STAR_NUM 20
+#define X_STAR_MODE 0
 typedef struct{
     std::mutex ta_mutex[2];
     std::mutex tq_mutex[2];
