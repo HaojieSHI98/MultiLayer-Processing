@@ -1287,15 +1287,18 @@ public:
         long offset_time;
         int query_turn_flag = 0;
         int turn_num = 0;
+        int t_min =1;
         for (int i=0; i < full_task_list.size(); i++) {
             if(overload_flag) break;
             if(arrival_task_nodes[i]==-1) continue;
             pair<double, int> &event = full_task_list[i];
 
             long issue_time = floor(event.first * MICROSEC_PER_SEC);
-            if(int(issue_time+1)%MICROSEC_PER_SEC==0) {
+
+            if(event.first>=t_min) {
                 update_param();
                 if(X_STAR_MODE)   compute_x_star();
+                t_min+=1;
             }
 //            cout<<"issue_time:"<<issue_time<<endl;
             int restart_flag = 0;
