@@ -1930,6 +1930,7 @@ public:
                 tp[id].eva_response_speed = 100;
             else
                 tp[id].eva_response_speed = tp[id].eva_response_time/tp[id].eva_query_num;
+            cout<<"pool "<<id<<"response_speed "<<tp[id].eva_response_speed<<"response time "<<tp[id].eva_response_time<<"query num "<<tp[id].eva_query_num<<endl;
         }
     }
     void update_query_time(){
