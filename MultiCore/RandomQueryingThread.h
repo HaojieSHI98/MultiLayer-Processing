@@ -755,6 +755,9 @@ typedef struct {
     double response_time_first;
     int query_num_first;
     int ontask_num;
+    double eva_response_time;
+    int eva_query_num;
+    double eva_response_speed;
 
 }OneThreadPool;
 
@@ -784,7 +787,13 @@ private:
     vector<std::pair<double, int> > full_list;
     vector<int> arrival_nodes;
     int configurationId;
-
+    int mode;
+    int last_eva_t = 0;
+    int query_update_set = 1;
+    int big_q_query;
+    int big_q_update;
+    int big_u_query;
+    int big_u_update;
 
 public:
     RandomTwoThreadPool_Control( int begin_node_val, int end_node_val, int num_threads_val, double alpha_val, int k_val, double fail_p_val,
@@ -808,6 +817,7 @@ public:
             tp[ti].response_time = 0;
             tp[ti].restart_flag = 0;
         }
+        mode = NORMAL_MODE;
         tp[1].threshold_number = 20000;
         tp[0].threshold_number = 20000;
         configurationId = configurationId_val;
@@ -1020,15 +1030,18 @@ public:
             tp[ti].init_list.assign(init_list.begin(),init_list.end());
             tp[ti].init_arrival_nodes.assign(init_arrival_node.begin(),init_arrival_node.end());
         }
-//        tp[0].num_threads_query = num_threads_each;
-//        tp[0].num_thread_update = 1;
-
+        tp[0].num_threads_query = num_threads_each;
+        tp[0].num_thread_update = 1;
+        big_q_query = num_threads_each;
+        big_q_update = 1;
         int num_q = int(sqrt(num_threads_each));
         int num_p = int((num_threads_each)/num_q);
-        tp[0].num_threads_query = max(num_q,num_p);
-        tp[0].num_thread_update = num_p+num_q-max(num_q,num_p);
-        tp[1].num_threads_query = max(num_q,num_p);
-        tp[1].num_thread_update = num_p+num_q-max(num_q,num_p);
+//        tp[0].num_threads_query = max(num_q,num_p);
+//        tp[0].num_thread_update = num_p+num_q-max(num_q,num_p);
+        tp[1].num_thread_update = max(num_q,num_p);
+        tp[1].num_threads_query = num_p+num_q-max(num_q,num_p);
+        big_u_query = num_p+num_q-max(num_q,num_p);
+        big_u_update = max(num_q,num_p);
 //        tp[1].num_threads_query = num_threads_each;
 //        tp[1].num_thread_update = 1;
         if(DISPLAY)cout<<"Pool 0 queries:"<<tp[0].num_threads_query<<" updates:"<<tp[0].num_thread_update<<endl;
@@ -1196,7 +1209,9 @@ public:
         double time_val = (observer.time_list[observer.task_list.size()-1]-observer.time_list[0])/MICROSEC_PER_SEC;
         observer.update_rate = observer.update_rate/time_val;
         observer.query_rate = observer.query_rate/time_val;
-
+        observer.last_update_query_ratio = observer.update_query_ratio;
+        if(observer.query_rate<=1e-5) observer.update_query_ratio=100;
+        else observer.update_query_ratio = observer.update_rate/observer.query_rate;
         if(X_STAR_MODE)
         {
             for(int id = 0;id<2;id++)
@@ -1295,28 +1310,24 @@ public:
 
             long issue_time = floor(event.first * MICROSEC_PER_SEC);
 
-            if(event.first>=t_min) {
-                update_param();
-                if(X_STAR_MODE)   compute_x_star();
-                t_min+=1;
-            }
 //            cout<<"issue_time:"<<issue_time<<endl;
-            int restart_flag = 0;
-            int restart_pool = -1;
+//            int restart_flag = 0;
+//            int restart_pool = -1;
+//
+////            if(event.first>=multiTestPara.config_simulation_time&&tp[0].run_time==0&&tp[1].run_time==0){
+//            if(observer.update_rate>20*observer.query_rate&&tp[0].run_time==0&&tp[1].run_time==0&&event.first>=5){
+//                update_query_time();
+//                clear_query_time();
+////                if(tp[0].response_time*tp[1].query_num>tp[1].response_time*tp[0].query_num)
+////                    restart_pool = 0;
+////                else restart_pool = 1;
+//                tp[restart_pool].restart_flag = 1;
+//                cout<<"time now: "<<event.first<<endl;
+//                cout<<"restart pool"<<restart_pool<<"!!"<<endl<<endl<<endl;
+//                task_reinit(0);
+//                restart_flag = 1;
+//            }
 
-//            if(event.first>=multiTestPara.config_simulation_time&&tp[0].run_time==0&&tp[1].run_time==0){
-            if(observer.update_rate>20*observer.query_rate&&tp[0].run_time==0&&tp[1].run_time==0&&event.first>=5){
-                update_query_time();
-                clear_query_time();
-//                if(tp[0].response_time*tp[1].query_num>tp[1].response_time*tp[0].query_num)
-//                    restart_pool = 0;
-//                else restart_pool = 1;
-                tp[restart_pool].restart_flag = 1;
-                cout<<"time now: "<<event.first<<endl;
-                cout<<"restart pool"<<restart_pool<<"!!"<<endl<<endl<<endl;
-                task_reinit(0);
-                restart_flag = 1;
-            }
 
             if(can_estimate)
                 gettimeofday(&end, NULL);
@@ -1326,6 +1337,112 @@ public:
                 estimate_mutex.unlock();
             }
             long current_time=(end.tv_sec - global_start.tv_sec) * MICROSEC_PER_SEC + end.tv_usec - global_start.tv_usec;
+
+            int restart_flag = 0;
+
+            if(event.first>=t_min) {
+                update_param();
+                if(X_STAR_MODE)   compute_x_star();
+                t_min+=1;
+            }
+
+            if(mode == NORMAL_MODE)
+            {
+                if(i==0) {
+                    mode = EVALUATION_START_MODE;
+                    last_eva_t = current_time;
+                    start_evaluation();
+                    cout<<"Last mode: NORMAL--> Start Evaluation!"<<endl<<endl;
+                }
+                if(abs(observer.update_query_ratio-observer.last_update_query_ratio)>=MIN_UQ_DIFF)
+                {
+                    int r_query_num = -1;
+                    int r_update_num = -1;
+                    if((observer.update_query_ratio-observer.last_update_query_ratio>=MIN_UQ_DIFF)&&(observer.update_query_ratio>=Update_Query_Threshold)){
+                        if(tp[0].num_thread_update==big_q_update&&tp[1].num_thread_update==big_q_update)
+                        {
+                            mode = RESET_MODE;
+                            r_query_num = big_u_query;
+                            r_update_num = big_u_update;
+                        }else if(tp[0].num_thread_update==big_q_update||tp[1].num_thread_update==big_q_update)
+                        {
+                            mode = EVALUATION_START_MODE;
+                            last_eva_t = current_time;
+                            start_evaluation();
+                            cout<<"Last mode: NORMAL--> Start Evaluation!"<<endl<<endl;
+                        }
+                    }else if((observer.last_update_query_ratio-observer.update_query_ratio>=MIN_UQ_DIFF)&&(observer.update_query_ratio<=Update_Query_Threshold)){
+                        if(tp[0].num_thread_update==big_u_update&&tp[1].num_thread_update==big_u_update){
+                            mode = RESET_MODE;
+                            r_query_num = big_q_query;
+                            r_update_num = big_q_update;
+                        }else if(tp[0].num_thread_update==big_u_update||tp[1].num_thread_update==big_u_update)
+                        {
+                            mode = EVALUATION_START_MODE;
+                            last_eva_t = current_time;
+                            start_evaluation();
+                            cout<<"Last mode: NORMAL--> Start Evaluation!"<<endl<<endl;
+                        }
+                    }
+                    if(mode == RESET_MODE)
+                    {
+                        restart_flag = 1;
+                        update_query_time();
+                        clear_query_time();
+                        tp[0].restart_flag = 1;
+                        cout << "Mode Last: NORMAL" << endl << "Reset Pool 0 To:" << r_query_num << "," << r_update_num
+                             << "!!" << endl << endl << endl;
+                        task_reinit_withQU(0, big_u_query, big_u_update);
+                        if (can_estimate)
+                            gettimeofday(&end, NULL);
+                        else {
+                            estimate_mutex.lock();
+                            gettimeofday(&end, NULL);
+                            estimate_mutex.unlock();
+                        }
+                        current_time = (end.tv_sec - global_start.tv_sec) * MICROSEC_PER_SEC + end.tv_usec -
+                                       global_start.tv_usec;
+                        mode = EVALUATION_START_MODE;
+                        last_eva_t = current_time;
+                        start_evaluation();
+                    }
+                }
+            }
+            else if(mode == EVALUATION_START_MODE){
+                if(current_time-last_eva_t>=EVA_TIME*MICROSEC_PER_SEC)
+                {
+                    cout<<"End Evaluation!"<<endl;
+                    mode = EVALUATION_END_MODE;
+                    end_evaluation();
+                    update_query_time();
+                    clear_query_time();
+                    int restart_pool = 0;
+                    int go_to_flag = -1;
+                    if(tp[0].eva_response_speed<tp[1].eva_response_speed)
+                    {
+                        restart_pool = 0;
+                    }
+                    else {
+                        restart_pool = 1;
+                    }
+                    if(tp[1-restart_pool].num_thread_update==big_q_update) go_to_flag = QUERY_SET;
+                    else go_to_flag = UPDATE_SET;
+                    if(go_to_flag==QUERY_SET&&observer.update_query_ratio>=Update_Query_Threshold){
+                        cout<<"change UQ-Threshold from:"<<Update_Query_Threshold<<" to "<<observer.update_query_ratio<<endl;
+                        Update_Query_Threshold = observer.update_query_ratio;
+                    }else if(go_to_flag==UPDATE_SET&&observer.update_query_ratio<=Update_Query_Threshold){
+                        cout<<"change UQ-Threshold from:"<<Update_Query_Threshold<<" to "<<observer.update_query_ratio<<endl;
+                        Update_Query_Threshold = observer.update_query_ratio;
+                    }
+                    tp[restart_pool].restart_flag = 1;
+                    cout<<"restart pool"<<restart_pool<<"!!"<<endl<<endl<<endl;
+                    task_reinit(restart_pool);
+                    restart_flag = 1;
+                    mode = NORMAL_MODE;
+                }
+            }
+
+
             if(i==0) offset_time = current_time-issue_time;
             if(restart_flag){
                 offset_time = current_time-issue_time;
@@ -1558,6 +1675,102 @@ public:
 
         }
     }
+    void task_reinit_withQU(int ti,int query_num,int update_num)
+    {
+        int tj = 1-ti;
+        wait_for_finish(ti);
+        set_stop(ti);
+        join(ti);
+        update_query_time();
+        observer.task_list.clear();
+        observer.time_list.clear();
+        observer.ts[0].clear();
+        observer.ta[0].clear();
+        observer.tu_ex[0].clear();
+        observer.tq_ex[0].clear();
+        observer.ts[1].clear();
+        observer.ta[1].clear();
+        observer.tu_ex[1].clear();
+        observer.tq_ex[1].clear();
+        long total_response_time = tp[0].response_time+tp[1].response_time;
+        number_of_queries = tp[0].query_num+tp[1].query_num;
+        cout<<"toal response time 0 :"<<tp[0].response_time<<" number of queries 0: "<<tp[0].query_num<<endl;
+        cout<<"toal response time 1 :"<<tp[1].response_time<<" number of queries 1: "<<tp[1].query_num<<endl;
+        cout << "expected response time: " << total_response_time / float(number_of_queries) << " seconds" << endl;
+        cout << "total_response_time: " << total_response_time << endl;
+        cout << "number_of_queries: " << number_of_queries << endl;
+        tp[0].response_time_first = tp[0].response_time;
+        tp[0].query_num_first = tp[0].query_num;
+        tp[1].response_time_first = tp[1].response_time;
+        tp[1].query_num_first = tp[1].query_num;
+        tp[ti].threadpool_id=ti;
+        tp[ti].num_threads_query = query_num;
+        tp[ti].num_thread_update = update_num;
+        tp[ti].run_time++;
+        tp[ti]._needjoin = 0;
+        tp[ti].threshold_number = 0;
+
+        tp[ti].total_object_map.clear();
+        tp[ti].init_arrival_nodes.clear();
+        tp[ti].init_list.clear();
+        tp[ti].current_object_node.clear();
+        tp[ti].init_arrival_nodes.assign(tp[tj].current_object_node.begin(),tp[tj].current_object_node.end());
+        for(int init_i = 0;init_i< tp[ti].init_arrival_nodes.size();init_i++)
+        {
+            tp[ti].init_list.push_back(make_pair(0.0, INSERT));
+        }
+
+
+        tp[ti].current_frame = 0;
+        tp[ti].begin_frame = 0;
+
+        tp[ti].global_start_q_id = 0;
+        tp[ti].restart_flag = 0;
+        tp[ti].rand_idx_query = 0;
+        tp[ti].rand_idx_update = 0;
+        tp[ti].restart_flag = 0;
+        tp[ti]._pool.clear();
+//        cout<<"init step1"<<endl;
+
+        globalThreadVar[ti] = new GlobalThreadVar*[tp[ti].num_threads_query];
+
+        for(int id =0;id<2;id++)
+        {
+            cout<<"pool: "<<id<<"update: "<<tp[id].num_thread_update<<"query: "<<tp[id].num_threads_query<<endl;
+        }
+//        cout<<"init step2"<<endl;
+        int k_star = compute_k_star(k, tp[ti].num_thread_update, alpha, fail_p);
+        for(int j =0;j<tp[ti].num_threads_query;j++) {
+            globalThreadVar[ti][j] = new GlobalThreadVar();
+            globalThreadVar[ti][j]->ran_threshold.clear();
+//            cout<<"query:"<<j<<" time:"<<globalThreadVar[j]->total_query_time<<" num:"<<globalThreadVar[j]->number_of_queries<<endl;
+            for (int i = 0; i <= QUERY_ID_FOLD; i++) globalThreadVar[ti][j]->ran_threshold.push_back(INT_MAX);
+        }
+//        cout<<"init step3"<<endl;
+        if(!multiTestPara.is_single_aggregate)
+            tp[ti]._aggregate_thread = new RandomAggregateThread* [tp[ti].num_threads_query];
+        if(multiTestPara.is_single_aggregate){
+            tp[ti]._single_aggregate_thread=new RandomAggregateThread(ti,0, k, tp[ti].num_thread_update);
+        }
+        if(DISPLAY)cout << "k_star: " << k_star << endl;
+        for(int j =0;j<tp[ti].num_threads_query;j++){
+
+            if(!multiTestPara.is_single_aggregate)
+                tp[ti]._aggregate_thread[j] = new RandomAggregateThread(ti,j, k, tp[ti].num_thread_update);
+            for(int i=0;i<tp[ti].num_thread_update;i++) {
+                if(!multiTestPara.is_single_aggregate) {
+                    RandomThread *t = new RandomThread(ti,j, i, k_star,query_cost,insert_cost,delete_cost, tp[ti]._aggregate_thread[j]);
+                    tp[ti]._pool.push_back(t);
+                }
+                else{
+                    RandomThread *t = new RandomThread(ti,j, i, k_star,query_cost,insert_cost,delete_cost, tp[ti]._single_aggregate_thread);
+                    tp[ti]._pool.push_back(t);
+                }
+            }
+        }
+        clear_query_time();
+        task_init(ti);
+    }
     void task_reinit(int ti)
     {
         int tj = 1-ti;
@@ -1689,6 +1902,34 @@ public:
         if(multiTestPara.is_single_aggregate){
             tp[ti]._single_aggregate_thread->set_stop();
             tp[ti]._single_aggregate_thread->notify();
+        }
+    }
+    void start_evaluation(){
+        for(int id =0;id<2;id++) {
+            tp[id].eva_response_time = 0;
+            tp[id].eva_query_num = 0;
+            for (int i = 0; i < tp[id].num_threads_query; i++) {
+                tp[id].eva_response_time += globalThreadVar[id][i]->total_query_time;
+                tp[id].eva_query_num += globalThreadVar[id][i]->number_of_queries;
+            }
+        }
+    }
+    void end_evaluation(){
+        for(int id =0;id<2;id++) {
+            double last_response_time = tp[id].eva_response_time;
+            int last_query_num = tp[id].eva_query_num;
+            tp[id].eva_response_time = 0;
+            tp[id].eva_query_num = 0;
+            for (int i = 0; i < tp[id].num_threads_query; i++) {
+                tp[id].eva_response_time += globalThreadVar[id][i]->total_query_time;
+                tp[id].eva_query_num += globalThreadVar[id][i]->number_of_queries;
+            }
+            tp[id].eva_response_time -= last_response_time;
+            tp[id].eva_query_num -= last_query_num;
+            if(tp[id].eva_response_time<=0 || tp[id].eva_query_num<=0)
+                tp[id].eva_response_speed = 100;
+            else
+                tp[id].eva_response_speed = tp[id].eva_response_time/tp[id].eva_query_num;
         }
     }
     void update_query_time(){

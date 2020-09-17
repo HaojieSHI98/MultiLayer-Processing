@@ -55,9 +55,20 @@ double PI = 3.1415926535;
 #define NUM_OBV_T 1
 //#define DISPLAY 0
 //new
+
+#define NORMAL_MODE 0
+#define EVALUATION_START_MODE 1
+#define EVALUATION_END_MODE 2
+#define RESET_MODE 3
+#define UPDATE_SET 0
+#define QUERY_SET 1
+#define MIN_UQ_DIFF 5
+#define EVA_TIME 5
+
 #define EXP_SIZE 1000
 #define STAR_NUM 20
 #define X_STAR_MODE 0
+int Update_Query_Threshold = 1;
 typedef struct{
     std::mutex ta_mutex[2];
     std::mutex tq_mutex[2];
@@ -75,6 +86,8 @@ typedef struct{
     double tu[2]={0};
     double Vq[2]={0};
     double Vu[2]={0};
+    double update_query_ratio=0;
+    double last_update_query_ratio=0;
 }Observer;
 vector<int> x_stars;
 Observer observer;
