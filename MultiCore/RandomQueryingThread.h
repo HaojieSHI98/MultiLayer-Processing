@@ -1926,10 +1926,10 @@ public:
             }
             tp[id].eva_response_time -= last_response_time;
             tp[id].eva_query_num -= last_query_num;
-            if(tp[id].eva_response_time<=0 || tp[id].eva_query_num<=0)
+            if(tp[id].eva_response_time<=1e-7 || tp[id].eva_query_num<=1e-7)
                 tp[id].eva_response_speed = 100;
             else
-                tp[id].eva_response_speed = tp[id].eva_response_time/tp[id].eva_query_num;
+                tp[id].eva_response_speed = tp[id].eva_query_num/tp[id].eva_response_time;
             cout<<"pool "<<id<<"response_speed "<<tp[id].eva_response_speed<<"response time "<<tp[id].eva_response_time<<"query num "<<tp[id].eva_query_num<<endl;
         }
     }
