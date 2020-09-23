@@ -1580,29 +1580,30 @@ public:
                 }
             }
             if (event.second == QUERY) {
-                for(int qid =0;qid<2;qid++)
-                {
-                    tp[qid].ontask_num = 0;
-                    for(int z = 0;z < tp[qid].num_threads_query;z++)
-                    {
-                        for(int q_id = 0;q_id <tp[qid].num_thread_update;q_id++)
-                        {
-                            int pool_index=z * tp[qid].num_thread_update + q_id;
-                            int num_queries = tp[qid]._pool[pool_index]->get_num_queries_in_queue();
-                            int num_inserts = tp[qid]._pool[pool_index]->get_num_inserts_in_queue();
-                            int num_deletes = tp[qid]._pool[pool_index]->get_num_deletes_in_queue();
-                            tp[qid].ontask_num+= num_queries+num_inserts+num_deletes;
-                        }
-                    }
-                }
-                if(tp[0].ontask_num>tp[1].ontask_num)
-                {
-                    query_turn_flag = 1;
-                }else if(tp[0].ontask_num<tp[1].ontask_num) {
-                    query_turn_flag = 0;
-                }else{
-                    query_turn_flag = 1-query_turn_flag;
-                }
+//                for(int qid =0;qid<2;qid++)
+//                {
+//                    tp[qid].ontask_num = 0;
+//                    for(int z = 0;z < tp[qid].num_threads_query;z++)
+//                    {
+//                        for(int q_id = 0;q_id <tp[qid].num_thread_update;q_id++)
+//                        {
+//                            int pool_index=z * tp[qid].num_thread_update + q_id;
+//                            int num_queries = tp[qid]._pool[pool_index]->get_num_queries_in_queue();
+//                            int num_inserts = tp[qid]._pool[pool_index]->get_num_inserts_in_queue();
+//                            int num_deletes = tp[qid]._pool[pool_index]->get_num_deletes_in_queue();
+//                            tp[qid].ontask_num+= num_queries+num_inserts+num_deletes;
+//                        }
+//                    }
+//                }
+//                if(tp[0].ontask_num>tp[1].ontask_num)
+//                {
+//                    query_turn_flag = 1;
+//                }else if(tp[0].ontask_num<tp[1].ontask_num) {
+//                    query_turn_flag = 0;
+//                }else{
+//                    query_turn_flag = 1-query_turn_flag;
+//                }
+                query_turn_flag = 1-query_turn_flag;
 //                int ti = query_turn_flag;
 //                turn_num ++;
 //                task_turn_mutex.lock();
