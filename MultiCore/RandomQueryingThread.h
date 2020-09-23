@@ -1200,6 +1200,7 @@ public:
         }
     }
     void update_param(void){
+        double t_uq;
         observer.update_rate = 0;
         observer.query_rate = 0;
         for(int o_i=0;o_i<observer.task_list.size();o_i++){
@@ -1209,9 +1210,31 @@ public:
         double time_val = (observer.time_list[observer.task_list.size()-1]-observer.time_list[0])/MICROSEC_PER_SEC;
         observer.update_rate = observer.update_rate/time_val;
         observer.query_rate = observer.query_rate/time_val;
+//        observer.last_update_query_ratio = observer.update_query_ratio;
+//        observer.task_list.erase(observer.task_list.begin(),observer.task_list.begin()+1);
+        if(observer.update_query_ratio_set.size()>=FILTER_NUM)
+        {
+            observer.update_query_ratio_set.erase(observer.update_query_ratio_set.begin(),observer.update_query_ratio_set.begin()+1);
+        }
+        if(observer.query_rate<=1e-5) t_uq=100;
+        else t_uq = observer.update_rate/observer.query_rate;
+        observer.update_query_ratio_set.push_back(t_uq);
         observer.last_update_query_ratio = observer.update_query_ratio;
-        if(observer.query_rate<=1e-5) observer.update_query_ratio=100;
-        else observer.update_query_ratio = observer.update_rate/observer.query_rate;
+        if(observer.update_query_ratio_set.size()<FILTER_NUM) observer.update_query_ratio=t_uq;
+        else{
+            double sum = 0;
+            double max = observer.update_query_ratio_set[0];
+            double min = max;
+            for(int oj =0;oj<observer.update_query_ratio_set.size();oj++)
+            {
+                sum += observer.update_query_ratio_set[oj];
+                if(min>observer.update_query_ratio_set[oj]) min = observer.update_query_ratio_set[oj];
+                if(max<observer.update_query_ratio_set[oj]) max = observer.update_query_ratio_set[oj];
+            }
+            observer.update_query_ratio = (sum-max-min)/(observer.update_query_ratio_set.size()-2);
+        }
+//        if(observer.query_rate<=1e-5) observer.update_query_ratio=100;
+//        else observer.update_query_ratio = observer.update_rate/observer.query_rate;
         if(X_STAR_MODE)
         {
             for(int id = 0;id<2;id++)
@@ -1692,6 +1715,7 @@ public:
         observer.ta[1].clear();
         observer.tu_ex[1].clear();
         observer.tq_ex[1].clear();
+        observer.update_query_ratio_set.clear();
         long total_response_time = tp[0].response_time+tp[1].response_time;
         number_of_queries = tp[0].query_num+tp[1].query_num;
         cout<<"toal response time 0 :"<<tp[0].response_time<<" number of queries 0: "<<tp[0].query_num<<endl;

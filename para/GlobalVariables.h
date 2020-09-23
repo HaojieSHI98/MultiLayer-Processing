@@ -68,6 +68,7 @@ double PI = 3.1415926535;
 #define EXP_SIZE 1000
 #define STAR_NUM 20
 #define X_STAR_MODE 0
+#define FILTER_NUM 5
 int Update_Query_Threshold = 1;
 typedef struct{
     std::mutex ta_mutex[2];
@@ -88,6 +89,7 @@ typedef struct{
     double Vu[2]={0};
     double update_query_ratio=0;
     double last_update_query_ratio=0;
+    vector<double> update_query_ratio_set;
 }Observer;
 vector<int> x_stars;
 Observer observer;
