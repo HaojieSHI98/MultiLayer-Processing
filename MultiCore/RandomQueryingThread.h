@@ -1030,20 +1030,20 @@ public:
             tp[ti].init_list.assign(init_list.begin(),init_list.end());
             tp[ti].init_arrival_nodes.assign(init_arrival_node.begin(),init_arrival_node.end());
         }
-        tp[0].num_threads_query = num_threads_each;
-        tp[0].num_thread_update = 1;
+//        tp[0].num_threads_query = num_threads_each;
+//        tp[0].num_thread_update = 1;
         big_q_query = num_threads_each;
         big_q_update = 1;
         int num_q = int(sqrt(num_threads_each));
         int num_p = int((num_threads_each)/num_q);
-//        tp[0].num_threads_query = max(num_q,num_p);
-//        tp[0].num_thread_update = num_p+num_q-max(num_q,num_p);
-        tp[1].num_thread_update = max(num_q,num_p);
-        tp[1].num_threads_query = num_p+num_q-max(num_q,num_p);
+        tp[0].num_threads_query = max(num_q,num_p);
+        tp[0].num_thread_update = num_p+num_q-max(num_q,num_p);
+//        tp[1].num_thread_update = max(num_q,num_p);
+//        tp[1].num_threads_query = num_p+num_q-max(num_q,num_p);
         big_u_query = num_p+num_q-max(num_q,num_p);
         big_u_update = max(num_q,num_p);
-//        tp[1].num_threads_query = num_threads_each;
-//        tp[1].num_thread_update = 1;
+        tp[1].num_threads_query = num_threads_each;
+        tp[1].num_thread_update = 1;
         if(DISPLAY)cout<<"Pool 0 queries:"<<tp[0].num_threads_query<<" updates:"<<tp[0].num_thread_update<<endl;
         if(DISPLAY)cout<<"Pool 1 queries:"<<tp[1].num_threads_query<<" updates:"<<tp[1].num_thread_update<<endl;
         for(int ti=0;ti<2;ti++){
