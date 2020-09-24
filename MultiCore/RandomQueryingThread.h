@@ -1381,65 +1381,105 @@ public:
 //                    }
 //                    cout<<"pool:"<<id<<" response time:"<<q_t<<" num:"<<q_n<<endl;
 //                }
-                if(X_STAR_MODE)   compute_x_star();
-                t_min+=1;
-            }
-
-            if(No_Record_Flag &&(current_time-Start_No_Record_Time>=MAX_NORECORD_TIME*MICROSEC_PER_SEC))
-            {
-                No_Record_Flag = 0;
-            }
-            if(mode == NORMAL_MODE && No_Record_Flag == 0)
-            {
-                if(i==0) {
-                    mode = EVALUATION_START_MODE;
-                    last_eva_t = current_time;
-                    start_evaluation();
-                    cout<<"Last mode: NORMAL--> Start Evaluation!"<<endl<<endl;
-                    No_Record_Flag = 1;
-                    Start_No_Record_Time = current_time;
-                }
-                if(abs(observer.update_query_ratio-observer.last_update_query_ratio)>=MIN_UQ_DIFF)
+                if(mode == NORMAL_MODE && No_Record_Flag == 0)
                 {
-                    cout<<"changed now!"<<endl;
+                    if(i==0) {
+                        mode = EVALUATION_START_MODE;
+                        last_eva_t = current_time;
+                        start_evaluation();
+                        cout<<"Last mode: NORMAL--> Start Evaluation!"<<endl<<endl;
+                        No_Record_Flag = 1;
+                        Start_No_Record_Time = current_time;
+                    }
+                    if(abs(observer.update_query_ratio-observer.last_update_query_ratio)>=MIN_UQ_DIFF)
+                    {
+                        cout<<"changed now!"<<endl;
 //                    cout<<"uq_r:"<<observer.update_query_ratio<<"uq_r_last:"<<observer.last_update_query_ratio<<endl;
-                    int r_query_num = -1;
-                    int r_update_num = -1;
-                    if((observer.update_query_ratio-observer.last_update_query_ratio>=MIN_UQ_DIFF)&&(observer.update_query_ratio>=Update_Query_Threshold)){
-                        if(tp[0].num_thread_update==big_q_update&&tp[1].num_thread_update==big_q_update)
-                        {
-                            mode = RESET_MODE;
-                            r_query_num = big_u_query;
-                            r_update_num = big_u_update;
-                        }else if(tp[0].num_thread_update==big_q_update||tp[1].num_thread_update==big_q_update)
-                        {
-                            mode = EVALUATION_START_MODE;
-                            last_eva_t = current_time;
-                            start_evaluation();
-                            cout<<"Last mode: NORMAL--> Start Evaluation!"<<endl<<endl;
+                        int r_query_num = -1;
+                        int r_update_num = -1;
+                        if((observer.update_query_ratio-observer.last_update_query_ratio>=MIN_UQ_DIFF)&&(observer.update_query_ratio>=Update_Query_Threshold)){
+                            if(tp[0].num_thread_update==big_q_update&&tp[1].num_thread_update==big_q_update)
+                            {
+                                mode = RESET_MODE;
+                                r_query_num = big_u_query;
+                                r_update_num = big_u_update;
+                            }else if(tp[0].num_thread_update==big_q_update||tp[1].num_thread_update==big_q_update)
+                            {
+                                mode = EVALUATION_START_MODE;
+                                last_eva_t = current_time;
+                                start_evaluation();
+                                cout<<"Last mode: NORMAL--> Start Evaluation!"<<endl<<endl;
+                            }
+                        }else if((observer.last_update_query_ratio-observer.update_query_ratio>=MIN_UQ_DIFF)&&(observer.update_query_ratio<=Update_Query_Threshold)){
+                            if(tp[0].num_thread_update==big_u_update&&tp[1].num_thread_update==big_u_update){
+                                mode = RESET_MODE;
+                                r_query_num = big_q_query;
+                                r_update_num = big_q_update;
+                            }else if(tp[0].num_thread_update==big_u_update||tp[1].num_thread_update==big_u_update)
+                            {
+                                mode = EVALUATION_START_MODE;
+                                last_eva_t = current_time;
+                                start_evaluation();
+                                cout<<"Last mode: NORMAL--> Start Evaluation!"<<endl<<endl;
+                            }
                         }
-                    }else if((observer.last_update_query_ratio-observer.update_query_ratio>=MIN_UQ_DIFF)&&(observer.update_query_ratio<=Update_Query_Threshold)){
-                        if(tp[0].num_thread_update==big_u_update&&tp[1].num_thread_update==big_u_update){
-                            mode = RESET_MODE;
-                            r_query_num = big_q_query;
-                            r_update_num = big_q_update;
-                        }else if(tp[0].num_thread_update==big_u_update||tp[1].num_thread_update==big_u_update)
+                        if(mode == RESET_MODE)
                         {
+                            restart_flag = 1;
+                            update_query_time();
+                            clear_query_time();
+                            tp[0].restart_flag = 1;
+                            cout << "Mode Last: NORMAL" << endl << "Reset Pool 0 To:" << r_query_num << "," << r_update_num
+                                 << "!!" << endl << endl << endl;
+                            task_reinit_withQU(0, big_u_query, big_u_update);
+                            if (can_estimate)
+                                gettimeofday(&end, NULL);
+                            else {
+                                estimate_mutex.lock();
+                                gettimeofday(&end, NULL);
+                                estimate_mutex.unlock();
+                            }
+                            current_time = (end.tv_sec - global_start.tv_sec) * MICROSEC_PER_SEC + end.tv_usec -
+                                           global_start.tv_usec;
                             mode = EVALUATION_START_MODE;
                             last_eva_t = current_time;
                             start_evaluation();
-                            cout<<"Last mode: NORMAL--> Start Evaluation!"<<endl<<endl;
+                            No_Record_Flag = 1;
+                            Start_No_Record_Time = current_time;
                         }
                     }
-                    if(mode == RESET_MODE)
+                }
+                else if(mode == EVALUATION_START_MODE){
+                    if(current_time-last_eva_t>=EVA_TIME*MICROSEC_PER_SEC)
                     {
-                        restart_flag = 1;
+                        cout<<"End Evaluation!"<<endl;
+                        mode = EVALUATION_END_MODE;
+                        end_evaluation();
                         update_query_time();
                         clear_query_time();
-                        tp[0].restart_flag = 1;
-                        cout << "Mode Last: NORMAL" << endl << "Reset Pool 0 To:" << r_query_num << "," << r_update_num
-                             << "!!" << endl << endl << endl;
-                        task_reinit_withQU(0, big_u_query, big_u_update);
+                        int restart_pool = 0;
+                        int go_to_flag = -1;
+                        if(tp[0].eva_response_speed<tp[1].eva_response_speed)
+                        {
+                            restart_pool = 0;
+                        }
+                        else {
+                            restart_pool = 1;
+                        }
+                        if(tp[1-restart_pool].num_thread_update==big_q_update) go_to_flag = QUERY_SET;
+                        else go_to_flag = UPDATE_SET;
+                        if(go_to_flag==QUERY_SET&&observer.update_query_ratio>=Update_Query_Threshold){
+                            cout<<"change UQ-Threshold from:"<<Update_Query_Threshold<<" to "<<observer.update_query_ratio<<endl;
+                            Update_Query_Threshold = observer.update_query_ratio;
+                        }else if(go_to_flag==UPDATE_SET&&observer.update_query_ratio<=Update_Query_Threshold){
+                            cout<<"change UQ-Threshold from:"<<Update_Query_Threshold<<" to "<<observer.update_query_ratio<<endl;
+                            Update_Query_Threshold = observer.update_query_ratio;
+                        }
+                        tp[restart_pool].restart_flag = 1;
+                        cout<<"restart pool"<<restart_pool<<"!!"<<endl<<endl<<endl;
+                        task_reinit(restart_pool);
+                        restart_flag = 1;
+                        mode = NORMAL_MODE;
                         if (can_estimate)
                             gettimeofday(&end, NULL);
                         else {
@@ -1449,58 +1489,19 @@ public:
                         }
                         current_time = (end.tv_sec - global_start.tv_sec) * MICROSEC_PER_SEC + end.tv_usec -
                                        global_start.tv_usec;
-                        mode = EVALUATION_START_MODE;
-                        last_eva_t = current_time;
-                        start_evaluation();
                         No_Record_Flag = 1;
                         Start_No_Record_Time = current_time;
                     }
                 }
+                if(X_STAR_MODE)   compute_x_star();
+                t_min+=1;
             }
-            else if(mode == EVALUATION_START_MODE){
-                if(current_time-last_eva_t>=EVA_TIME*MICROSEC_PER_SEC)
-                {
-                    cout<<"End Evaluation!"<<endl;
-                    mode = EVALUATION_END_MODE;
-                    end_evaluation();
-                    update_query_time();
-                    clear_query_time();
-                    int restart_pool = 0;
-                    int go_to_flag = -1;
-                    if(tp[0].eva_response_speed<tp[1].eva_response_speed)
-                    {
-                        restart_pool = 0;
-                    }
-                    else {
-                        restart_pool = 1;
-                    }
-                    if(tp[1-restart_pool].num_thread_update==big_q_update) go_to_flag = QUERY_SET;
-                    else go_to_flag = UPDATE_SET;
-                    if(go_to_flag==QUERY_SET&&observer.update_query_ratio>=Update_Query_Threshold){
-                        cout<<"change UQ-Threshold from:"<<Update_Query_Threshold<<" to "<<observer.update_query_ratio<<endl;
-                        Update_Query_Threshold = observer.update_query_ratio;
-                    }else if(go_to_flag==UPDATE_SET&&observer.update_query_ratio<=Update_Query_Threshold){
-                        cout<<"change UQ-Threshold from:"<<Update_Query_Threshold<<" to "<<observer.update_query_ratio<<endl;
-                        Update_Query_Threshold = observer.update_query_ratio;
-                    }
-                    tp[restart_pool].restart_flag = 1;
-                    cout<<"restart pool"<<restart_pool<<"!!"<<endl<<endl<<endl;
-                    task_reinit(restart_pool);
-                    restart_flag = 1;
-                    mode = NORMAL_MODE;
-                    if (can_estimate)
-                        gettimeofday(&end, NULL);
-                    else {
-                        estimate_mutex.lock();
-                        gettimeofday(&end, NULL);
-                        estimate_mutex.unlock();
-                    }
-                    current_time = (end.tv_sec - global_start.tv_sec) * MICROSEC_PER_SEC + end.tv_usec -
-                                   global_start.tv_usec;
-                    No_Record_Flag = 1;
-                    Start_No_Record_Time = current_time;
-                }
+
+            if(No_Record_Flag &&(current_time-Start_No_Record_Time>=MAX_NORECORD_TIME*MICROSEC_PER_SEC))
+            {
+                No_Record_Flag = 0;
             }
+
 
 
             if(i==0) offset_time = current_time-issue_time;
