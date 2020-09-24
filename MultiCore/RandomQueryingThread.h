@@ -1371,7 +1371,7 @@ public:
 
             if(mode == NORMAL_MODE)
             {
-                if(i==100000) {
+                if(i==100) {
                     mode = EVALUATION_START_MODE;
                     last_eva_t = current_time;
                     start_evaluation();
