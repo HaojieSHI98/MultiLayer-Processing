@@ -72,7 +72,7 @@ double PI = 3.1415926535;
 #define MAX_NORECORD_TIME 2
 int No_Record_Flag=0;
 long Start_No_Record_Time = 0;
-int Update_Query_Threshold = 1;
+int Update_Query_Threshold = 20;
 long Start_Normal_Time = 0;
 typedef struct{
     std::mutex ta_mutex[2];
