@@ -1431,7 +1431,7 @@ public:
                             tp[0].restart_flag = 1;
                             cout << "Mode Last: NORMAL" << endl << "Reset Pool 0 To:" << r_query_num << "," << r_update_num
                                  << "!!" << endl << endl << endl;
-                            task_reinit_withQU(0, big_u_query, big_u_update);
+                            task_reinit_withQU(0, r_query_num, r_update_num);
                             if (can_estimate)
                                 gettimeofday(&end, NULL);
                             else {
@@ -1757,11 +1757,11 @@ public:
         observer.update_query_ratio_set.clear();
         long total_response_time = tp[0].response_time+tp[1].response_time;
         number_of_queries = tp[0].query_num+tp[1].query_num;
-        cout<<"toal response time 0 :"<<tp[0].response_time<<" number of queries 0: "<<tp[0].query_num<<endl;
-        cout<<"toal response time 1 :"<<tp[1].response_time<<" number of queries 1: "<<tp[1].query_num<<endl;
-        cout << "expected response time: " << total_response_time / float(number_of_queries) << " seconds" << endl;
-        cout << "total_response_time: " << total_response_time << endl;
-        cout << "number_of_queries: " << number_of_queries << endl;
+//        cout<<"toal response time 0 :"<<tp[0].response_time<<" number of queries 0: "<<tp[0].query_num<<endl;
+//        cout<<"toal response time 1 :"<<tp[1].response_time<<" number of queries 1: "<<tp[1].query_num<<endl;
+//        cout << "expected response time: " << total_response_time / float(number_of_queries) << " seconds" << endl;
+//        cout << "total_response_time: " << total_response_time << endl;
+//        cout << "number_of_queries: " << number_of_queries << endl;
         tp[0].response_time_first = tp[0].response_time;
         tp[0].query_num_first = tp[0].query_num;
         tp[1].response_time_first = tp[1].response_time;
