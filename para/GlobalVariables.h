@@ -63,13 +63,13 @@ double PI = 3.1415926535;
 #define UPDATE_SET 0
 #define QUERY_SET 1
 #define MIN_UQ_DIFF 10
-#define EVA_TIME 10
+#define EVA_TIME 6
 
 #define EXP_SIZE 1000
 #define STAR_NUM 20
 #define X_STAR_MODE 0
 #define FILTER_NUM 5
-#define MAX_NORECORD_TIME 5
+#define MAX_NORECORD_TIME 3
 int No_Record_Flag=0;
 long Start_No_Record_Time = 0;
 int Update_Query_Threshold = 20;
