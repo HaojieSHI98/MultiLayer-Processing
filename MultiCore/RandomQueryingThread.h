@@ -1370,6 +1370,7 @@ public:
 
             if(event.first>=t_min) {
                 update_param();
+                cout<<"uq_r:"<<observer.update_query_ratio<<"uq_r_last:"<<observer.last_update_query_ratio<<endl;
 //                for(int id =0;id<2;id++) {
 //                    double q_t =0;
 //                    int q_n = 0;
@@ -1399,6 +1400,8 @@ public:
                 }
                 if(abs(observer.update_query_ratio-observer.last_update_query_ratio)>=MIN_UQ_DIFF)
                 {
+                    cout<<"changed now!"<<endl;
+//                    cout<<"uq_r:"<<observer.update_query_ratio<<"uq_r_last:"<<observer.last_update_query_ratio<<endl;
                     int r_query_num = -1;
                     int r_update_num = -1;
                     if((observer.update_query_ratio-observer.last_update_query_ratio>=MIN_UQ_DIFF)&&(observer.update_query_ratio>=Update_Query_Threshold)){
