@@ -69,7 +69,7 @@ double PI = 3.1415926535;
 #define STAR_NUM 20
 #define X_STAR_MODE 0
 #define FILTER_NUM 5
-#define MAX_NORECORD_TIME 3
+#define MAX_NORECORD_TIME 2
 int No_Record_Flag=0;
 long Start_No_Record_Time = 0;
 int Update_Query_Threshold = 1;
