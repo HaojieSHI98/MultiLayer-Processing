@@ -1497,7 +1497,7 @@ public:
                     current_time =
                             (end.tv_sec - global_start.tv_sec) * MICROSEC_PER_SEC + end.tv_usec - global_start.tv_usec;
 
-                    if (issue_time > current_time) std::this_thread::sleep_for(std::chrono::microseconds(1));
+                    if (issue_time > current_time-offset_time) std::this_thread::sleep_for(std::chrono::microseconds(1));
                 } while (true);
                 issue_time = current_time;
             }
