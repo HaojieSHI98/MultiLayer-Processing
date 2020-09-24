@@ -817,7 +817,7 @@ public:
             tp[ti].response_time = 0;
             tp[ti].restart_flag = 0;
         }
-        mode = NORMAL_MODE;
+        mode = RESET_MODE;
         tp[1].threshold_number = 20000;
         tp[0].threshold_number = 20000;
         configurationId = configurationId_val;
@@ -1371,7 +1371,7 @@ public:
 
             if(mode == NORMAL_MODE)
             {
-                if(i==0) {
+                if(i==10000) {
                     mode = EVALUATION_START_MODE;
                     last_eva_t = current_time;
                     start_evaluation();
