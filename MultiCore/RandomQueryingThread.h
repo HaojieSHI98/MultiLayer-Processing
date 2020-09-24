@@ -197,11 +197,14 @@ public:
                     }
 //                    cout<<"current_time: "<<current_time<<endl;
 //                    cout<<"issue_time: "<<issue_time<<endl;
+                    if(No_Record_Flag==0)
+                    {
+                        globalThreadVar[pool_id][copy_id]->ran_global_locker.lock();
+                        globalThreadVar[pool_id][copy_id]->total_query_time += response_time * 1.0 / MICROSEC_PER_SEC;
+                        globalThreadVar[pool_id][copy_id]->number_of_queries++;
+                        globalThreadVar[pool_id][copy_id]->ran_global_locker.unlock();
+                    }
 
-                    globalThreadVar[pool_id][copy_id]->ran_global_locker.lock();
-                    globalThreadVar[pool_id][copy_id]->total_query_time += response_time * 1.0 / MICROSEC_PER_SEC;
-                    globalThreadVar[pool_id][copy_id]->number_of_queries++;
-                    globalThreadVar[pool_id][copy_id]->ran_global_locker.unlock();
 
 //                    observer.tq_mutex[pool_id].lock();
 //                    if(observer.tq_ex[pool_id].size()>EXP_SIZE)
@@ -1379,6 +1382,10 @@ public:
                 t_min+=1;
             }
 
+            if(No_Record_Flag &&(current_time-Start_No_Record_Time>=MAX_NORECORD_TIME*MICROSEC_PER_SEC))
+            {
+                No_Record_Flag = 0;
+            }
             if(mode == NORMAL_MODE)
             {
                 if(i==0) {
@@ -1386,6 +1393,8 @@ public:
                     last_eva_t = current_time;
                     start_evaluation();
                     cout<<"Last mode: NORMAL--> Start Evaluation!"<<endl<<endl;
+                    No_Record_Flag = 1;
+                    Start_No_Record_Time = current_time;
                 }
                 if(abs(observer.update_query_ratio-observer.last_update_query_ratio)>=MIN_UQ_DIFF)
                 {
@@ -1438,6 +1447,8 @@ public:
                         mode = EVALUATION_START_MODE;
                         last_eva_t = current_time;
                         start_evaluation();
+                        No_Record_Flag = 1;
+                        Start_No_Record_Time = current_time;
                     }
                 }
             }
@@ -1472,6 +1483,17 @@ public:
                     task_reinit(restart_pool);
                     restart_flag = 1;
                     mode = NORMAL_MODE;
+                    if (can_estimate)
+                        gettimeofday(&end, NULL);
+                    else {
+                        estimate_mutex.lock();
+                        gettimeofday(&end, NULL);
+                        estimate_mutex.unlock();
+                    }
+                    current_time = (end.tv_sec - global_start.tv_sec) * MICROSEC_PER_SEC + end.tv_usec -
+                                   global_start.tv_usec;
+                    No_Record_Flag = 1;
+                    Start_No_Record_Time = current_time;
                 }
             }
 
