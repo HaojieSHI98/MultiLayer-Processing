@@ -68,11 +68,12 @@ double PI = 3.1415926535;
 #define EXP_SIZE 1000
 #define STAR_NUM 20
 #define X_STAR_MODE 0
-#define FILTER_NUM 5
+#define FILTER_NUM 3
 #define MAX_NORECORD_TIME 2
 int No_Record_Flag=0;
 long Start_No_Record_Time = 0;
 int Update_Query_Threshold = 1;
+long Start_Normal_Time = 0;
 typedef struct{
     std::mutex ta_mutex[2];
     std::mutex tq_mutex[2];
