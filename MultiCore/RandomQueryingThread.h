@@ -1654,7 +1654,7 @@ public:
                 // put to query tasks
                 for (int j = 0; j < tp[ti].num_thread_update; j++) {
                     pair<int, int> node_type_pair = std::make_pair(query_node, QUERY);
-                    pair<long, pair<int, int> > task = std::make_pair(issue_time, node_type_pair);
+                    pair<long, pair<int, int> > task = std::make_pair(current_time2, node_type_pair);
 //                    cout<<"query added to "<<current_query_threads * num_threads_update + j<<endl;
                     if(multiTestPara.method_name.compare("dijk")!=0) {
                         int use_thread_id=-1;
