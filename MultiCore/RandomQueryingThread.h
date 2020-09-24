@@ -1371,6 +1371,7 @@ public:
             if(event.first>=t_min) {
                 update_param();
                 cout<<"uq_r:"<<observer.update_query_ratio<<"uq_r_last:"<<observer.last_update_query_ratio<<endl;
+                cout<<"mode:"<<mode<<" Flag:"<<No_Record_Flag<<endl;
 //                for(int id =0;id<2;id++) {
 //                    double q_t =0;
 //                    int q_n = 0;
