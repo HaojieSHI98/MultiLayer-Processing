@@ -189,14 +189,15 @@ public:
 //                    thread_mutex.lock();
 //                    response_time_list.push_back(response_time);
                     thread_mutex.unlock();
-//                    if(response_time>0.01*MICROSEC_PER_SEC){
-//                        cout<<"response time too large:"<<response_time<<endl;
-////                        cout<<"overloaded!"<<endl;
-////                        overload_flag = 1;
-////                        break;
-//                    }
+                    if(response_time>0.01*MICROSEC_PER_SEC){
+                        cout<<"pool "<<pool_id<<"response time too large:"<<response_time<<endl;
+//                        cout<<"overloaded!"<<endl;
+//                        overload_flag = 1;
+//                        break;
+                    }
 //                    cout<<"current_time: "<<current_time<<endl;
 //                    cout<<"issue_time: "<<issue_time<<endl;
+
                     globalThreadVar[pool_id][copy_id]->ran_global_locker.lock();
                     globalThreadVar[pool_id][copy_id]->total_query_time += response_time * 1.0 / MICROSEC_PER_SEC;
                     globalThreadVar[pool_id][copy_id]->number_of_queries++;
@@ -1371,7 +1372,7 @@ public:
 
             if(mode == NORMAL_MODE)
             {
-                if(i==100) {
+                if(i==0) {
                     mode = EVALUATION_START_MODE;
                     last_eva_t = current_time;
                     start_evaluation();
