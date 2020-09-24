@@ -817,7 +817,7 @@ public:
             tp[ti].response_time = 0;
             tp[ti].restart_flag = 0;
         }
-        mode = RESET_MODE;
+        mode = NORMAL_MODE;
         tp[1].threshold_number = 20000;
         tp[0].threshold_number = 20000;
         configurationId = configurationId_val;
