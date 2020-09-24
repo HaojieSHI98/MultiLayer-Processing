@@ -1324,7 +1324,7 @@ public:
     void task_run(){
         struct timeval end;
         long offset_time;
-        int query_turn_flag = 0;
+        int query_turn_flag = 1;
         int turn_num = 0;
         int t_min =1;
         for (int i=0; i < full_task_list.size(); i++) {
