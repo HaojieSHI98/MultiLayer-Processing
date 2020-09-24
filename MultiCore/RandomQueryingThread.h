@@ -1400,7 +1400,7 @@ public:
                 }
                 if(abs(observer.update_query_ratio-observer.last_update_query_ratio)>=MIN_UQ_DIFF)
                 {
-                    cout<<"changed now!"<<endl;
+//                    cout<<"changed now!"<<endl;
 //                    cout<<"uq_r:"<<observer.update_query_ratio<<"uq_r_last:"<<observer.last_update_query_ratio<<endl;
                     int r_query_num = -1;
                     int r_update_num = -1;

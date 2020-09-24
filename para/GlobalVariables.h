@@ -62,7 +62,7 @@ double PI = 3.1415926535;
 #define RESET_MODE 3
 #define UPDATE_SET 0
 #define QUERY_SET 1
-#define MIN_UQ_DIFF 5
+#define MIN_UQ_DIFF 10
 #define EVA_TIME 5
 
 #define EXP_SIZE 1000
