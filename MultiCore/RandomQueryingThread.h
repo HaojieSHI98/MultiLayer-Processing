@@ -1366,6 +1366,15 @@ public:
 
             if(event.first>=t_min) {
                 update_param();
+                for(int id =0;id<2;id++) {
+                    double q_t =0;
+                    int q_n = 0;
+                    for (int i = 0; i < tp[id].num_threads_query; i++) {
+                        q_t += globalThreadVar[id][i]->total_query_time;
+                        q_n += globalThreadVar[id][i]->number_of_queries;
+                    }
+                    cout<<"pool:"<<id<<" response time:"<<q_t<<" num:"<<q_n<<endl;
+                }
                 if(X_STAR_MODE)   compute_x_star();
                 t_min+=1;
             }
