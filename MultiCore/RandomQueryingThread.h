@@ -189,7 +189,7 @@ public:
 //                    thread_mutex.lock();
 //                    response_time_list.push_back(response_time);
                     thread_mutex.unlock();
-                    if(response_time>0.1*MICROSEC_PER_SEC){
+                    if(response_time>0.01*MICROSEC_PER_SEC){
                         cout<<"pool "<<pool_id<<"response time too large:"<<response_time<<endl;
 //                        cout<<"overloaded!"<<endl;
 //                        overload_flag = 1;
