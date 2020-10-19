@@ -49,7 +49,7 @@ echo $insertnum2
 echo $deletenum2
 
 
-/home/siqiang/MPR/TOAIN/TOAIN -multicore $1 -part 1 -teststr $4  -method toain -threshold 0 -parmethod rand -out _NY_${cores}_${objects}_${configstr} -single_aggr 1  -init $objects -layer 1 -toaintype q -network NY -DISPLAY $6 -configstr $3 -mode 0 -updatethread 1
+/home/siqiang/MPR/TOAIN/TOAIN -multicore $1 -part 1 -teststr $4  -method toain -threshold 0 -parmethod rand -out _NY_${cores}_${objects}_${configstr} -single_aggr 1  -init $objects -layer 1 -toaintype q -network NY -DISPLAY $6 -configstr $3 -mode $7 -updatethread 1
 #/home/siqiang/MPR/TOAIN/TOAIN -multicore $1 -part 1 -teststr $4  -method toain -threshold 0 -parmethod rand -out _NY_${cores}_${objects}_${configstr} -single_aggr 1  -init $objects -layer 1 -toaintype q -network NY -DISPLAY $6 -configstr $3 -mode 0 -updatethread 1
 #/home/siqiang/MPR/TOAIN/TOAIN -multicore $1 -part 1 -teststr $4  -method toain -threshold 0 -parmethod rand -out _NY_${cores}_${objects}_${configstr} -single_aggr 1  -init $objects -layer 1 -toaintype q -network NY -DISPLAY $6 -configstr $3 -mode 0 -updatethread 1
 #/home/siqiang/MPR/TOAIN/TOAIN -multicore $1 -part 1 -teststr $4  -method toain -threshold 0 -parmethod rand -out _NY_${cores}_${objects}_${configstr} -single_aggr 1  -init $objects -layer 1 -toaintype q -network NY -DISPLAY $6 -configstr $3 -mode 0 -updatethread 1
