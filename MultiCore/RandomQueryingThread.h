@@ -1388,7 +1388,7 @@ public:
                         last_eva_t = current_time;
                         start_evaluation();
                         cout<<"Last mode: NORMAL--> Start Evaluation!"<<endl<<endl;
-                        No_Record_Flag = 1;
+//                        No_Record_Flag = 1;
                         Start_No_Record_Time = current_time;
                     }
                     if(abs(observer.update_query_ratio-observer.last_update_query_ratio)>=MIN_UQ_DIFF)
@@ -1444,7 +1444,7 @@ public:
                             mode = EVALUATION_START_MODE;
                             last_eva_t = current_time;
                             start_evaluation();
-                            No_Record_Flag = 1;
+//                            No_Record_Flag = 1;
                             Start_No_Record_Time = current_time;
                         }
                     }
@@ -1489,7 +1489,7 @@ public:
                         }
                         current_time = (end.tv_sec - global_start.tv_sec) * MICROSEC_PER_SEC + end.tv_usec -
                                        global_start.tv_usec;
-                        No_Record_Flag = 1;
+//                        No_Record_Flag = 1;
                         Start_No_Record_Time = current_time;
                     }
                 }
@@ -1497,10 +1497,10 @@ public:
                 t_min+=1;
             }
 
-            if(No_Record_Flag &&(current_time-Start_No_Record_Time>=MAX_NORECORD_TIME*MICROSEC_PER_SEC))
-            {
-                No_Record_Flag = 0;
-            }
+//            if(No_Record_Flag &&(current_time-Start_No_Record_Time>=MAX_NORECORD_TIME*MICROSEC_PER_SEC))
+//            {
+//                No_Record_Flag = 0;
+//            }
 
 
 
