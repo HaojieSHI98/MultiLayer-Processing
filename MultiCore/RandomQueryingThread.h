@@ -3321,7 +3321,7 @@ public:
         std::ofstream outfile;
 
 
-        outfile.open(input_parameters.output_data_dir + "stone9_24_outfile_auto_query_"+to_string(num_threads_query)+"_update_"+to_string(num_threads_update) +"_"+ configstr+".txt", std::ios_base::app);
+        outfile.open(input_parameters.output_data_dir + "stone_experi10_25_outfile_auto_query_"+to_string(num_threads_query)+"_update_"+to_string(num_threads_update) +"_"+ configstr+".txt", std::ios_base::app);
         outfile << endl
                 << " update thread "<<num_threads_update
                 << " query thread "<<num_threads_query
