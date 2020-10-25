@@ -134,9 +134,9 @@ vector<std::pair<double, int> > make_online_query_update_list_str(string configs
     vector<double> query_sequence,insert_sequence,delete_sequence;
     for(int j_c = 0;j_c<configstring.size();j_c+=3)
     {
-        int query_ratio = atoi(configstring[j_c].c_str());
-        int update_ratio = atoi(configstring[j_c+1].c_str());
-        int test_time = atoi(configstring[j_c+2].c_str());
+        double query_ratio = strtod(configstring[j_c].c_str());
+        double update_ratio = strtod(configstring[j_c+1].c_str());
+        double test_time = strtod(configstring[j_c+2].c_str());
         int updatenum = objectnum*update_ratio;
         int insertnum = updatenum/2;
         int deletenum = updatenum/2;
