@@ -1331,6 +1331,7 @@ public:
         int query_turn_flag = 1;
         int turn_num = 0;
         int t_min =1;
+        int start_flag = 0;
         for (int i=0; i < full_task_list.size(); i++) {
             if(overload_flag) break;
             if(arrival_task_nodes[i]==-1) continue;
@@ -1383,7 +1384,8 @@ public:
 //                }
                 if(mode == NORMAL_MODE && No_Record_Flag == 0)
                 {
-                    if(i==0) {
+                    if(start_flag==0) {
+                        start_flag = 1;
                         mode = EVALUATION_START_MODE;
                         last_eva_t = current_time;
                         start_evaluation();
